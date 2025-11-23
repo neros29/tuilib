@@ -163,9 +163,9 @@ public:
         for (int i = 0; i != screen.size(); i++){
             int y = i / size[0];
             int x = i % size[0];
-            // if (screen[i] != def_chr){
-            //     file <<"\x1b[" << y << ";"<< x << "H" << screen[i];
-            //} 
+            if (screen[i] != def_chr){
+                file <<"\x1b[" << y << ";"<< x << "H" << screen[i];
+            } 
             file <<"\x1b[" << y << ";"<< x << "H" << screen[i];
        
         }
