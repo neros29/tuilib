@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Plan/Rendering.md",
+                "file": "brainstorm/11-22-2025.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Rendering"
+              "title": "11-22-2025"
             }
           }
         ],
@@ -93,7 +93,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "8243f05dcc7ce60b",
@@ -186,9 +187,10 @@
   },
   "active": "67b7210027b56c41",
   "lastOpenFiles": [
+    "Plan/Rendering.md",
+    "brainstorm/11-22-2025.md",
     "brainstorm/11-21-2025.md",
     "Notes/ANSI.md",
-    "Plan/Rendering.md",
     "Plan/Rendering/Untitled.md",
     "Plan/Rendering",
     "brainstorm/11-19-2025.md",
