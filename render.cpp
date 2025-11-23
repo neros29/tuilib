@@ -5,7 +5,7 @@
 #include <sys/ioctl.h>
 #include <algorithm>
 #include <fstream>
-#include <ctime>
+#include <chrono>
 
 using namespace std;
 
@@ -19,7 +19,7 @@ private:
     int bg[3];
 
 public:
-    string ch = " ";
+    string ch = "";
     string ansii {""};
     void set_fg(int r, int g, int b){
         fg[0] = r;
@@ -59,24 +59,12 @@ public:
     int size[2];
     int z {0};
 
-    Surface(int sizei[2], string ch = " ", int x = 0, int y = 0, int zi = 0){
-        z =zi;
-        r_cords[0] = x;
-        r_cords[1] = y;
-        size[0] = sizei[0];
-        size[1] = sizei[1];
-        for(int i = 0;i != size[0]*size[1]; i++){
-            Character chr;
-            Character end;
-            if (i % size[0] == 0){
-                chr.set_ch(ch);
-            }
-            else {
-                chr.set_ch(ch);
-            }
-            chr.genrate();
-            surface.push_back(chr);
-        }
+    Surface(int size[2], string ch, int z, int x, int y):z(z), r_cords{x, y}, size{size[0], size[1]}{
+        Character chr;
+        chr.set_ch(ch);
+        chr.genrate();
+        surface.assign(size[0]*size[1], chr);
+
     }
     Character operator[](int x){
         return surface[x];
@@ -87,7 +75,6 @@ public:
             surface[i].genrate();
         }
     }
-    
 };
 
 class Screen{
@@ -95,42 +82,46 @@ private:
     vector <Surface> surfaces;
     vector <string> screen;
     string def_chr = " ";
+    bool soreted {false};
+    bool size_ch {true};
     
     void get_win_size(){
-         struct winsize ws = {(struct winsize){0,0,0,0}};
+        struct winsize ws = {(struct winsize){0,0,0,0}};
         ioctl(0, TIOCGWINSZ, &ws);
-        size[0] = ws.ws_col;
-        size[1] = ws.ws_row;
+        if (size[0] != ws.ws_col){
+            size[0] = ws.ws_col;
+            size_ch = true;
+        }
+        if (size[1] != ws.ws_row){
+            size[1] = ws.ws_row;
+            size_ch = true;
+        }
+        size_ch = false;
     }
-    void sort_surfaces(vector <Surface> &surf){
+    void sort_surfaces(vector <Surface> surf){
         sort(surf.begin(), surf.end(), 
             [](const Surface& a, const Surface& b){
             return a.z < b.z;
             }
         );
+        soreted = true;
     };
     void init_screen(){
-        for (int i = 0; i != (size[0]-1) * (size[1]); i ++){
-            if (i % size[0] == 0 && i != 0){
-                screen.push_back("\n");
-                screen.push_back(def_chr);
-            }
-            else{
-                screen.push_back(def_chr);
-            }
-        }
+        screen.assign(size[0]*size[1], def_chr);
     }
     void render(){
         get_win_size();
-        sort_surfaces(surfaces);
-        init_screen();
+        if (!soreted){
+            sort_surfaces(surfaces);
+        }
+        if (!size_ch){
+            init_screen();
+        }
+
         int x = 0;
         int y = 0;
         for (int i = 0; i != screen.size(); i++){
-            if (screen[i] == "\n"){
-                continue;
-            }
-            for (Surface surf: surfaces){
+            for (Surface &surf: surfaces){
                 int r_x = x - surf.r_cords[0];
                 int r_y = y - surf.r_cords[1];
 
@@ -138,6 +129,7 @@ private:
                     if (r_x >= 0 && r_y >= 0){
                         int index = (surf.size[0] * r_y) + r_x;
                         screen[i] = surf[index].ansii;
+                        break;
                       
                     
                     }
@@ -160,27 +152,42 @@ public:
     int size[2];
     void append(Surface &surf){
         surfaces.push_back(surf);
+        soreted = false;
     }
     
     void flip(){
         ofstream file("/dev/stdout");
+        
         render();
-        for (string i: screen){
-            file << i;
-            
+        file << "\x1b[?25l";
+        for (int i = 0; i != screen.size(); i++){
+            int y = i / size[0];
+            int x = i % size[0];
+            // if (screen[i] != def_chr){
+            //     file <<"\x1b[" << y << ";"<< x << "H" << screen[i];
+            //} 
+            file <<"\x1b[" << y << ";"<< x << "H" << screen[i];
+       
         }
+        file <<"\x1b[?25h";
         file.flush();
+        
     }
 
 };
 
 int main(){
     Screen screen;
-    int size[2] = {50, 10};
-    int x = -20;
-    int y = 5;
-    Surface surface(size, " ", x, y, 2);
-    surface.fill(255, 0, 0);
-    screen.append(surface);
-    screen.flip();
+    int size[2] = {10, 10};
+    int x = 0;
+    int y = 0;
+    Surface surf(size, " ", 1, x, y);
+    screen.append(surf);
+    surf.fill(255, 0, 0);
+    cout << "\x1b[3J";
+   while(true){
+       screen.flip();
+        x++;
+        y++;
+    }
 }
