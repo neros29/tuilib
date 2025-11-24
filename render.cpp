@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <fstream>
 #include <chrono>
+#include <deque>
 
 using namespace std;
 
@@ -60,14 +61,11 @@ public:
         chr.set_ch(ch);
         chr.genrate();
         surface.assign(size[0]*size[1], chr);
-        cout << size[0] * size[1] << endl;
-        cout << surface.size() << endl;
     }
     Character operator[](int x){
         return surface[x];
     }
     void fill(int r, int g, int b){
-        cout << surface.size() << endl;
         for(int i = 0; i != surface.size(); i++){
             surface[i].set_bg(r, g, b);
             surface[i].genrate();
@@ -77,7 +75,7 @@ public:
 
 class Screen{
 private:
-    vector <Surface> surfaces;
+    deque <Surface> surfaces;
     vector <string> screen;
     vector <int> sort_idx;
     int idx {0};
@@ -163,10 +161,10 @@ public:
         for (int i = 0; i != screen.size(); i++){
             int y = i / size[0];
             int x = i % size[0];
-            // // if (screen[i] != def_chr){
-            // //     file <<"\x1b[" << y << ";"<< x << "H" << screen[i];
-            // // } 
-            // // file <<"\x1b[" << y << ";"<< x << "H" << screen[i];
+            if (screen[i] != def_chr){
+                file <<"\x1b[" << y << ";"<< x << "H" << screen[i];
+            } 
+            file <<"\x1b[" << y << ";"<< x << "H" << screen[i];
         }
         file <<"\x1b[?25h";
         file.flush();
@@ -175,15 +173,14 @@ public:
 
 int main(){
     Screen screen;
-    int size[2] = {10, 10};
+    int size[2] = {10, 5};
     int offset[2] = {0, 0};
-    int offset2[3] = {8, 0};
-    int offset3[3] = {0, 8};
     auto &surf = screen.append(size, "&", 1, offset);
-    auto &surf2 = screen.append(size, "#", 0, offset2);
-    auto &surf3 = screen.append(size, " ", 1, offset3);
+    auto &surf2 = screen.append(size, "#", 0, offset);
+    auto &surf3 = screen.append(size, " ", 1, offset);
     surf3.fill(255, 255, 255);
-    // // cout << "\x1b[3J";
+    surf.fill(255, 0, 0);
+    cout << "\x1b[3J";
     while(true){
         // auto start = chrono::high_resolution_clock::now();
         screen.flip();

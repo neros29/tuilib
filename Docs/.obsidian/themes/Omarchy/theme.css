@@ -1,5 +1,5 @@
 /* Omarchy Theme for Obsidian */
-/* Generated on Wed Nov 12 09:57:27 PM MST 2025 from theme: dreamwave */
+/* Generated on Sun Nov 23 07:58:50 AM MST 2025 from theme: neros */
 /* Colors sorted by frequency, backgrounds by distance */
 
 .theme-dark, .theme-light {
@@ -82,7 +82,7 @@
   /* Fonts */
   --font-interface-theme: "Liberation Sans";
   --font-text-theme: "Liberation Sans";
-  --font-monospace-theme: "CaskaydiaMono Nerd Font";
+  --font-monospace-theme: "JetBrainsMonoNL Nerd Font";
 }
 
 /* Headers */
