@@ -1,5 +1,5 @@
 /* Omarchy Theme for Obsidian */
-/* Generated on Sun Nov 23 07:58:50 AM MST 2025 from theme: neros */
+/* Generated on Tue Nov 25 10:36:14 PM MST 2025 from theme: neros */
 /* Colors sorted by frequency, backgrounds by distance */
 
 .theme-dark, .theme-light {
@@ -14,10 +14,10 @@
 
   /* Code block colors (always distance-based) */
   --code-background: #191625;
-  --code-foreground: #c78bf5;
+  --code-foreground: #faf8f2;
 
   /* Border color from btop theme */
-  --border-color: #8c53b7;
+  --border-color: #565f89;
 
   /* Selection colors from Alacritty */
   --text-selection: background = ;
@@ -25,18 +25,18 @@
 
   /* 13-slot color system for remaining elements */
   --text-title-h1: #8c53b7;
-  --text-title-h2: #f1279f;
-  --text-title-h3: #ef6469;
-  --text-title-h4: #e37bd1;
-  --text-title-h5: #cc58fc;
-  --text-title-h6: #cc58fc;  /* Same as h5 */
-  --text-link: #ca2cb0;
-  --markup-code: #c911f8;
-  --text-mark: #c78bf5;
-  --interactive-accent: #c429b2;
-  --blockquote-border: #b52af3;
-  --text-muted: #8c53b7;  /* Use text-specific color for muted text */
-  --text-faint: #8c53b7;  /* Use text-specific color for faint text */
+  --text-title-h2: #faf8f2;
+  --text-title-h3: #f1279f;
+  --text-title-h4: #ef6469;
+  --text-title-h5: #e37bd1;
+  --text-title-h6: #e37bd1;  /* Same as h5 */
+  --text-link: #cc58fc;
+  --markup-code: #ca2cb0;
+  --text-mark: #c911f8;
+  --interactive-accent: #c78bf5;
+  --blockquote-border: #c429b2;
+  --text-muted: #565f89;  /* Use text-specific color for muted text */
+  --text-faint: #565f89;  /* Use text-specific color for faint text */
 
   /* Additional mappings */
   --text-accent: var(--interactive-accent);

@@ -1,0 +1,5 @@
+- User level interaction should not require any optimization rules
+- Users should have full control of every character on the screen.
+- Widgets will just be an optional way to add more abstraction however will have no performance affect
+- Widgets will run once on the start of the code and will simply abstract away alot of the complexity
+- 

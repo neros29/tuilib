@@ -14,7 +14,7 @@ The surface object will be what widgets are created from. Think pygame surface a
 ### Screen Object
 The screen object will represent the acutle terrminal window and thus will be what is rendered on to it. The screen will be created by going for each charecter in the screen matrix genrated by the terrminal size and cheaking every surfaces relative charecter and rendering the top most Z level charachter as that points charecter. This will allow for the ablity to have widgets that store information off screen to be easy to build. The screen object will includ:
 - **Screen** The main screen matrix that will be rendered
-- **Filler** The charecter object to be used in any place on the screen that no surface covers can be thouhg of as the background
+- **Filler** The character object to be used in any place on the screen that no surface covers can be thouhg of as the background
 - This object will also hold a pointer to every single surface that is to be rendered 
 - **Size** the value of `ioctl(STDOUT_FILENO, TIOCGWINSZ, &((struct winsize){0,0,0,0}))`
 - **Flip** function will be used to finaly display the screen on to the terrminal

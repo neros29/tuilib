@@ -175,11 +175,8 @@ int main(){
     Screen screen;
     int size[2] = {10, 5};
     int offset[2] = {0, 0};
-    auto &surf = screen.append(size, "&", 1, offset);
-    auto &surf2 = screen.append(size, "#", 0, offset);
-    auto &surf3 = screen.append(size, " ", 1, offset);
-    surf3.fill(255, 255, 255);
-    surf.fill(255, 0, 0);
+    auto &surf = screen.append(size, " ", 1, offset);
+    surf.fill(255, 255, 255);
     cout << "\x1b[3J";
     while(true){
         // auto start = chrono::high_resolution_clock::now();

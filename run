@@ -1,1 +1,2 @@
-g++ test.cpp -o test && ./test
+make
+./build/test
