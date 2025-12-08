@@ -1,7 +1,7 @@
 #include <string>
 #include <vector>
 #include <sys/ioctl.h>
-#include "tui.h"
+#include "../tui.h"
 
 Surface::Surface(int size[2], string ch, int z, int offsett[2]):z(z), r_cords{offsett[0], offsett[1]}, size{size[0], size[1]}{
     Character chr;

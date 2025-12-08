@@ -1,14 +1,12 @@
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <vector>
 #include <sys/ioctl.h>
 #include <algorithm>
 #include <fstream>
-#include <chrono>
 #include <deque>
 
-#include "tui.h"
+#include "../tui.h"
 
 
 

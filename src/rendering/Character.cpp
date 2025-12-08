@@ -1,6 +1,6 @@
 #include <sstream>
 #include <string>
-#include "tui.h"
+#include "../tui.h"
 
 using namespace std;
 
