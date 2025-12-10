@@ -24,15 +24,16 @@ void restore() {
 }
 char get_char(){
 	char ch {};
-	if (read(0, &ch, 8) == 1){ // Do i need to uses read or is there a better way 
+    set_raw();
+	if (read(0, &ch, 8) == 1){ // Do i need to use read or is there a better way 
 		return ch;
 	}
+    restore();
 	return NULL;
 
 }
 
 int main() {
-    set_raw();
     ofstream stdout("/dev/stdout");
     struct winsize ws = {(struct winsize){0,0,0,0}};
     ioctl(STDIN_FILENO, TIOCGWINSZ, &ws);
@@ -41,20 +42,25 @@ int main() {
     cout << "Hello terminal" <<  ws.ws_row << " " << ws.ws_col << endl;
     int index {0};
     while (true){
-		char ch = get_char();
-		if (ch == NULL) {
-			continue;
-		}
-		if (ch == 'q'){
-			break;
-		}
-        cout << ch;
-        cout.flush(); // is there a better way then flushing every loop;
-        ++index;
+        try{
+            char ch = get_char();
+            if (ch == NULL) {
+                continue;
+            }
+            if (ch == 'q'){
+                break;
+            }
+            cout << ch;
+            cout.flush(); // is there a better way then flushing every loop;
+            ++index;
+        }
+        catch(exception){
+            restore();
+            return 1;
+        }
 	}
 	cout << endl;
     restore();
-
-   
     return 0;
+
 }

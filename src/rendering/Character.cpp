@@ -16,6 +16,7 @@ void Character::genrate(){
         _bg << ESC << "[48;2;"<< bg[0] << ";" << bg[1] << ";" << bg[2] << "m";
     }
     oss << _bg.str() << _fg.str() << ch << ESC << "[0m";
+    dirty = true;
     ansii = oss.str();
 }
 void Character::set_ch(string chi){
