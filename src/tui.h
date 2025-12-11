@@ -40,11 +40,12 @@ class Screen {
 private:
     deque<Surface> surfaces;
     vector<string> screen;
+    vector<string> last_screen;
     vector<int> sort_idx;
     int idx{0};
     string def_chr = " ";
-    bool soreted{false};
     bool size_ch{true};
+    bool sorted{false};
 
     void get_win_size();
     void sort_surfaces();
@@ -53,6 +54,7 @@ private:
 
 public:
     int size[2];
+    int amount;
     Surface &append(int size[2], string ch, int z, int offset[2]);
     void flip();
 };
@@ -60,4 +62,12 @@ public:
 
 
 // Input
-char get_char();
+class Input{
+private:
+    bool is_char();
+
+public:
+    Input();
+    ~Input();
+    char get_char();
+};

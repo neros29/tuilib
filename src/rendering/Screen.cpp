@@ -10,16 +10,15 @@
 
 void Screen::get_win_size(){
     struct winsize ws = {(struct winsize){0,0,0,0}};
-        ioctl(0, TIOCGWINSZ, &ws);
-        if (size[0] != ws.ws_col + 1){
-            size[0] = ws.ws_col + 1;
-            size_ch = true;
-        }
-        if (size[1] != ws.ws_row + 1){
-            size[1] = ws.ws_row + 1;
-            size_ch = true;
-        }
+    ioctl(0, TIOCGWINSZ, &ws);
+    if (size[0] != ws.ws_col + 1 || size[1] != ws.ws_row + 1){
+        size[0] = ws.ws_col + 1;
+        size[1] = ws.ws_row + 1;
+        size_ch = true;
+    }
+    else {
         size_ch = false;
+    }
 }
 
 void Screen::sort_surfaces(){
@@ -28,11 +27,12 @@ void Screen::sort_surfaces(){
             return surfaces[a].z > surfaces[b].z;
         }
     );
-    soreted = true;
+    sorted = true;
 }
 
 void Screen::init_screen(){
     screen.assign(size[0] * size[1], def_chr);
+    last_screen.assign(size[0] * size[1], def_chr);
 }
 
 void Screen::render(){
@@ -41,12 +41,13 @@ void Screen::render(){
     // if (!soreted){
     //     sort_surfaces();
     // }
-    if (!size_ch){
+    if (size_ch){
         init_screen();
     }
     int x = 0;
     int y = 0;
     for (int i = 0; i != screen.size(); i++){
+        bool def {true};
         for (int j: sort_idx){
             Surface &surf = surfaces[j];
             int r_x = x - surf.r_cords[0];
@@ -55,9 +56,13 @@ void Screen::render(){
                 if (r_x >= 0 && r_y >= 0){
                     int index = (surf.size[0] * r_y) + r_x;
                     screen[i] = surf[index].ansii;
+                    def = false;
                     break;
                 }
             }
+        }
+        if (def){
+            screen[i] = def_chr;
         }
         if (x == size[0] - 1){
             x = 0;
@@ -74,7 +79,7 @@ Surface &Screen::append(int size[2], string ch, int z, int offset[2]){
     surfaces.push_back(surf);
     sort_idx.push_back(idx);
     idx++;
-    soreted = false;
+    sorted = false;
     return surfaces[idx-1];
 }
 
@@ -85,8 +90,14 @@ void Screen::flip(){
     for (int i = 0; i != screen.size(); i++){
         int y = i / size[0];
         int x = i % size[0];
-        file <<"\x1b[" << y << ";"<< x << "H" << screen[i];
+        if (screen[i] != last_screen[i]){
+            file <<"\x1b[" << y << ";"<< x << "H" << screen[i];
+            amount++;
+        }
     }
+    last_screen = screen;
     file <<"\x1b[?25h";
     file.flush();
 }
+
+

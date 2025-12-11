@@ -4,20 +4,20 @@
 #include "../tui.h"
 
 
-void set_raw() {
+Input::Input() {
     struct termios term;
     tcgetattr(0, &term);
     term.c_lflag &= ~(ECHO | ICANON);
     tcsetattr(0, TCSANOW, &term);
 }
 
-void restore() {
+Input::~Input() {
     struct termios term;
     tcgetattr(0, &term);
     term.c_lflag = (ECHO | ICANON);
     tcsetattr(0, TCSANOW, &term);
 }
-bool is_char(){
+bool Input::is_char(){
     fd_set readfds;
     struct timeval timeout {0, 3};
     FD_ZERO(&readfds);
@@ -32,12 +32,10 @@ bool is_char(){
 
 
 }
-char get_char(){
+char Input::get_char(){
     char ch {};
-    set_raw();
     if (is_char()){
         read(0, &ch, 1);
     }
-    restore();
     return ch;
 }
