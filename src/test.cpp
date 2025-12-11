@@ -9,12 +9,15 @@ int main(){
     Input input;
     int size[2] {40, 10};
     int offset[2] {1, 5};
+    int offset2[2] {1, 1};
 
     auto &surf = screen.append(size, " ", 0, offset);
+    auto &surf2 = screen.append(size, " ", 1, offset2);
+    surf2.fill_bg(255, 0, 0);
 
     surf.fill_bg(255, 255, 255);
     surf.fill_fg(0, 0, 0);
-    surf.add_string("Hello World", (size[0]/2) - 6 , 4);
+    surf.add_string("Hello World", (size[0]/2) - 6 , 4, nullptr, nullptr);
 
     int color = 1;
     system("clear");
@@ -39,6 +42,8 @@ int main(){
             if(color == 1){
                 surf.fill_bg(0, 0, 0);
                 surf.fill_fg(255, 255, 255);
+                surf[0].set_bg(255, 0, 0);
+                surf[0].genrate();
                 color = 0;
             }
             else{
@@ -48,17 +53,25 @@ int main(){
             }
         }
         if (ch == 'j'){
-            surf.r_cords[1] += 1;
+            offset[1] ++;
         }
         if (ch == 'k'){
-            surf.r_cords[1] -= 1;
+            offset[1] --;
         }
         if (ch == 'h'){
-            surf.r_cords[0] -= 1;
+            offset[0] --;
         }
         if (ch == 'l'){
-            surf.r_cords[0] += 1;
+            offset[0] ++;
+    
         }
+        if (ch == '2'){
+            surf.set_z(2);
+        }
+        if (ch == '0'){
+            surf.set_z(0);
+        }
+        surf.set_offset(offset[0], offset[1]);
         screen.flip();
         count ++;
 

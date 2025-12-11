@@ -22,8 +22,14 @@ void Surface::fill_fg(int r, int g, int b){
         surface[i].genrate();
     }
 }
-
-void Surface::add_string(string str, int col_start, int row){
+void Surface::set_z(int zi){
+    z = zi;
+}
+void Surface::set_offset(int x, int y){
+    r_cords[0] = x;
+    r_cords[1] = y;
+}
+void Surface::add_string(string str, int col_start, int row, int fg[3], int bg[3]){
     int x = 0;
     int y = 0;
     for (int i = 0; i != surface.size(); i++){
@@ -34,6 +40,11 @@ void Surface::add_string(string str, int col_start, int row){
                 int index = (str.size() * r_y) + r_x;
                 string ch = "";
                 ch += str[index];
+                if (fg != nullptr){
+                    surface[i].set_fg(fg[0], fg[1], fg[2]);
+                }if (bg != nullptr){
+                    surface[i].set_bg(bg[0], bg[1], bg[2]);
+                }
                 surface[i].set_ch(ch);
                 surface[i].genrate();
             }

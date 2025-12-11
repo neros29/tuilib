@@ -41,12 +41,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Notes.md",
+                "file": "Notes/ANSI.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Notes"
+              "title": "ANSI"
             }
           }
         ],
@@ -200,6 +200,7 @@
   },
   "active": "2afd0c6a89ac6658",
   "lastOpenFiles": [
+    "Notes.md",
     "TODO.md",
     "Goal.md",
     "Notes/ANSI.md",
@@ -211,7 +212,6 @@
     "test.cpp",
     "Untitled.md",
     "Logs/2025-11-07.md",
-    "Notes.md",
     "Plan/Rendering.md",
     "Plan/Input Handling.md",
     "Features & Philosophy.md",

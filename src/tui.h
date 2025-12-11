@@ -2,7 +2,7 @@
 #include <deque>
 #include <string>
 #include <vector>
-
+#include <fstream>
 using namespace std;
 
 class Character {
@@ -23,6 +23,7 @@ public:
 };
 
 class Surface {
+
 public:
     int size[2];
     vector<Character> surface;
@@ -32,7 +33,9 @@ public:
     Surface(int size[2], string ch, int z, int offsett[2]);
     void fill_bg(int r, int g, int b);
     void fill_fg(int r, int g, int b);
-    void add_string(string str, int col_start, int row);
+    void set_z(int z);
+    void set_offset(int x, int y);
+    void add_string(string str, int col_start, int row, int fg[3], int bg[3]);
 
 };
 
@@ -42,6 +45,7 @@ private:
     vector<string> screen;
     vector<string> last_screen;
     vector<int> sort_idx;
+    ofstream file;
     int idx{0};
     string def_chr = " ";
     bool size_ch{true};
@@ -55,6 +59,8 @@ private:
 public:
     int size[2];
     int amount;
+    Screen();
+    ~Screen();
     Surface &append(int size[2], string ch, int z, int offset[2]);
     void flip();
 };

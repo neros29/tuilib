@@ -84,7 +84,6 @@ Surface &Screen::append(int size[2], string ch, int z, int offset[2]){
 }
 
 void Screen::flip(){
-    ofstream file("/dev/stdout");
     render();
     file << "\x1b[?25l";
     for (int i = 0; i != screen.size(); i++){
@@ -99,5 +98,10 @@ void Screen::flip(){
     file <<"\x1b[?25h";
     file.flush();
 }
-
+Screen::Screen(){
+    file.open("/dev/stdout");
+}
+Screen::~Screen(){
+    file.close();
+}
 
