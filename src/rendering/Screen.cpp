@@ -29,6 +29,10 @@ void Screen::sort_surfaces(){
     );
     sorted = true;
 }
+vector<int> Screen::get_size(){
+    vector<int> size_v {size[0], size[1]};
+    return size_v;
+}
 
 void Screen::init_screen(){
     screen.assign(size[0] * size[1], def_chr);
@@ -99,6 +103,8 @@ void Screen::flip(){
     file.flush();
 }
 Screen::Screen(){
+    get_win_size();
+    init_screen();
     file.open("/dev/stdout");
 }
 Screen::~Screen(){

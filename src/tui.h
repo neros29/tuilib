@@ -61,7 +61,8 @@ public:
     int amount;
     Screen();
     ~Screen();
-    Surface &append(int size[2], string ch, int z, int offset[2]);
+    vector<int> get_size();
+    Surface& append(int size[2], string ch, int z, int offset[2]);
     void flip();
 };
 

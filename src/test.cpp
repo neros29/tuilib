@@ -9,7 +9,7 @@ int main(){
     Input input;
     int size[2] {40, 10};
     int offset[2] {1, 5};
-    int offset2[2] {1, 1};
+    int offset2[2] {1, 2};
 
     auto &surf = screen.append(size, " ", 0, offset);
     auto &surf2 = screen.append(size, " ", 1, offset2);
@@ -29,14 +29,14 @@ int main(){
 
 
     while (true){
-        // time_t diff = time(nullptr) - start;
-        // if (diff > secounds){
-        //     break;
-        // }
+        time_t diff = time(nullptr) - start;
+        if (diff > secounds){
+            break;
+        }
         char ch = input.get_char();
 
         if (ch == 'q' || ch == 3){
-            return 0;
+            break;
         }
         if (ch == 'r'){
             if(color == 1){
