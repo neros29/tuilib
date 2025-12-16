@@ -8,16 +8,21 @@ int main(){
     Screen screen;
     Input input;
     int size[2] {40, 10};
-    int offset[2] {1, 5};
+    int offset[2] {1, 12};
     int offset2[2] {1, 2};
+
+    int BLACK[3] {0, 0, 0};
+    int WHITE[3] {255, 255, 255};
 
     auto &surf = screen.append(size, " ", 0, offset);
     auto &surf2 = screen.append(size, " ", 1, offset2);
-    surf2.fill_bg(255, 0, 0);
 
     surf.fill_bg(255, 255, 255);
     surf.fill_fg(0, 0, 0);
-    surf.add_string("Hello World", (size[0]/2) - 6 , 4, nullptr, nullptr);
+
+    surf.add_string("🎯 Hello World🎯", (size[0]/2) - 6 , 4, nullptr, nullptr);
+    surf2.add_string("🎯 Hello World🎯", size[0]/2 - 6, 4, nullptr, nullptr);
+
 
     int color = 1;
     system("clear");
@@ -72,6 +77,7 @@ int main(){
             surf.set_z(0);
         }
         surf.set_offset(offset[0], offset[1]);
+        surf2.set_offset(offset[0], offset[1]- 10);
         screen.flip();
         count ++;
 

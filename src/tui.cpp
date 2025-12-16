@@ -51,7 +51,11 @@ PYBIND11_MODULE(tui, m) {
              py::arg("r"), py::arg("g"), py::arg("b"))
         .def("fill_fg", &Surface::fill_fg,
              py::arg("r"), py::arg("g"), py::arg("b"))
-        .def("add_string", &Surface::add_string,
+        .def("add_string", [](Surface &self, string text, int col_start, int row, array<int, 3> fg, array<int, 3> bg){
+            int fga[3] = {fg[0], fg[1], fg[2]};
+            int bga[3] = {bg[0], bg[1], bg[2]};
+            return self.add_string(text, col_start, row, fga, bga);
+        },
              py::arg("text"),
              py::arg("col_start"),
              py::arg("row"),

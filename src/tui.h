@@ -5,6 +5,18 @@
 #include <fstream>
 using namespace std;
 
+class InputString{
+private:
+    int get_byte_len(unsigned char firstbyte);
+    vector<string> str;
+public:
+    auto begin();
+    auto end();
+    size_t size();
+    InputString(string s);
+    string operator[](int i);
+};
+
 class Character {
 private:
     string ch = "";
