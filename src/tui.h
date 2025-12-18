@@ -4,19 +4,19 @@
 #include <vector>
 #include <fstream>
 using namespace std;
-
-class InputString{
-private:
-    int get_byte_len(unsigned char firstbyte);
-    vector<string> str;
-public:
-    auto begin();
-    auto end();
-    size_t size();
-    InputString(string s);
-    string operator[](int i);
-};
-
+//
+// class InputString{
+// private:
+//     int get_byte_len(unsigned char firstbyte);
+//     vector<string> str;
+// public:
+//     auto begin();
+//     auto end();
+//     size_t size();
+//     InputString(string s);
+//     string operator[](int i);
+// };
+//
 class Character {
 private:
     string ch = "";
@@ -35,20 +35,24 @@ public:
 };
 
 class Surface {
-
-public:
+private:
     int size[2];
     vector<Character> surface;
     int r_cords[2];
     int z{0};
+
+public:
     Character& operator[](int x);
     Surface(int size[2], string ch, int z, int offsett[2]);
     void fill_bg(int r, int g, int b);
     void fill_fg(int r, int g, int b);
     void set_z(int z);
     void set_offset(int x, int y);
-    void add_string(string str, int col_start, int row, int fg[3], int bg[3]);
+    void blit(Surface& surf, int col, int row);
 
+    int get_z();
+    int* offset();
+    int* ssize();
 };
 
 class Screen {
@@ -57,6 +61,7 @@ private:
     vector<string> screen;
     vector<string> last_screen;
     vector<int> sort_idx;
+    int size[2];
     ofstream file;
     int idx{0};
     string def_chr = " ";
@@ -69,12 +74,11 @@ private:
     void render();
 
 public:
-    int size[2];
     int amount;
     Screen();
     ~Screen();
     vector<int> get_size();
-    Surface& append(int size[2], string ch, int z, int offset[2]);
+    Surface& append(int size[2], int offset[2], string ch = " ", int z = -1);
     void flip();
 };
 

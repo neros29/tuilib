@@ -24,7 +24,7 @@ void Screen::get_win_size(){
 void Screen::sort_surfaces(){
     sort(sort_idx.begin(), sort_idx.end(), 
         [&](const int& a, const int& b){
-            return surfaces[a].z > surfaces[b].z;
+            return surfaces[a].get_z() > surfaces[b].get_z();
         }
     );
     sorted = true;
@@ -42,7 +42,7 @@ void Screen::init_screen(){
 void Screen::render(){
     get_win_size();
     sort_surfaces();
-    // if (!soreted){
+    // if (!sorted){
     //     sort_surfaces();
     // }
     if (size_ch){
@@ -54,11 +54,11 @@ void Screen::render(){
         bool def {true};
         for (int j: sort_idx){
             Surface &surf = surfaces[j];
-            int r_x = x - surf.r_cords[0];
-            int r_y = y - surf.r_cords[1];
-            if (r_x < surf.size[0] && r_y < surf.size[1]){
+            int r_x = x - surf.offset()[0];
+            int r_y = y - surf.offset()[1];
+            if (r_x < surf.ssize()[0] && r_y < surf.ssize()[1]){
                 if (r_x >= 0 && r_y >= 0){
-                    int index = (surf.size[0] * r_y) + r_x;
+                    int index = (surf.ssize()[0] * r_y) + r_x;
                     screen[i] = surf[index].ansii;
                     def = false;
                     break;
@@ -78,7 +78,10 @@ void Screen::render(){
     }
 }
 
-Surface &Screen::append(int size[2], string ch, int z, int offset[2]){
+Surface &Screen::append(int size[2],  int offset[2], string ch, int z){
+    if (z == -1){
+        z = idx;
+    }
     Surface surf(size, ch, z, offset);
     surfaces.push_back(surf);
     sort_idx.push_back(idx);

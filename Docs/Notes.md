@@ -1,2 +1,6 @@
 - Make my own string class that handles rows in the terminal better 
+- wcwidth is for wchar and wcswidth is for wchar string
+- you need to set the local using ` setlocale(LC_ALL, "");` so that the wcswidth knows that your using utf-8
+- I need a way to turn a string of chars into a wchar
+- I should build a simple tree to hold the idx to my surfaces dque allowing me to acces them faster
 - 

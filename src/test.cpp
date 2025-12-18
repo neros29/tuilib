@@ -13,16 +13,22 @@ int main(){
 
     int BLACK[3] {0, 0, 0};
     int WHITE[3] {255, 255, 255};
+    int BLUE[3] {0, 0, 255};
 
-    auto &surf = screen.append(size, " ", 0, offset);
-    auto &surf2 = screen.append(size, " ", 1, offset2);
-
+    auto &surf = screen.append(size, offset);
+    auto &surf2 = screen.append(size, offset2);
+    // int of[2] {0, 0};
+    // int sz[2] {5, 5};
+    // for (int i = 0; i < 255; i ++){
+    //     auto &s = screen.append(sz, of);
+    //     s.fill_bg(i, i, i);
+    //     of[0] = i;
+    //
+    // }
+    //
     surf.fill_bg(255, 255, 255);
     surf.fill_fg(0, 0, 0);
-
-    surf.add_string("🎯 Hello World🎯", (size[0]/2) - 6 , 4, nullptr, nullptr);
-    surf2.add_string("🎯 Hello World🎯", size[0]/2 - 6, 4, nullptr, nullptr);
-
+    surf2.fill_bg(0, 255, 0);
 
     int color = 1;
     system("clear");
@@ -77,7 +83,7 @@ int main(){
             surf.set_z(0);
         }
         surf.set_offset(offset[0], offset[1]);
-        surf2.set_offset(offset[0], offset[1]- 10);
+        // surf2.set_offset(offset[0], offset[1]- 10);
         screen.flip();
         count ++;
 
