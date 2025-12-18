@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <array>
 using namespace std;
 //
 // class InputString{
@@ -43,12 +44,12 @@ private:
 
 public:
     Character& operator[](int x);
-    Surface(int size[2], string ch, int z, int offsett[2]);
+    Surface(array<int, 2> size, string ch, int z, array<int, 2> offset);
     void fill_bg(int r, int g, int b);
     void fill_fg(int r, int g, int b);
     void set_z(int z);
     void set_offset(int x, int y);
-    void blit(Surface& surf, int col, int row);
+    void blit(Surface& surf);
 
     int get_z();
     int* offset();
@@ -78,7 +79,7 @@ public:
     Screen();
     ~Screen();
     vector<int> get_size();
-    Surface& append(int size[2], int offset[2], string ch = " ", int z = -1);
+    Surface& append(array<int, 2> size, array<int, 2> offset, string ch = " ", int z = -1);
     void flip();
 };
 

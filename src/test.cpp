@@ -7,16 +7,17 @@ using namespace std;
 int main(){
     Screen screen;
     Input input;
-    int size[2] {40, 10};
-    int offset[2] {1, 12};
-    int offset2[2] {1, 2};
+    array<int, 2> offset {1, 12};
+    array<int, 2> offset2 {1, 12};
 
     int BLACK[3] {0, 0, 0};
     int WHITE[3] {255, 255, 255};
     int BLUE[3] {0, 0, 255};
 
-    auto &surf = screen.append(size, offset);
-    auto &surf2 = screen.append(size, offset2);
+
+    auto &surf = screen.append({40, 10}, offset);
+    auto &surf2 = screen.append({40, 10}, offset2);
+
     // int of[2] {0, 0};
     // int sz[2] {5, 5};
     // for (int i = 0; i < 255; i ++){
@@ -26,10 +27,15 @@ int main(){
     //
     // }
     //
+    //
     surf.fill_bg(255, 255, 255);
     surf.fill_fg(0, 0, 0);
     surf2.fill_bg(0, 255, 0);
 
+
+    Surface sub({5, 5}, " ", 0, {3, 3});
+    sub.fill_bg(255, 0, 255);
+    surf.blit(sub);
     int color = 1;
     system("clear");
     cout << "\x1b[3J";

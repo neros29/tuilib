@@ -6,7 +6,7 @@
 
 using namespace std;
 
-Surface::Surface(int size[2], string ch, int z, int offsett[2]):z(z), r_cords{offsett[0], offsett[1]}, size{size[0], size[1]}{
+Surface::Surface(array<int, 2> size, string ch, int z, array<int, 2> offset):z(z), r_cords{offset[0], offset[1]}, size{size[0], size[1]}{
     Character chr;
     chr.set_ch(ch);
     chr.genrate();
@@ -42,16 +42,16 @@ void Surface::set_offset(int x, int y){
     r_cords[0] = x;
     r_cords[1] = y;
 }
-void Surface::blit(Surface &surf, int row, int col){
+void Surface::blit(Surface &surf){
     int x = 0;
     int y = 0;
     for (int i = 0; i != surface.size(); i++){
         bool def {true};
-        int r_x = x - surf.r_cords[0];
-        int r_y = y - surf.r_cords[1];
-        if (r_x < surf.size[0] && r_y < surf.size[1]){
+        int r_x = x - surf.offset()[0];
+        int r_y = y - surf.offset()[1];
+        if (r_x < surf.ssize()[0] && r_y < surf.ssize()[1]){
             if (r_x >= 0 && r_y >= 0){
-                int index = (surf.size[0] * r_y) + r_x;
+                int index = (surf.ssize()[0] * r_y) + r_x;
                 surface[i] = surf[index];
             }
         }

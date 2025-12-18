@@ -78,7 +78,7 @@ void Screen::render(){
     }
 }
 
-Surface &Screen::append(int size[2],  int offset[2], string ch, int z){
+Surface &Screen::append(array<int, 2> size,  array<int, 2> offset, string ch, int z){
     if (z == -1){
         z = idx;
     }
