@@ -51,39 +51,39 @@ Any whitespaces between sequences and arguments should be ignored. They are pres
 
 ## Cursor Controls
 
-| ESC Code Sequence                                  | Description                                              |
-| :------------------------------------------------- | :------------------------------------------------------- |
-| `ESC[H`                                            | moves cursor to home position (0, 0)                     |
-| `ESC[{line};{column}H` <br> `ESC[{line};{column}f` | moves cursor to line #, column #                         |
-| `ESC[#A`                                           | moves cursor up # lines                                  |
-| `ESC[#B`                                           | moves cursor down # lines                                |
-| `ESC[#C`                                           | moves cursor right # columns                             |
-| `ESC[#D`                                           | moves cursor left # columns                              |
-| `ESC[#E`                                           | moves cursor to beginning of next line, # lines down     |
-| `ESC[#F`                                           | moves cursor to beginning of previous line, # lines up   |
-| `ESC[#G`                                           | moves cursor to column #                                 |
-| `ESC[6n`                                           | request cursor position (reports as `ESC[#;#R`)          |
-| `ESC M`                                            | moves cursor one line up, scrolling if needed            |
-| `ESC 7`                                            | save cursor position (DEC)                               |
-| `ESC 8`                                            | restores the cursor to the last saved position (DEC)     |
-| `ESC[s`                                            | save cursor position (SCO)                               |
-| `ESC[u`                                            | restores the cursor to the last saved position (SCO)     |
+| ESC Code Sequence                                  | Description                                            |
+| :------------------------------------------------- | :----------------------------------------------------- |
+| `ESC[H`                                            | moves cursor to home position (0, 0)                   |
+| `ESC[{line};{column}H` <br> `ESC[{line};{column}f` | moves cursor to line #, column #                       |
+| `ESC[#A`                                           | moves cursor up # lines                                |
+| `ESC[#B`                                           | moves cursor down # lines                              |
+| `ESC[#C`                                           | moves cursor right # columns                           |
+| `ESC[#D`                                           | moves cursor left # columns                            |
+| `ESC[#E`                                           | moves cursor to beginning of next line, # lines down   |
+| `ESC[#F`                                           | moves cursor to beginning of previous line, # lines up |
+| `ESC[#G`                                           | moves cursor to column #                               |
+| `ESC[6n`                                           | request cursor position (reports as `ESC[#;#R`)        |
+| `ESC M`                                            | moves cursor one line up, scrolling if needed          |
+| `ESC 7`                                            | save cursor position (DEC)                             |
+| `ESC 8`                                            | restores the cursor to the last saved position (DEC)   |
+| `ESC[s`                                            | save cursor position (SCO)                             |
+| `ESC[u`                                            | restores the cursor to the last saved position (SCO)   |
 
 > **Note:** Some sequences, like saving and restoring cursors, are private sequences and are not standardized. While some terminal emulators (i.e. xterm and derived) support both SCO and DEC sequences, they are likely to have different functionality. It is therefore recommended to use DEC sequences.
 
 ## Erase Functions
 
-| ESC Code Sequence | Description                               |
-| :---------------- | :---------------------------------------- |
-| `ESC[J`           | erase in display (same as `ESC[0J`)       |
-| `ESC[0J`          | erase from cursor until end of screen     |
-| `ESC[1J`          | erase from cursor to beginning of screen  |
-| `ESC[2J`          | erase entire screen                       |
-| `ESC[3J`          | erase saved lines                         |
-| `ESC[K`           | erase in line (same as `ESC[0K`)          |
-| `ESC[0K`          | erase from cursor to end of line          |
-| `ESC[1K`          | erase start of line to the cursor         |
-| `ESC[2K`          | erase the entire line                     |
+| ESC Code Sequence | Description                              |
+| :---------------- | :--------------------------------------- |
+| `ESC[J`           | erase in display (same as `ESC[0J`)      |
+| `ESC[0J`          | erase from cursor until end of screen    |
+| `ESC[1J`          | erase from cursor to beginning of screen |
+| `ESC[2J`          | erase entire screen                      |
+| `ESC[3J`          | erase saved lines                        |
+| `ESC[K`           | erase in line (same as `ESC[0K`)         |
+| `ESC[0K`          | erase from cursor to end of line         |
+| `ESC[1K`          | erase start of line to the cursor        |
+| `ESC[2K`          | erase the entire line                    |
 
 > Note: Erasing the line won't move the cursor, meaning that the cursor will stay at the last position it was at before the line was erased. You can use `\r` after erasing the line, to return the cursor to the start of the current line.
 

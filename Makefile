@@ -17,3 +17,5 @@ $(EXECUTABLE): $(OBJECTS)
 
 clean:
 	rm -f $(OBJECTS)
+	rm -rf build/*
+

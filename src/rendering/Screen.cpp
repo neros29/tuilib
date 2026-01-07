@@ -8,67 +8,72 @@
 
 #include "../tui.h"
 
-void Screen::get_win_size(){
+void Screen::m_getWinSize(){
     struct winsize ws = {(struct winsize){0,0,0,0}};
     ioctl(0, TIOCGWINSZ, &ws);
-    if (size[0] != ws.ws_col + 1 || size[1] != ws.ws_row + 1){
-        size[0] = ws.ws_col + 1;
-        size[1] = ws.ws_row + 1;
-        size_ch = true;
+    if (m_size[0] != ws.ws_col + 1 || m_size[1] != ws.ws_row + 1){
+        m_size[0] = ws.ws_col + 1;
+        m_size[1] = ws.ws_row + 1;
+        m_sizeChange = true;
     }
     else {
-        size_ch = false;
+        m_sizeChange = false;
     }
 }
 
-void Screen::sort_surfaces(){
-    sort(sort_idx.begin(), sort_idx.end(), 
+void Screen::m_sortSurfaces(){
+    sort(m_sortIndex.begin(), m_sortIndex.end(), 
         [&](const int& a, const int& b){
-            return surfaces[a].get_z() > surfaces[b].get_z();
+            return m_surfaces[a].get_z() > m_surfaces[b].get_z();
         }
     );
-    sorted = true;
+    m_sorted = true;
 }
-vector<int> Screen::get_size(){
-    vector<int> size_v {size[0], size[1]};
-    return size_v;
-}
-
-void Screen::init_screen(){
-    screen.assign(size[0] * size[1], def_chr);
-    last_screen.assign(size[0] * size[1], def_chr);
+array<int, 2> Screen::getSize(){
+    return m_size;
 }
 
-void Screen::render(){
-    get_win_size();
-    sort_surfaces();
+void Screen::m_initScreen(){
+    m_screen.assign(m_size[0] * m_size[1], m_defaultCharacter);
+    m_lastScreen.assign(m_size[0] * m_size[1], m_defaultCharacter);
+}
+
+void Screen::m_render(){
+    m_getWinSize();
+    m_sortSurfaces();
     // if (!sorted){
     //     sort_surfaces();
     // }
-    if (size_ch){
-        init_screen();
+    if (m_sizeChange){
+        m_initScreen();
     }
     int x = 0;
     int y = 0;
-    for (int i = 0; i != screen.size(); i++){
+    for (int i = 0; i != m_screen.size(); i++){
         bool def {true};
-        for (int j: sort_idx){
-            Surface &surf = surfaces[j];
+        for (int j: m_sortIndex){
+            Surface &surf = m_surfaces[j];
             int r_x = x - surf.offset()[0];
             int r_y = y - surf.offset()[1];
             if (r_x < surf.ssize()[0] && r_y < surf.ssize()[1]){
                 if (r_x >= 0 && r_y >= 0){
                     int index = (surf.ssize()[0] * r_y) + r_x;
-                    screen[i] = surf[index].ansii;
-                    def = false;
-                    break;
+                    if (surf[index].ch_def){
+                        continue;
+                    }
+                    else{
+                        m_screen[i] = surf[index].ansii;
+                        def = false;
+                        break;
+                    }
+                    
                 }
             }
         }
         if (def){
-            screen[i] = def_chr;
+            m_screen[i] = m_defaultCharacter;
         }
-        if (x == size[0] - 1){
+        if (x == m_size[0] - 1){
             x = 0;
             y ++;
         }
@@ -80,37 +85,36 @@ void Screen::render(){
 
 Surface &Screen::append(array<int, 2> size,  array<int, 2> offset, string ch, int z){
     if (z == -1){
-        z = idx;
+        z = m_index;
     }
-    Surface surf(size, ch, z, offset);
-    surfaces.push_back(surf);
-    sort_idx.push_back(idx);
-    idx++;
-    sorted = false;
-    return surfaces[idx-1];
+    m_surfaces.emplace_back(size, ch, z, offset);
+    m_sortIndex.emplace_back(m_index);
+    m_index ++;
+    m_sorted = false;
+    return m_surfaces[m_index-1];
 }
 
 void Screen::flip(){
-    render();
-    file << "\x1b[?25l";
-    for (int i = 0; i != screen.size(); i++){
-        int y = i / size[0];
-        int x = i % size[0];
-        if (screen[i] != last_screen[i]){
-            file <<"\x1b[" << y << ";"<< x << "H" << screen[i];
+    m_render();
+    m_file << "\x1b[?25l";
+    for (int i = 0; i != m_screen.size(); i++){
+        int y = i / m_size[0];
+        int x = i % m_size[0];
+        if (m_screen[i] != m_lastScreen[i]){
+            m_file <<"\x1b[" << y << ";"<< x << "H" << m_screen[i];
             amount++;
         }
     }
-    last_screen = screen;
-    file <<"\x1b[?25h";
-    file.flush();
+    m_lastScreen = m_screen;
+    m_file <<"\x1b[?25h";
+    m_file.flush();
 }
 Screen::Screen(){
-    get_win_size();
-    init_screen();
-    file.open("/dev/stdout");
+    m_getWinSize();
+    m_initScreen();
+    m_file.open("/dev/stdout");
 }
 Screen::~Screen(){
-    file.close();
+    m_file.close();
 }
 

@@ -32,10 +32,10 @@ int Surface::get_z(){
     return z;
 }
 
-int* Surface::ssize(){
+array<int, 2> Surface::ssize(){
     return size;
 }
-int* Surface::offset(){
+array<int, 2> Surface::offset(){
     return r_cords;
 }
 void Surface::set_offset(int x, int y){

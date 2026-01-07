@@ -27,7 +27,7 @@ private:
     int bg[3];
 
 public:
-    bool dirty {true};
+    bool ch_def {true};
     string ansii{""};
     void set_fg(int r, int g, int b);
     void set_bg(int r, int g, int b);
@@ -37,9 +37,9 @@ public:
 
 class Surface {
 private:
-    int size[2];
+    array<int, 2> size;
     vector<Character> surface;
-    int r_cords[2];
+    array<int, 2> r_cords;
     int z{0};
 
 public:
@@ -52,33 +52,33 @@ public:
     void blit(Surface& surf);
 
     int get_z();
-    int* offset();
-    int* ssize();
+    array<int, 2> offset();
+    array<int, 2> ssize(); 
 };
 
 class Screen {
 private:
-    deque<Surface> surfaces;
-    vector<string> screen;
-    vector<string> last_screen;
-    vector<int> sort_idx;
-    int size[2];
-    ofstream file;
-    int idx{0};
-    string def_chr = " ";
-    bool size_ch{true};
-    bool sorted{false};
+    deque<Surface> m_surfaces;
+    vector<string> m_screen;
+    vector<string> m_lastScreen;
+    vector<int> m_sortIndex;
+    array<int, 2> m_size;
+    ofstream m_file;
+    int m_index{0};
+    string m_defaultCharacter {" "};
+    bool m_sizeChange {true};
+    bool m_sorted {false};
 
-    void get_win_size();
-    void sort_surfaces();
-    void init_screen();
-    void render();
+    void m_getWinSize();
+    void m_sortSurfaces();
+    void m_initScreen();
+    void m_render();
 
 public:
     int amount;
     Screen();
     ~Screen();
-    vector<int> get_size();
+    array<int, 2> getSize();
     Surface& append(array<int, 2> size, array<int, 2> offset, string ch = " ", int z = -1);
     void flip();
 };
@@ -95,3 +95,32 @@ public:
     ~Input();
     char get_char();
 };
+
+struct Node{
+    int data = -1;
+    int px;
+    int py;
+    int sx;
+    int sy;
+    Node* left;
+    Node* right;
+};
+
+class Tree{
+private:
+    Node* root;
+    int depath = 4;
+    int idx = 0;
+    Node* add_node(vector<Surface>& surfaces, Node* last, string direction, array<int, 2> start, array<int, 2> end);
+    vector<int> get_avg(Surface& surf);
+
+public:
+    Tree(int width, int height);
+    Surface& get_surf(array<int, 2> pos);
+    ~Tree();
+
+
+};
+
+
+
