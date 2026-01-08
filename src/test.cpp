@@ -4,6 +4,8 @@
 #include <time.h>
 
 using namespace std;
+
+
 int main(){
     Screen screen;
     Input input;
@@ -17,7 +19,6 @@ int main(){
 
     auto &surf = screen.append({40, 10}, offset);
     auto &surf2 = screen.append({40, 10}, offset2);
-
     // int of[2] {0, 0};
     // int sz[2] {5, 5};
     // for (int i = 0; i < 255; i ++){
@@ -32,9 +33,13 @@ int main(){
     surf.fill_fg(0, 0, 0);
     surf2.fill_bg(0, 255, 0);
 
+    string str = "Echo:";
+    Label lab(surf, str, {1, 1});
+    
+    // Surface sub({11, 1}, " ", 0, {0, 1});
+    // sub.fill_bg(255, 0, 0);
+    // surf.blit(sub);
 
-    Surface sub({10, 5}, " ", 0, {3, 3});
-    sub.fill_bg(255, 255, 0);
     int color = 1;
     system("clear");
     cout << "\x1b[3J";
@@ -50,43 +55,53 @@ int main(){
             break;
         }
         char ch = input.get_char();
-
-        surf.blit(sub);
-        if (ch == 'q' || ch == 3){
+        //
+        if (/*ch == 'q' || */ch == 3){
             break;
         }
-        if (ch == 'r'){
-            if(color == 1){
-                surf.fill_bg(0, 0, 0);
-                surf.fill_fg(255, 255, 255);
-                surf[0].set_bg(255, 0, 0);
-                surf[0].genrate();
-                color = 0;
+        // else if (ch == 'r'){
+        //     if(color == 1){
+        //         surf.fill_bg(0, 0, 0);
+        //         surf.fill_fg(255, 255, 255);
+        //         surf[0].set_bg(255, 0, 0);
+        //         surf[0].genrate();
+        //         color = 0;
+        //     }
+        //     else{
+        //         surf.fill_bg(255, 255, 255);
+        //         surf.fill_fg(0, 0, 0);
+        //         color = 1;
+        //     }
+        // }
+        // else if (ch == 'j'){
+        //     offset[1] ++;
+        // }
+        // else if (ch == 'k'){
+        //     offset[1] --;
+        // }
+        // else if (ch == 'h'){
+        //     offset[0] --;
+        // }
+        // else if (ch == 'l'){
+        //     offset[0] ++;
+        //
+        // }
+        // else if (ch == '2'){
+        //     surf.set_z(2);
+        // }
+        // else if (ch == '0'){
+        //     surf.set_z(0);
+        // }
+        if (ch == 'd'){
+            str.pop_back();
+            lab.updateSurface();
+        }
+        else {
+            if (ch){
+                int num  = static_cast<int>(ch);
+                str += num;
+                lab.updateSurface();
             }
-            else{
-                surf.fill_bg(255, 255, 255);
-                surf.fill_fg(0, 0, 0);
-                color = 1;
-            }
-        }
-        if (ch == 'j'){
-            offset[1] ++;
-        }
-        if (ch == 'k'){
-            offset[1] --;
-        }
-        if (ch == 'h'){
-            offset[0] --;
-        }
-        if (ch == 'l'){
-            offset[0] ++;
-    
-        }
-        if (ch == '2'){
-            surf.set_z(2);
-        }
-        if (ch == '0'){
-            surf.set_z(0);
         }
         surf.set_offset(offset[0], offset[1]);
         // surf2.set_offset(offset[0], offset[1]- 10);

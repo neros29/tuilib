@@ -1,3 +1,4 @@
+#include <iostream>
 #include <sstream>
 #include <string>
 #include "../tui.h"
@@ -16,11 +17,11 @@ void Character::genrate(){
         _bg << ESC << "[48;2;"<< bg[0] << ";" << bg[1] << ";" << bg[2] << "m";
     }
     oss << _bg.str() << _fg.str() << ch << ESC << "[0m";
-    ch_def = false;
     ansii = oss.str();
 }
 void Character::set_ch(string chi){
     ch = chi;
+    ch_def = false;
 }
 void Character::set_bg(int r, int g, int b){
     bg[0] = r;

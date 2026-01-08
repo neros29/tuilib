@@ -5,6 +5,8 @@
 #include <fstream>
 #include <array>
 using namespace std;
+
+//
 //
 // class InputString{
 // private:
@@ -19,16 +21,16 @@ using namespace std;
 // };
 //
 class Character {
-private:
-    string ch = "";
+public:
     bool bg_def {true};
     bool fg_def {true};
-    int fg[3];
-    int bg[3];
-
-public:
     bool ch_def {true};
+
+    array<int, 3> fg;
+    array<int, 3> bg;
+    string ch = "";
     string ansii{""};
+
     void set_fg(int r, int g, int b);
     void set_bg(int r, int g, int b);
     void set_ch(string chi);
@@ -45,6 +47,7 @@ private:
 public:
     Character& operator[](int x);
     Surface(array<int, 2> size, string ch, int z, array<int, 2> offset);
+    Surface();
     void fill_bg(int r, int g, int b);
     void fill_fg(int r, int g, int b);
     void set_z(int z);
@@ -90,6 +93,7 @@ class Input{
 private:
     bool is_char();
 
+
 public:
     Input();
     ~Input();
@@ -106,21 +110,19 @@ struct Node{
     Node* right;
 };
 
-class Tree{
+class Label{
 private:
-    Node* root;
-    int depath = 4;
-    int idx = 0;
-    Node* add_node(vector<Surface>& surfaces, Node* last, string direction, array<int, 2> start, array<int, 2> end);
-    vector<int> get_avg(Surface& surf);
-
+    Surface& root;
+    Surface surf;
+    const string& str;
+    string oldStr;
+    vector<string> text;
+    array<int, 2> size;
+    array<int, 2> offset;
+    void m_getSize();
+    void m_parseString(const string& i_str);
 public:
-    Tree(int width, int height);
-    Surface& get_surf(array<int, 2> pos);
-    ~Tree();
-
-
+    Label(Surface& i_root, const string& i_text, array<int, 2> i_offset);
+    void updateSurface();
 };
-
-
 

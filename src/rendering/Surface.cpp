@@ -12,6 +12,8 @@ Surface::Surface(array<int, 2> size, string ch, int z, array<int, 2> offset):z(z
     chr.genrate();
     surface.assign(size[0]*size[1], chr);
 }
+Surface::Surface(){
+}
 
 void Surface::fill_bg(int r, int g, int b){
     for(int i = 0; i != surface.size(); i++){
@@ -52,7 +54,16 @@ void Surface::blit(Surface &surf){
         if (r_x < surf.ssize()[0] && r_y < surf.ssize()[1]){
             if (r_x >= 0 && r_y >= 0){
                 int index = (surf.ssize()[0] * r_y) + r_x;
-                surface[i] = surf[index];
+                if (!surf[index].bg_def){
+                    surface[i].set_bg(surf[index].bg[0], surf[index].bg[1], surf[index].bg[2]);
+                }
+                if (!surf[index].fg_def){
+                    surface[i].set_fg(surf[index].fg[0], surf[index].fg[1], surf[index].fg[2]);
+                }
+                if (!surf[index].ch_def){
+                    surface[i].set_ch(surf[index].ch);
+                }
+                surface[i].genrate();
             }
         }
         if (x == size[0] - 1){

@@ -2,7 +2,7 @@
 CC = g++
 CFLAGS = 
 # Source files
-SOURCES = src/rendering/Screen.cpp src/rendering/Surface.cpp src/rendering/Character.cpp src/test.cpp src/input/input.cpp 
+SOURCES = src/rendering/Screen.cpp src/rendering/Surface.cpp src/rendering/Character.cpp src/test.cpp src/input/input.cpp src/widgets/Label.cpp
 OBJECTS = $(SOURCES:.cpp=.o)  # Automatic object file names
 # Executable name
 EXECUTABLE = build/test
