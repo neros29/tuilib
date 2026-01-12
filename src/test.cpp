@@ -33,7 +33,7 @@ int main(){
     surf.fill_fg(0, 0, 0);
     surf2.fill_bg(0, 255, 0);
 
-    string str = "Echo:";
+    string str = "Hello world";
     Label lab(surf, str, {1, 1});
     
     // Surface sub({11, 1}, " ", 0, {0, 1});
@@ -56,52 +56,41 @@ int main(){
         }
         char ch = input.get_char();
         //
-        if (/*ch == 'q' || */ch == 3){
+        if (ch == 'q' || ch == 3){
             break;
         }
-        // else if (ch == 'r'){
-        //     if(color == 1){
-        //         surf.fill_bg(0, 0, 0);
-        //         surf.fill_fg(255, 255, 255);
-        //         surf[0].set_bg(255, 0, 0);
-        //         surf[0].genrate();
-        //         color = 0;
-        //     }
-        //     else{
-        //         surf.fill_bg(255, 255, 255);
-        //         surf.fill_fg(0, 0, 0);
-        //         color = 1;
-        //     }
-        // }
-        // else if (ch == 'j'){
-        //     offset[1] ++;
-        // }
-        // else if (ch == 'k'){
-        //     offset[1] --;
-        // }
-        // else if (ch == 'h'){
-        //     offset[0] --;
-        // }
-        // else if (ch == 'l'){
-        //     offset[0] ++;
-        //
-        // }
-        // else if (ch == '2'){
-        //     surf.set_z(2);
-        // }
-        // else if (ch == '0'){
-        //     surf.set_z(0);
-        // }
-        if (ch == 'd'){
-            str.pop_back();
-            lab.updateSurface();
-        }
-        else {
-            if (ch){
-                int num  = static_cast<int>(ch);
-                str += num;
-                lab.updateSurface();
+        else if (ch == 'r'){
+            if(color == 1){
+                surf.fill_bg(0, 0, 0);
+                surf.fill_fg(255, 255, 255);
+                surf[0].set_bg(255, 0, 0);
+                surf[0].genrate();
+                color = 0;
             }
+            else{
+                surf.fill_bg(255, 255, 255);
+                surf.fill_fg(0, 0, 0);
+                color = 1;
+            }
+        }
+        else if (ch == 'j'){
+            offset[1] ++;
+        }
+        else if (ch == 'k'){
+            offset[1] --;
+        }
+        else if (ch == 'h'){
+            offset[0] --;
+        }
+        else if (ch == 'l'){
+            offset[0] ++;
+
+        }
+        else if (ch == '2'){
+            surf.set_z(2);
+        }
+        else if (ch == '0'){
+            surf.set_z(0);
         }
         surf.set_offset(offset[0], offset[1]);
         // surf2.set_offset(offset[0], offset[1]- 10);
