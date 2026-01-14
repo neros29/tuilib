@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Plan/Widgets/Label.md",
+                "file": "Goal.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Label"
+              "title": "Goal"
             }
           }
         ],
@@ -186,18 +186,18 @@
   },
   "active": "1e45ae27cf390a0c",
   "lastOpenFiles": [
-    "Plan/Rendering.md",
+    "TODO.md",
+    "Goal.md",
     "Plan/Widgets/Label.md",
+    "Plan/Rendering.md",
     "Plan/Input Handling.md",
     "brainstorm/01-06-2026.md",
     "brainstorm/12-18-2025.md",
-    "TODO.md",
     "Notes/ANSI.md",
     "Logs/2025-11-07.md",
     "Logs/2025-12-07.md",
     "brainstorm/12-16-2025.md",
     "Notes.md",
-    "Goal.md",
     "brainstorm/12-02-2025.md",
     "TUI.md",
     "examples/test.cpp",
