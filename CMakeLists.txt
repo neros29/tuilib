@@ -16,7 +16,6 @@ set(TUI_CORE_SOURCES
     src/rendering/Screen.cpp
     src/rendering/Surface.cpp
     src/rendering/Character.cpp
-    src/rendering/InputString.cpp
     src/input/input.cpp
 )
 
