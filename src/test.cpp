@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include "tui.h"
 #include <time.h>
@@ -7,8 +8,11 @@ using namespace std;
 
 
 int main(){
+    ofstream file("log");
+    cout.rdbuf(file.rdbuf());
     Screen screen;
     Input input;
+
     array<int, 2> offset {1, 12};
     array<int, 2> offset2 {1, 22};
 
@@ -23,12 +27,17 @@ int main(){
     surf.fill_fg(0, 0, 0);
     surf2.fill_bg(0, 255, 0);
 
-    string str = "Hello world";
+    string str = "Hello 🧮world";
+    InputString is(str);
+    for (int i = 0; i < is.size(); i++){
+        cout << is[i] << endl;
+    }
+    
     Label lab(surf, str, {1, 1});
 
     int color = 1;
     system("clear");
-    cout << "\x1b[3J";
+    // cout << "\x1b[3J";
     int vec[2] {1, 1};
 
     unsigned long count = 0;

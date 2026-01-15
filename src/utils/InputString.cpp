@@ -1,4 +1,5 @@
 #include "../tui.h"
+#include <utf8proc.h>
 #include <iostream>
 
 using namespace std;
@@ -29,18 +30,33 @@ int InputString::get_byte_len(unsigned char firstByte) {
         return -1; // Or throw an exception, depending on desired behavior
     }
 }
-auto InputString::begin(){
-    return str.begin();
-}
-auto InputString::end(){
-    return str.end();
-}
 size_t InputString::size(){
     return str.size();
 }
 string InputString::operator[](int i){
     return str[i];
     
+}
+
+int InputString::getWidth(string s){
+    if (s.empty()) return 0;
+    utf8proc_int32_t cp = 0;
+    // utf8proc_iterate decodes the first codepoint from UTF-8 bytes.
+    // It returns number of bytes consumed, or a negative value on error.
+    int consumed = utf8proc_iterate(
+        reinterpret_cast<const utf8proc_uint8_t*>(s.data()),
+        static_cast<utf8proc_ssize_t>(s.size()),
+        &cp
+    );
+
+    if (consumed < 0) return 1;                 // invalid UTF-8
+    if (static_cast<size_t>(consumed) != s.size()) {
+        return 1;
+    }
+
+    int w = utf8proc_charwidth(cp);             // 0/1/2 (and sometimes -1)
+    if (w < 0) return 1;                        // non-printable -> treat as 1
+    return w;
 }
 
 InputString::InputString(string s){
@@ -51,7 +67,7 @@ InputString::InputString(string s){
         if (len != -1){
             string ch {""};
             int new_index = index + len;
-            for (int i = index; i <= new_index; i++){
+            for (int i = index; i < new_index; i++){
                 ch += s[i];
             }
             str.push_back(ch);

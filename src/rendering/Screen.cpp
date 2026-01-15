@@ -97,7 +97,7 @@ Surface &Screen::append(array<int, 2> size,  array<int, 2> offset, string ch, in
 void Screen::flip(){
     m_render();
     m_file << "\x1b[?25l";
-    for (int i = 0; i != m_screen.size(); i++){
+    for (int i = m_screen.size()-1; i >= 0; i--){
         int y = i / m_size[0];
         int x = i % m_size[0];
         if (m_screen[i] != m_lastScreen[i]){

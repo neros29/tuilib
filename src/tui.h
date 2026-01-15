@@ -6,20 +6,17 @@
 #include <array>
 using namespace std;
 
-//
-//
-// class InputString{
-// private:
-//     int get_byte_len(unsigned char firstbyte);
-//     vector<string> str;
-// public:
-//     auto begin();
-//     auto end();
-//     size_t size();
-//     InputString(string s);
-//     string operator[](int i);
-// };
-//
+class InputString{
+private:
+    int get_byte_len(unsigned char firstbyte);
+    vector<string> str;
+public:
+    size_t size();
+    int getWidth(string ch); 
+    InputString(string s);
+    string operator[](int i);
+};
+
 class Character {
 public:
     bool bg_def {true};

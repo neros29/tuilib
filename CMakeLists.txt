@@ -16,12 +16,14 @@ set(TUI_CORE_SOURCES
     src/rendering/Screen.cpp
     src/rendering/Surface.cpp
     src/rendering/Character.cpp
+    src/widgets/Label.cpp
     src/input/input.cpp
 )
 
 # Header location (tui.h etc)
 # Adjust if your headers live somewhere else
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(tui PRIVATE utf8proc)
 
 # -------------------------
 # Python extension module

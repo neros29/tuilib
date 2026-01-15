@@ -1,4 +1,6 @@
 #include "../tui.h"
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -15,10 +17,23 @@ void Label::updateSurface(){
         surf = Surface(size, " ", 0, offset);
         string ch = "";
         for (int y = 0; y < text.size(); y++){
-            for (int x = 0; x < text[y].size(); x++){
-                ch = text[y][x];
+
+            InputString istr(text[y]);
+            int x = 0;
+            int index = 0;
+            while (x <= istr.size()){
+                ch = istr[index];
+                index++;
+                int width = istr.getWidth(ch);
                 surf[y * size[0] + x].set_ch(ch);
                 surf[y * size[0] + x].genrate();
+                x++;
+                for (int i = 2; i <= width; i++){
+                    if (x <= istr.size()){
+                        surf[y * size[0] + x].ch_def = false;
+                        x++;
+                    }
+                }
             } 
         }
         root.blit(surf);
