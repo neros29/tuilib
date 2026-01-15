@@ -8,8 +8,8 @@ using namespace std;
 
 
 int main(){
-    ofstream file("log");
-    cout.rdbuf(file.rdbuf());
+    // ofstream file("log");
+    // cout.rdbuf(file.rdbuf());
     Screen screen;
     Input input;
 
@@ -27,13 +27,9 @@ int main(){
     surf.fill_fg(0, 0, 0);
     surf2.fill_bg(0, 255, 0);
 
-    string str = "Hello 🧮world";
-    InputString is(str);
-    for (int i = 0; i < is.size(); i++){
-        cout << is[i] << endl;
-    }
+    string str = "WHello world😁";
     
-    Label lab(surf, str, {1, 1});
+    Label lab(surf, str, {2, 2});
 
     int color = 1;
     system("clear");
@@ -47,9 +43,9 @@ int main(){
 
     while (true){
         time_t diff = time(nullptr) - start;
-        if (diff > secounds){
-            break;
-        }
+        // if (diff > secounds){
+        //     break;
+        // }
         char ch = input.get_char();
         //
         if (ch == 'q' || ch == 3){

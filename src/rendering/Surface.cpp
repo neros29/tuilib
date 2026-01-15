@@ -66,7 +66,7 @@ void Surface::blit(Surface &surf){
                 surface[i].genrate();
             }
         }
-        if (x == size[0] - 1){
+        if (x == size[0]-1){
             x = 0;
             y ++;
         }

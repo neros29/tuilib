@@ -30,7 +30,7 @@ void Label::updateSurface(){
                 x++;
                 for (int i = 2; i <= width; i++){
                     if (x <= istr.size()){
-                        surf[y * size[0] + x].ch_def = false;
+                        surf[y * size[0] + x].set_ch(" ");
                         x++;
                     }
                 }

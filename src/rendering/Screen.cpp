@@ -47,10 +47,11 @@ void Screen::m_render(){
     if (m_sizeChange){
         m_initScreen();
     }
-    int x = 0;
-    int y = 0;
+    int x = 1;
+    int y = 1;
     for (int i = 0; i != m_screen.size(); i++){
         bool def {true};
+        Character ch;
         for (int j: m_sortIndex){
             Surface &surf = m_surfaces[j];
             int r_x = x - surf.offset()[0];
@@ -58,13 +59,25 @@ void Screen::m_render(){
             if (r_x < surf.ssize()[0] && r_y < surf.ssize()[1]){
                 if (r_x >= 0 && r_y >= 0){
                     int index = (surf.ssize()[0] * r_y) + r_x;
-                    if (surf[index].ch_def){
-                        continue;
-                    }
-                    else{
-                        m_screen[i] = surf[index].ansii;
+                    if (!surf[index].ch_def && ch.ch_def){
+                        ch.set_ch(surf[index].ch);
                         def = false;
-                        break;
+                    }
+                    if (!surf[index].fg_def && ch.fg_def){
+                        ch.set_fg(surf[index].fg[0], surf[index].fg[1], surf[index].fg[2]);
+                        def = false;
+                    }
+                    if (!surf[index].bg_def && ch.bg_def){
+                        ch.set_bg(surf[index].bg[0], surf[index].bg[1], surf[index].bg[2]);
+                        def = false;
+                    }
+                    if (!ch.bg_def && !ch.ch_def){
+                        if (!ch.fg_def){
+                            ch.genrate();
+                            m_screen[i] = ch.ansii;
+                            break;
+
+                        }
                     }
                     
                 }
@@ -73,8 +86,12 @@ void Screen::m_render(){
         if (def){
             m_screen[i] = m_defaultCharacter;
         }
-        if (x == m_size[0] - 1){
-            x = 0;
+        else{
+            ch.genrate();
+            m_screen[i] = ch.ansii;
+        }
+        if (x == m_size[0]){
+            x = 1;
             y ++;
         }
         else{
@@ -107,6 +124,7 @@ void Screen::flip(){
     }
     m_lastScreen = m_screen;
     m_file <<"\x1b[?25h";
+    m_file << "\x1b[1;1H";
     m_file.flush();
 }
 Screen::Screen(){
