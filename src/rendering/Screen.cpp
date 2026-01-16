@@ -41,9 +41,6 @@ void Screen::m_initScreen(){
 void Screen::m_render(){
     m_getWinSize();
     m_sortSurfaces();
-    // if (!sorted){
-    //     sort_surfaces();
-    // }
     if (m_sizeChange){
         m_initScreen();
     }

@@ -13,8 +13,8 @@ int main(){
     Screen screen;
     Input input;
 
-    array<int, 2> offset {1, 12};
-    array<int, 2> offset2 {1, 22};
+    array<int, 2> offset {2, 12};
+    array<int, 2> offset2 {2, 22};
 
     array<int, 3> BLACK {0, 0, 0};
     array<int, 3> WHITE {255, 255, 255};
