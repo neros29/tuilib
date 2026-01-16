@@ -34,7 +34,7 @@ size_t InputString::size(){
     return str.size();
 }
 string InputString::operator[](int i){
-    return str[i];
+    return str.at(i);
     
 }
 

@@ -34,9 +34,11 @@ array<int, 2> Screen::getSize(){
 }
 
 void Screen::m_initScreen(){
+    clog << "[Screen] m_initScreen was called"<< endl;
     m_screen.assign(m_size[0] * m_size[1], m_defaultCharacter);
     m_lastScreen.assign(m_size[0] * m_size[1], m_defaultCharacter);
 }
+
 
 void Screen::m_render(){
     m_getWinSize();
@@ -121,15 +123,17 @@ void Screen::flip(){
     }
     m_lastScreen = m_screen;
     m_file <<"\x1b[?25h";
-    m_file << "\x1b[1;1H";
+    m_file << "\x1b["<< m_size[0] << ";" << m_size[1] << "H";
     m_file.flush();
 }
 Screen::Screen(){
+    clog << "[Screen] Screen was Constructed"<< endl;
     m_getWinSize();
     m_initScreen();
     m_file.open("/dev/stdout");
 }
 Screen::~Screen(){
+    clog << "[Screen] Screen's Destructer ran"<< endl;
     m_file.close();
 }
 

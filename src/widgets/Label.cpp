@@ -16,12 +16,11 @@ void Label::updateSurface(){
         // TODO Do i need a better z handling here
         surf = Surface(size, " ", 0, offset);
         string ch = "";
-        for (int y = 0; y < text.size(); y++){
-
+        for (int y = 0; y <= text.size()-1; y++){
             InputString istr(text[y]);
             int x = 0;
             int index = 0;
-            while (x <= istr.size()){
+            while (index < istr.size()){
                 ch = istr[index];
                 index++;
                 int width = istr.getWidth(ch);
@@ -29,7 +28,7 @@ void Label::updateSurface(){
                 surf[y * size[0] + x].genrate();
                 x++;
                 for (int i = 2; i <= width; i++){
-                    if (x <= istr.size()){
+                    if (index <= istr.size()){
                         surf[y * size[0] + x].set_ch(" ");
                         x++;
                     }

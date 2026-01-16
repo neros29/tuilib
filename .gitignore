@@ -7,3 +7,4 @@ src/rendering/*.o
 src/input/*.o
 src/widgets/*.o
 src/utils/*.o
+log

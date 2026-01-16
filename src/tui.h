@@ -80,10 +80,9 @@ public:
     ~Screen();
     array<int, 2> getSize();
     Surface& append(array<int, 2> size, array<int, 2> offset, string ch = " ", int z = -1);
+    void setDirty();
     void flip();
 };
-
-
 
 // Input
 class Input{
@@ -95,16 +94,6 @@ public:
     Input();
     ~Input();
     char get_char();
-};
-
-struct Node{
-    int data = -1;
-    int px;
-    int py;
-    int sx;
-    int sy;
-    Node* left;
-    Node* right;
 };
 
 class Label{
@@ -122,4 +111,15 @@ public:
     Label(Surface& i_root, const string& i_text, array<int, 2> i_offset);
     void updateSurface();
 };
-
+//
+// class InputBox{
+// private:
+//     Surface& root;
+//     Surface surf;
+//     string& str;
+//     array<int, 3> offset;
+//
+// public:
+//     InputBox(Surface& i_root, string& i_str, array<int, 3> i_offset);
+//     void updateSurface();
+// };
