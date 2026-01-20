@@ -4,7 +4,7 @@
 #include <array>
 #include <string>
 
-#include "tui.h"
+#include "core/tui.h"
 
 namespace py = pybind11;
 

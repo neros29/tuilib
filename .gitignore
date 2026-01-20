@@ -1,10 +1,6 @@
-.vscode/*
-build/*
-Docs/*
-.cache/*
-src/*.o
-src/rendering/*.o
-src/input/*.o
-src/widgets/*.o
-src/utils/*.o
+.vscode/
+build/
+Docs/
+.cache/
+**/*.o
 log

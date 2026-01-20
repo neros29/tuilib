@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "brainstorm/01-17-2026.md",
+                "file": "Notes/ANSI.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "01-17-2026"
+              "title": "ANSI"
             }
           }
         ],
@@ -186,6 +186,13 @@
   },
   "active": "83c341663d582ed4",
   "lastOpenFiles": [
+    "Plan/Input Handling.md",
+    "Notes/ANSI.md",
+    "Plan/Rendering.md",
+    "BUGS.md",
+    "Features & Philosophy.md",
+    "V2/Ideas.md",
+    "brainstorm/01-17-2026.md",
     "examples/test.cpp",
     "examples/test",
     "examples/render.cpp",
@@ -200,26 +207,20 @@
     "brainstorm/11-19-2025.md",
     "brainstorm/11-17-2025.md",
     "brainstorm/01-06-2026.md",
-    "V2/Ideas.md",
     "V2",
     "TUI.md",
     "TODO.md",
     "Plan/Widgets/Label.md",
     "Plan/Widgets",
-    "Plan/Rendering.md",
-    "Plan/Input Handling.md",
     "Plan",
-    "Notes/ANSI.md",
     "Notes",
     "Notes.md",
     "Logs/2025-12-07.md",
     "Logs/2025-11-07.md",
     "Goal.md",
-    "Features & Philosophy.md",
     "TUI.md~",
     "Untitled 1.md",
     "Logs/2026-01-17.md",
-    "brainstorm/01-17-2026.md",
     "render.cpp",
     "Untitled.canvas"
   ]

@@ -2,7 +2,7 @@
 #include <sstream>
 #include <fstream>
 #include <string>
-#include "tui.h"
+#include "core/tui.h"
 #include <time.h>
 
 using namespace std;

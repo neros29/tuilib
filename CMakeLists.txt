@@ -13,11 +13,11 @@ find_package(pybind11 CONFIG REQUIRED)
 
 # Core engine sources (everything that implements Screen / Surface / Character / input)
 set(TUI_CORE_SOURCES
-    src/rendering/Screen.cpp
-    src/rendering/Surface.cpp
-    src/rendering/Character.cpp
-    src/widgets/Label.cpp
-    src/input/input.cpp
+    src/core/rendering/Screen.cpp
+    src/core/rendering/Surface.cpp
+    src/core/rendering/Character.cpp
+    src/core/widgets/Label.cpp
+    src/core/input/input.cpp
 )
 
 # Header location (tui.h etc)
