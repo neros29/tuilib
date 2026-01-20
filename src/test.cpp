@@ -3,7 +3,7 @@
 #include <fstream>
 #include <string>
 #include "core/tui.h"
-#include <time.h>
+#include <chrono>
 
 using namespace std;
 
@@ -24,16 +24,17 @@ int main(){
 
     auto &surf = screen.append({40, 10}, offset);
     auto &surf2 = screen.append({40, 10}, offset2);
-    auto &debug = screen.append({screen.getSize()[0], screen.getSize()[1]}, {2, 2}, " ", 1000);
+    auto &debug = screen.append({screen.getSize()[0], screen.getSize()[1]}, {-screen.getSize()[0], -screen.getSize()[1]}, " ", 1000);
 
     surf.fill_bg(210, 210, 210);
     surf.fill_fg(0, 0, 0);
     surf2.fill_bg(0, 255, 0);
 
     string str = "😁Hello world😁\n😁Hello world😁";
-    string fps = "";
     Label lab(surf, str, {2, 2});
-    Label fps_lab(debug, fps, {1, 1});
+
+    string debugStr = "";
+    Label debugLabel(debug, debugStr, {1, 1});
 
     int color = 1;
     system("clear");
@@ -41,18 +42,18 @@ int main(){
     int vec[2] {1, 1};
 
     unsigned long count = 0;
-    time_t start = time(nullptr);
+    auto start = chrono::system_clock::now();
 
-    bool show_debug = true;
+    bool show_debug = false;
     while (true){
-        time_t diff = time(nullptr) - start;
+        int diff = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now() - start).count();
         if (diff > 1){
-            int fpsi = count / diff;
+            double fps = (static_cast<double>(count) / static_cast<double>(diff)) * 1000;
             int cpf = screen.amount / count;
             ostringstream s;
-            s << "fps = " << fpsi << " Total frames = " << count << "\n" <<  "Charecters per frame = " << cpf << " Total Charecters = " << screen.amount << "\n";
-            fps = s.str();
-            fps_lab.updateSurface();
+            s << "fps = " << static_cast<int>(fps) << " Total frames = " << count << "\n" <<  "Charecters per frame = " << cpf << " Total Charecters = " << screen.amount << "\n" << "run time = " << static_cast<float>(diff) / 1000 << " secounds\n";
+            debugStr = s.str();
+            debugLabel.updateSurface();
         }
         //
         char ch = input.get_char();
