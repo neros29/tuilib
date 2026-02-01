@@ -21,14 +21,6 @@ void Screen::m_getWinSize(){
     }
 }
 
-void Screen::m_sortSurfaces(){
-    sort(m_sortIndex.begin(), m_sortIndex.end(), 
-        [&](const int& a, const int& b){
-            return m_surfaces[a].get_z() > m_surfaces[b].get_z();
-        }
-    );
-    m_sorted = true;
-}
 array<int, 2> Screen::getSize(){
     return m_size;
 }
@@ -42,7 +34,6 @@ void Screen::m_initScreen(){
 
 void Screen::m_render(){
     m_getWinSize();
-    m_sortSurfaces();
     if (m_sizeChange){
         m_initScreen();
     }
@@ -52,12 +43,12 @@ void Screen::m_render(){
         bool def {true};
         Character ch;
         for (int j: m_sortIndex){
-            Surface &surf = m_surfaces[j];
-            int r_x = x - surf.offset()[0];
-            int r_y = y - surf.offset()[1];
-            if (r_x < surf.ssize()[0] && r_y < surf.ssize()[1]){
+            const Surface &surf = m_surfaces[j];
+            int r_x = x - surf.get_offset()[0];
+            int r_y = y - surf.get_offset()[1];
+            if (r_x < surf.get_size()[0] && r_y < surf.get_size()[1]){
                 if (r_x >= 0 && r_y >= 0){
-                    int index = (surf.ssize()[0] * r_y) + r_x;
+                    int index = (surf.get_size()[0] * r_y) + r_x;
                     if (!surf[index].ch_def && ch.ch_def){
                         ch.set_ch(surf[index].ch);
                         def = false;
@@ -99,16 +90,6 @@ void Screen::m_render(){
     }
 }
 
-Surface &Screen::append(array<int, 2> size,  array<int, 2> offset, string ch, int z){
-    if (z == -1){
-        z = m_index;
-    }
-    m_surfaces.emplace_back(size, ch, z, offset);
-    m_sortIndex.emplace_back(m_index);
-    m_index ++;
-    m_sorted = false;
-    return m_surfaces[m_index-1];
-}
 
 void Screen::flip(){
     m_render();
@@ -126,7 +107,7 @@ void Screen::flip(){
     m_file << "\x1b["<< m_size[0] << ";" << m_size[1] << "H";
     m_file.flush();
 }
-Screen::Screen(){
+Screen::Screen(const deque<Surface>& surfaces, const vector<int>& sortIndex):m_surfaces(surfaces), m_sortIndex(sortIndex){
     clog << "[Screen] Screen was Constructed"<< endl;
     m_getWinSize();
     m_initScreen();

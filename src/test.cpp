@@ -1,20 +1,14 @@
 #include <iostream>
 #include <sstream>
-#include <fstream>
 #include <string>
-#include "core/tui.h"
+#include "api.h"
 #include <chrono>
 
 using namespace std;
 
 
 int main(){
-    ofstream file("log", ios::app);
-    clog.rdbuf(file.rdbuf());
-    clog << "[Program] Starting up" << endl;
-    Screen screen;
-    Input input;
-
+    Tui tui{"log"};
     array<int, 2> offset {20, 12};
     array<int, 2> offset2 {20, 22};
 
@@ -22,19 +16,20 @@ int main(){
     array<int, 3> WHITE {255, 255, 255};
     array<int, 3> BLUE {0, 0, 255};
 
-    auto &surf = screen.append({40, 10}, offset);
-    auto &surf2 = screen.append({40, 10}, offset2);
-    auto &debug = screen.append({screen.getSize()[0], screen.getSize()[1]}, {-screen.getSize()[0], -screen.getSize()[1]}, " ", 1000);
+    auto &surf = tui.append({40, 10}, offset);
+    auto &surf2 = tui.append({40, 10}, offset2);
+    auto &debug = tui.append({tui.getScreenSize()[0], tui.getScreenSize()[1]}, {-tui.getScreenSize()[0], -tui.getScreenSize()[1]}, " ", 1000);
 
     surf.fill_bg(210, 210, 210);
     surf.fill_fg(0, 0, 0);
     surf2.fill_bg(0, 255, 0);
+    surf.register_keys({"q", "h", "j", "k", "l"});
 
     string str = "😁Hello world😁\n😁Hello world😁";
-    Label lab(surf, str, {2, 2});
+    Label lab{surf, str, {2, 2}};
 
     string debugStr = "";
-    Label debugLabel(debug, debugStr, {1, 1});
+    Label debugLabel{debug, debugStr, {1, 1}};
 
     int color = 1;
     system("clear");
@@ -49,69 +44,38 @@ int main(){
         int diff = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now() - start).count();
         if (diff > 1){
             double fps = (static_cast<double>(count) / static_cast<double>(diff)) * 1000;
-            int cpf = screen.amount / count;
+            int cpf = tui.charactersRendered() / count;
             ostringstream s;
-            s << "fps = " << static_cast<int>(fps) << " Total frames = " << count << "\n" <<  "Charecters per frame = " << cpf << " Total Charecters = " << screen.amount << "\n" << "run time = " << static_cast<float>(diff) / 1000 << " secounds\n";
+            s << "fps = " << static_cast<int>(fps) << " Total frames = " << count << "\n" <<  "Charecters per frame = " << cpf << " Total Charecters = " << tui.charactersRendered() << "\n" << "run time = " << static_cast<float>(diff) / 1000 << " secounds\n";
             debugStr = s.str();
             debugLabel.updateSurface();
         }
-        //
-        char ch = input.get_char();
-        if (ch == 'q' || ch == 3){
+
+
+        if (surf.get_event("q")){
             break;
         }
-        else if (ch == 'd'){
-            if (show_debug){
-                debug.set_offset(-screen.getSize()[0], -screen.getSize()[1]);
-                show_debug = false;
-            }
-            else{
-                debug.set_offset(2, 2);
-                show_debug = true;
-            }
+        if (surf.get_event("k")){
+            offset[1] -= 1;
         }
-
-        else if (ch == 'r'){
-            if(color == 1){
-                surf.fill_bg(0, 0, 0);
-                surf.fill_fg(255, 255, 255);
-                color = 0;
-            }
-            else{
-                surf.fill_bg(255, 255, 255);
-                surf.fill_fg(0, 0, 0);
-                color = 1;
-            }
+        if (surf.get_event("j")){
+            offset[1] += 1;
         }
-        else if (ch == 'j'){
-            offset[1] ++;
+        if (surf.get_event("h")){
+            offset[0] -= 1;
         }
-        else if (ch == 'k'){
-            offset[1] --;
-        }
-        else if (ch == 'h'){
-            offset[0] --;
-        }
-        else if (ch == 'l'){
-            offset[0] ++;
-        }
-        else if (ch == '2'){
-            surf.set_z(2);
-        }
-        else if (ch == '0'){
-            surf.set_z(0);
+        if (surf.get_event("l")){
+            offset[0] += 1;
         }
         surf.set_offset(offset[0], offset[1]);
-        // surf2.set_offset(offset[0], offset[1]- 10);
-        screen.flip();
+        
+        tui.update();
         count ++;
 
         // system("sleep .05");
     }
     system("clear");
-    clog << "[Program] Shutting down" << endl;
-    file.close();
     cout << "the amount of frames render was " << count << endl;
-    cout << "the amount of charecters renderd was " << screen.amount << endl;
+    cout << "the amount of charecters renderd was " << tui.charactersRendered() << endl;
  
 }

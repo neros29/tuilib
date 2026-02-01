@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Notes/ANSI.md",
+                "file": "TODO.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "ANSI"
+              "title": "TODO"
             }
           }
         ],
@@ -186,19 +186,26 @@
   },
   "active": "83c341663d582ed4",
   "lastOpenFiles": [
-    "Plan/Input Handling.md",
-    "Notes/ANSI.md",
-    "Plan/Rendering.md",
-    "BUGS.md",
+    "examples/input.cpp~",
+    "Notes.md",
+    "Goal.md",
     "Features & Philosophy.md",
+    "BUGS.md",
     "V2/Ideas.md",
+    "Plan/Input Handling.md",
+    "TUI.md",
+    "Untitled.md",
+    "brainstorm/12-16-2025.md",
+    "brainstorm/12-18-2025.md",
+    "Notes/ANSI.md",
+    "brainstorm/01-21-2026.md",
+    "Plan/Widgets/Label.md",
+    "Plan/Rendering.md",
     "brainstorm/01-17-2026.md",
     "examples/test.cpp",
     "examples/test",
     "examples/render.cpp",
     "examples",
-    "brainstorm/12-18-2025.md",
-    "brainstorm/12-16-2025.md",
     "brainstorm/12-02-2025.md",
     "brainstorm/12-01-2025.md",
     "brainstorm/11-23-2025.md",
@@ -208,19 +215,12 @@
     "brainstorm/11-17-2025.md",
     "brainstorm/01-06-2026.md",
     "V2",
-    "TUI.md",
     "TODO.md",
-    "Plan/Widgets/Label.md",
     "Plan/Widgets",
     "Plan",
     "Notes",
-    "Notes.md",
     "Logs/2025-12-07.md",
-    "Logs/2025-11-07.md",
-    "Goal.md",
     "TUI.md~",
-    "Untitled 1.md",
-    "Logs/2026-01-17.md",
     "render.cpp",
     "Untitled.canvas"
   ]

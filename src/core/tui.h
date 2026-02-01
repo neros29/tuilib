@@ -1,9 +1,13 @@
 #pragma once
 #include <deque>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <fstream>
 #include <array>
+#include <termios.h>
+#include <term.h>
+
 using namespace std;
 
 class InputString{
@@ -40,28 +44,35 @@ private:
     vector<Character> surface;
     array<int, 2> r_cords;
     int z{0};
-
 public:
-    Character& operator[](int x);
+    unordered_map<string, bool> events;
+    vector<string> keys;
     Surface(array<int, 2> size, string ch, int z, array<int, 2> offset);
     Surface();
+    Character& operator[](int x);
+    Character operator[](int x) const;
+    bool get_event(string event);
+    void register_keys(vector<string> keys);
     void fill_bg(int r, int g, int b);
     void fill_fg(int r, int g, int b);
+
     void set_z(int z);
     void set_offset(int x, int y);
     void blit(Surface& surf);
 
-    int get_z();
-    array<int, 2> offset();
-    array<int, 2> ssize(); 
+    int get_z() const;
+    array<int, 2> get_offset() const;
+    array<int, 2> get_size() const; 
 };
+
+
 
 class Screen {
 private:
-    deque<Surface> m_surfaces;
+    const deque<Surface>& m_surfaces;
     vector<string> m_screen;
     vector<string> m_lastScreen;
-    vector<int> m_sortIndex;
+    const vector<int>& m_sortIndex;
     array<int, 2> m_size;
     ofstream m_file;
     int m_index{0};
@@ -70,30 +81,37 @@ private:
     bool m_sorted {false};
 
     void m_getWinSize();
-    void m_sortSurfaces();
     void m_initScreen();
     void m_render();
 
 public:
-    int amount;
-    Screen();
+    int amount; // amount of charecters renderd for debing
+    Screen(const deque<Surface>& surfaces, const vector<int>& sortIndex);
     ~Screen();
     array<int, 2> getSize();
-    Surface& append(array<int, 2> size, array<int, 2> offset, string ch = " ", int z = -1);
-    void setDirty();
     void flip();
 };
 
 // Input
 class Input{
 private:
-    bool is_char();
-
-
+    struct termios g_old;
+    vector<string> m_events;
+    string m_buffer;
+    unordered_map<string, string> m_termDb;
+    deque<Surface>& m_surfaces; 
+    const vector<int>& m_sortIndex;
+    void set_raw_mode();
+    void restore_mode();
+    int getDataSize();
+    void getData();
+    void parseBuffer();
+    void populateDb();
+    string cap(const char* name); 
 public:
-    Input();
+    Input(deque<Surface>& surfaces, const vector<int>& sortIndex);
     ~Input();
-    char get_char();
+    void update();
 };
 
 class Label{

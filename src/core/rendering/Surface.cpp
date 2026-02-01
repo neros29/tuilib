@@ -30,14 +30,14 @@ void Surface::fill_fg(int r, int g, int b){
 void Surface::set_z(int zi){
     z = zi;
 }
-int Surface::get_z(){
+int Surface::get_z() const{
     return z;
 }
 
-array<int, 2> Surface::ssize(){
+array<int, 2> Surface::get_size() const{
     return size;
 }
-array<int, 2> Surface::offset(){
+array<int, 2> Surface::get_offset() const{
     return r_cords;
 }
 void Surface::set_offset(int x, int y){
@@ -49,11 +49,11 @@ void Surface::blit(Surface &surf){
     int y = 0;
     for (int i = 0; i != surface.size(); i++){
         bool def {true};
-        int r_x = x - surf.offset()[0];
-        int r_y = y - surf.offset()[1];
-        if (r_x < surf.ssize()[0] && r_y < surf.ssize()[1]){
+        int r_x = x - surf.get_offset()[0];
+        int r_y = y - surf.get_offset()[1];
+        if (r_x < surf.get_size()[0] && r_y < surf.get_size()[1]){
             if (r_x >= 0 && r_y >= 0){
-                int index = (surf.ssize()[0] * r_y) + r_x;
+                int index = (surf.get_size()[0] * r_y) + r_x;
                 if (!surf[index].bg_def){
                     surface[i].set_bg(surf[index].bg[0], surf[index].bg[1], surf[index].bg[2]);
                 }
@@ -79,4 +79,19 @@ void Surface::blit(Surface &surf){
 Character& Surface::operator[](int x){
     return surface[x];
 }
+Character Surface::operator[](int x) const{
+    return surface[x];
+}
 
+bool Surface::get_event(string event){
+    if (bool isEvent = events[event]){
+        events[event] = false;
+        return isEvent;
+    }
+    return false;
+}
+void Surface::register_keys(vector<string> i_keys){
+    for (string key: i_keys){
+        keys.push_back(key);
+    }
+}
