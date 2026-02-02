@@ -1,14 +1,17 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "api.h"
 #include <chrono>
+#include <fstream>
+#include "api.h"
 
 using namespace std;
 
 
 int main(){
-    Tui tui{"log"};
+    ofstream log("log");
+    clog.rdbuf(log.rdbuf());
+    Tui tui;
     array<int, 2> offset {20, 12};
     array<int, 2> offset2 {20, 22};
 
@@ -23,7 +26,7 @@ int main(){
     surf.fill_bg(210, 210, 210);
     surf.fill_fg(0, 0, 0);
     surf2.fill_bg(0, 255, 0);
-    surf.register_keys({"q", "h", "j", "k", "l"});
+    surf.register_keys({"q", "h", "j", "k", "l", "Up", "b"});
 
     string str = "😁Hello world😁\n😁Hello world😁";
     Label lab{surf, str, {2, 2}};
@@ -51,9 +54,17 @@ int main(){
             debugLabel.updateSurface();
         }
 
-
         if (surf.get_event("q")){
             break;
+        }
+        if (surf.get_event("d")){
+            if (!show_debug){
+                debug.set_offset(2, 2);
+                show_debug = true;
+            }else {
+                debug.set_offset(-tui.getScreenSize()[0], -tui.getScreenSize()[1]);
+                show_debug = false;
+            }
         }
         if (surf.get_event("k")){
             offset[1] -= 1;

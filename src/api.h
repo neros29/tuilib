@@ -13,7 +13,7 @@ private:
     ofstream m_logFile; 
 public:
     Input m_input;
-    Tui(string logFilePath = "/dev/stdout");
+    Tui();
     ~Tui();
     Surface& append(array<int, 2> size, array<int, 2> offset, string ch = " ", int z = -1);
     void update();

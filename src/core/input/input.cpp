@@ -10,98 +10,97 @@
 using namespace std;
 
 Input::Input(deque<Surface>& surfaces, const vector<int>& sortIndex):m_surfaces(surfaces), m_sortIndex(sortIndex){
-    set_raw_mode();
-    populateDb();
+    m_setRawMode();
+    m_initNamePair();
+    m_initDb();
 }
-
 Input::~Input() {
-    restore_mode();
+    m_restoreMode();
 }
 
-void Input::set_raw_mode() {
-    tcgetattr(STDIN_FILENO, &g_old);
-    termios t = g_old;
-    t.c_lflag &= ~(ICANON | ECHO); // raw-ish: no line buffering, no echo
+inline void Input::m_initNamePair(){
+    for (int i = 1; i <= 12; i++) {
+        std::string capname = "kf" + std::to_string(i);
+        std::string human = "F" + std::to_string(i);
+        m_namePair.push_back({capname, human});
+    }
+    m_namePair.push_back({"kcuu1", "Up"});
+    m_namePair.push_back({"kcud1", "Down"});
+    m_namePair.push_back({"kcub1", "Left"});
+    m_namePair.push_back({"kcuf1", "Right"});
+    m_namePair.push_back({"khome", "Home"});
+    m_namePair.push_back({"kend",  "End"});
+    m_namePair.push_back({"kdch1", "Delete"});
+    m_namePair.push_back({"kich1", "Insert"});
+    m_namePair.push_back({"kpp",   "PageUp"});
+    m_namePair.push_back({"knp",   "PageDown"});
+    m_namePair.push_back({"kbs",   "Backspace"});
+    m_namePair.push_back({"kent",  "Enter"});
+
+
+}
+
+void Input::m_setRawMode() {
+    tcgetattr(STDIN_FILENO, &m_old);
+    termios t = m_old;
+    t.c_lflag &= ~(ICANON | ECHO);
     t.c_cc[VMIN] = 1;
     t.c_cc[VTIME] = 0;
     tcsetattr(STDIN_FILENO, TCSANOW, &t);
 }
-
-void Input::restore_mode() {
-    tcsetattr(STDIN_FILENO, TCSANOW, &g_old);
+void Input::m_restoreMode() {
+    tcsetattr(STDIN_FILENO, TCSANOW, &m_old);
 }
-string Input::cap(const char* name){
+string Input::m_getCap(const char* name){
         char* s = tigetstr(const_cast<char*>(name));
         if (s == (char*)-1 || s == nullptr) return {};
         return std::string(s);
 }
-void Input::populateDb(){
-  int err = 0;
+void Input::m_initDb(){
+    int err = 0;
     if (setupterm(nullptr, STDOUT_FILENO, &err) != 0) {
-        clog << "error = " << err << endl;
+        clog << "[Input] error = " << err << endl;
         terminate();
     }
 
-    // Enable keypad transmit / application mode so terminfo key strings match.
-    // This is the missing piece for arrows on many terminals.
-    std::string smkx = cap("smkx");
-    std::string rmkx = cap("rmkx");
+    std::string smkx = m_getCap("smkx");
+    std::string rmkx = m_getCap("rmkx");
     if (!smkx.empty()) putp(const_cast<char*>(smkx.c_str()));
 
-
-    auto add = [&](const char* capname, const char* human) {
-        std::string s = cap(capname);
+    for (int i = 0; i < m_namePair.size(); i++){
+        array<string, 2>& pair = m_namePair[i]; 
+        string human = pair[1];
+        string capname = pair[0];
+        string s = m_getCap(capname.c_str());
         if (s.empty()) {
-            std::clog << "<missing>\n";
+            clog << "[Input] "<< capname << " dose not exist in terminfo " << endl;
         } else {
             m_termDb[s] = human;
-        }
-    };
-
-    add("kcuu1", "Up");
-    add("kcud1", "Down");
-    add("kcub1", "Left");
-    add("kcuf1", "Right");
-    add("khome", "Home");
-    add("kend",  "End");
-    add("kdch1", "Delete");
-    add("kich1", "Insert");
-    add("kpp",   "PageUp");
-    add("knp",   "PageDown");
-    add("kbs",   "Backspace");
-    add("kent",  "Enter");
-
-    for (int i = 1; i <= 12; i++) {
-        std::string capname = "kf" + std::to_string(i);
-        std::string human = "F" + std::to_string(i);
-        std::string s = cap(capname.c_str());
-        if (!s.empty()) {
-            m_termDb[s] = human;
+            clog << human << ", " << capname << endl;
         }
     }
-
-    
 }
 
-int Input::getDataSize(){
+int Input::m_getDataSize(){
     int size;
     ioctl(0, FIONREAD, &size);
     return size;
 }
-void Input::getData(){
+
+void Input::m_getData(){
     m_buffer = "";
-    int dataSize = getDataSize();
+    int dataSize = m_getDataSize();
     if (dataSize){
-        clog << "data size: " << dataSize << endl;
-        char buff[dataSize];
+        char buff[dataSize + 1];
         read(0, &buff, dataSize);
         buff[dataSize] = '\0';
         m_buffer = buff;
     }
 }
-void Input::parseBuffer(){
+
+void Input::m_parseBuffer(){
     string human;
-    getData();
+    m_getData();
     if (m_buffer.empty()){
         return;
     }
@@ -118,13 +117,15 @@ void Input::parseBuffer(){
     for (int i : m_sortIndex){
         Surface& surf = m_surfaces[i];
         auto it = find(surf.keys.begin(), surf.keys.end(), human);
+        clog << "humen = " << human << endl;
         if (it != surf.keys.end()){
             surf.events[human] = true;
+            break;
         }
     }
     
 
 };
 void Input::update(){
-    parseBuffer();
+    m_parseBuffer();
 }

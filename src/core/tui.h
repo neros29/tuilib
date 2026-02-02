@@ -95,22 +95,33 @@ public:
 // Input
 class Input{
 private:
-    struct termios g_old;
-    vector<string> m_events;
-    string m_buffer;
-    unordered_map<string, string> m_termDb;
+    // Surface data passed from api 
     deque<Surface>& m_surfaces; 
     const vector<int>& m_sortIndex;
-    void set_raw_mode();
-    void restore_mode();
-    int getDataSize();
-    void getData();
-    void parseBuffer();
-    void populateDb();
-    string cap(const char* name); 
+
+    // input stuff
+    struct termios m_old;
+    vector<array<string, 2>> m_namePair;
+    unordered_map<string, string> m_termDb;
+
+    // input buffer
+    string m_buffer;
+
+    // member private functions
+    void m_initNamePair();
+    void m_setRawMode();
+    void m_restoreMode();
+    int m_getDataSize();
+    void m_getData();
+    void m_parseBuffer();
+    void m_initDb();
+    string m_getCap(const char* name);
 public:
+    // Constructers
     Input(deque<Surface>& surfaces, const vector<int>& sortIndex);
     ~Input();
+
+    // member public functions
     void update();
 };
 

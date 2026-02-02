@@ -18,9 +18,7 @@ Surface &Tui::append(array<int, 2> size,  array<int, 2> offset, string ch, int z
     return m_surfaces[m_index-1];
 }
 
-Tui::Tui(string logFilePath):m_screen(Screen(m_surfaces, m_sortedSurfaceIndex)), m_input(Input(m_surfaces, m_sortedSurfaceIndex)){
-    m_logFile = ofstream(logFilePath, ios::app);
-    clog.rdbuf(m_logFile.rdbuf());
+Tui::Tui():m_screen(Screen(m_surfaces, m_sortedSurfaceIndex)), m_input(Input(m_surfaces, m_sortedSurfaceIndex)){
     clog << "[Program] Starting up" << endl;
 }
 Tui::~Tui(){
