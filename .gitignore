@@ -3,4 +3,5 @@ build/
 Docs/
 .cache/
 **/*.o
+**/*.d
 log
