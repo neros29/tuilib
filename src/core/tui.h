@@ -21,7 +21,7 @@ public:
     string operator[](int i);
 };
 
-class Character {
+struct Character {
 public:
     bool bg_def {true};
     bool fg_def {true};
@@ -36,33 +36,45 @@ public:
     void set_bg(int r, int g, int b);
     void set_ch(string chi);
     void genrate();
+    bool operator == (const Character ch) const;
 };
 
 class Surface {
 private:
-    array<int, 2> size;
     vector<Character> surface;
+    vector<Character> m_old;
+
+    bool m_dirty = true;
+    array<int, 2> size;
     array<int, 2> r_cords;
+
     int z{0};
 public:
     unordered_map<string, bool> events;
     vector<string> keys;
+
     Surface(array<int, 2> size, string ch, int z, array<int, 2> offset);
     Surface();
+
     Character& operator[](int x);
     Character operator[](int x) const;
+
+    bool cheakDirty();
     bool get_event(string event);
     void register_keys(vector<string> keys);
+
     void fill_bg(int r, int g, int b);
     void fill_fg(int r, int g, int b);
 
     void set_z(int z);
-    void set_offset(int x, int y);
-    void blit(Surface& surf);
-
     int get_z() const;
+
+
+    void set_offset(int x, int y);
     array<int, 2> get_offset() const;
+
     array<int, 2> get_size() const; 
+    void blit(Surface& surf);
 };
 
 
@@ -85,7 +97,7 @@ private:
     void m_render();
 
 public:
-    int amount; // amount of charecters renderd for debing
+    int charactersRenderd;
     Screen(const deque<Surface>& surfaces, const vector<int>& sortIndex);
     ~Screen();
     array<int, 2> getSize();
@@ -113,7 +125,7 @@ private:
     void m_restoreMode();
     int m_getDataSize();
     void m_getData();
-    void m_parseBuffer();
+    bool m_parseBuffer();
     void m_initDb();
     string m_getCap(const char* name);
 public:
@@ -122,7 +134,7 @@ public:
     ~Input();
 
     // member public functions
-    void update();
+    bool update();
 };
 
 class Label{

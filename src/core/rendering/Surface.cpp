@@ -1,6 +1,6 @@
 #include <string>
-#include <iostream>
 #include <vector>
+#include <iostream>
 #include <sys/ioctl.h>
 #include "../tui.h"
 
@@ -28,7 +28,10 @@ void Surface::fill_fg(int r, int g, int b){
     }
 }
 void Surface::set_z(int zi){
-    z = zi;
+    if (zi != z){
+        m_dirty = true;
+        z = zi;
+    }
 }
 int Surface::get_z() const{
     return z;
@@ -41,8 +44,12 @@ array<int, 2> Surface::get_offset() const{
     return r_cords;
 }
 void Surface::set_offset(int x, int y){
-    r_cords[0] = x;
-    r_cords[1] = y;
+    if (x != r_cords[0] || y != r_cords[1]){
+        m_dirty = true;
+        r_cords[0] = x;
+        r_cords[1] = y;
+
+    }
 }
 void Surface::blit(Surface &surf){
     int x = 0;
@@ -74,6 +81,19 @@ void Surface::blit(Surface &surf){
             x++;
         }
     }
+   
+}
+
+bool Surface::cheakDirty(){
+    if (m_old != surface){
+        m_old = surface;
+        return true;
+    }
+    if (m_dirty){
+        m_dirty = false;
+        return true;
+    }
+    return false;
 }
 
 Character& Surface::operator[](int x){

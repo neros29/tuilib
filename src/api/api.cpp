@@ -1,11 +1,9 @@
 #include "../api.h"
 #include <algorithm>
 #include <iostream>
-#include <fstream>
-
-
 
 using namespace std;
+
 Surface &Tui::append(array<int, 2> size,  array<int, 2> offset, string ch, int z){
     static int m_index;
     if (z == -1){
@@ -19,11 +17,11 @@ Surface &Tui::append(array<int, 2> size,  array<int, 2> offset, string ch, int z
 }
 
 Tui::Tui():m_screen(Screen(m_surfaces, m_sortedSurfaceIndex)), m_input(Input(m_surfaces, m_sortedSurfaceIndex)){
-    clog << "[Program] Starting up" << endl;
+    clog << "[API] Starting up" << endl;
 }
+
 Tui::~Tui(){
-    clog << "[Program] Shutting down" << endl;
-    m_logFile.close();
+    clog << "[API] Shutting down" << endl;
 }
 
 void Tui::m_sortSurfaces(){
@@ -36,9 +34,19 @@ void Tui::m_sortSurfaces(){
 }
 
 void Tui::update(){
-    m_input.update();
+    bool isDirty = m_input.update();
     m_sortSurfaces();
-    m_screen.flip();
+    for (Surface& surf: m_surfaces){
+        if (surf.cheakDirty()){
+            isDirty = true;
+        }
+    }
+    if (isDirty){
+        m_screen.flip();
+    }
+    else{
+        skipedFrames += 1;
+    }
 }
 
 array<int, 2> Tui::getScreenSize(){
@@ -46,5 +54,5 @@ array<int, 2> Tui::getScreenSize(){
 }
 
 int Tui::charactersRendered(){
-    return m_screen.amount;
+    return m_screen.charactersRenderd;
 }

@@ -35,3 +35,15 @@ void Character::set_fg(int r, int g, int b){
     fg[2] = b;
     fg_def = false;
 }
+bool Character::operator ==(const Character chi) const{
+    if (chi.bg != bg){
+        return false;
+    }
+    if (chi.fg != fg){
+        return false;
+    }
+    if (chi.ch != ch){
+        return false;
+    }
+    return true;
+}

@@ -2,7 +2,7 @@
 CXX = g++
 
 # Flags
-CXXFLAGS = -std=c++20 -MMD -MP
+CXXFLAGS = -std=c++20 -MMD -MP -O0
 LDFLAGS  = -lutf8proc -ltinfo
 
 # Source files

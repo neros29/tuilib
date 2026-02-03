@@ -10,11 +10,13 @@
 using namespace std;
 
 Input::Input(deque<Surface>& surfaces, const vector<int>& sortIndex):m_surfaces(surfaces), m_sortIndex(sortIndex){
+    clog << "[Input] Starting up" << endl;
     m_setRawMode();
     m_initNamePair();
     m_initDb();
 }
 Input::~Input() {
+    clog << "[Input] Shuting down" << endl;
     m_restoreMode();
 }
 
@@ -35,7 +37,6 @@ inline void Input::m_initNamePair(){
     m_namePair.push_back({"kpp",   "PageUp"});
     m_namePair.push_back({"knp",   "PageDown"});
     m_namePair.push_back({"kbs",   "Backspace"});
-    m_namePair.push_back({"kent",  "Enter"});
 
 
 }
@@ -76,7 +77,6 @@ void Input::m_initDb(){
             clog << "[Input] "<< capname << " dose not exist in terminfo " << endl;
         } else {
             m_termDb[s] = human;
-            clog << human << ", " << capname << endl;
         }
     }
 }
@@ -98,18 +98,18 @@ void Input::m_getData(){
     }
 }
 
-void Input::m_parseBuffer(){
+bool Input::m_parseBuffer(){
     string human;
     m_getData();
     if (m_buffer.empty()){
-        return;
+        return false;
     }
     if ((unsigned char)m_buffer[0] == 0x1b){
         auto it = m_termDb.find(m_buffer);
         if (it != m_termDb.end()){
             human = it->second; 
         } else {
-            return;
+            return false;
         }
     } else {
         human = m_buffer; 
@@ -117,15 +117,13 @@ void Input::m_parseBuffer(){
     for (int i : m_sortIndex){
         Surface& surf = m_surfaces[i];
         auto it = find(surf.keys.begin(), surf.keys.end(), human);
-        clog << "humen = " << human << endl;
         if (it != surf.keys.end()){
             surf.events[human] = true;
-            break;
+            return true;
         }
     }
-    
-
+    return false;
 };
-void Input::update(){
-    m_parseBuffer();
+bool Input::update(){
+    return m_parseBuffer();
 }

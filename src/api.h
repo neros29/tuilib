@@ -10,9 +10,10 @@ private:
     void m_sortSurfaces();
 
     Screen m_screen;
+    Input m_input;
     ofstream m_logFile; 
 public:
-    Input m_input;
+    int skipedFrames = 0;
     Tui();
     ~Tui();
     Surface& append(array<int, 2> size, array<int, 2> offset, string ch = " ", int z = -1);

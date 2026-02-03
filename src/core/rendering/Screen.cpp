@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 #include <sys/ioctl.h>
-#include <algorithm>
 #include <fstream>
 #include <deque>
 
@@ -26,11 +25,9 @@ array<int, 2> Screen::getSize(){
 }
 
 void Screen::m_initScreen(){
-    clog << "[Screen] m_initScreen was called"<< endl;
     m_screen.assign(m_size[0] * m_size[1], m_defaultCharacter);
     m_lastScreen.assign(m_size[0] * m_size[1], m_defaultCharacter);
 }
-
 
 void Screen::m_render(){
     m_getWinSize();
@@ -66,10 +63,8 @@ void Screen::m_render(){
                             ch.genrate();
                             m_screen[i] = ch.ansii;
                             break;
-
                         }
                     }
-                    
                 }
             }
         }
@@ -90,7 +85,6 @@ void Screen::m_render(){
     }
 }
 
-
 void Screen::flip(){
     m_render();
     m_file << "\x1b[?25l";
@@ -99,7 +93,7 @@ void Screen::flip(){
         int x = i % m_size[0];
         if (m_screen[i] != m_lastScreen[i]){
             m_file <<"\x1b[" << y << ";"<< x << "H" << m_screen[i];
-            amount++;
+            charactersRenderd++;
         }
     }
     m_lastScreen = m_screen;
@@ -107,14 +101,16 @@ void Screen::flip(){
     m_file << "\x1b["<< m_size[0] << ";" << m_size[1] << "H";
     m_file.flush();
 }
+
 Screen::Screen(const deque<Surface>& surfaces, const vector<int>& sortIndex):m_surfaces(surfaces), m_sortIndex(sortIndex){
-    clog << "[Screen] Screen was Constructed"<< endl;
+    clog << "[Screen] Starting up"<< endl;
     m_getWinSize();
     m_initScreen();
     m_file.open("/dev/stdout");
 }
+
 Screen::~Screen(){
-    clog << "[Screen] Screen's Destructer ran"<< endl;
+    clog << "[Screen] Shuting down"<< endl;
     m_file.close();
 }
 

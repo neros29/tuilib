@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "TODO.md",
+                "file": "Features & Philosophy.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "TODO"
+              "title": "Features & Philosophy"
             }
           }
         ],
@@ -186,6 +186,7 @@
   },
   "active": "83c341663d582ed4",
   "lastOpenFiles": [
+    "TODO.md",
     "examples/input.cpp~",
     "Notes.md",
     "Goal.md",
@@ -215,13 +216,11 @@
     "brainstorm/11-17-2025.md",
     "brainstorm/01-06-2026.md",
     "V2",
-    "TODO.md",
     "Plan/Widgets",
     "Plan",
     "Notes",
     "Logs/2025-12-07.md",
     "TUI.md~",
-    "render.cpp",
     "Untitled.canvas"
   ]
 }
