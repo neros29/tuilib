@@ -38,7 +38,7 @@ void Screen::m_render(){
     int y = 1;
     for (int i = 0; i != m_screen.size(); i++){
         bool def {true};
-        Character ch;
+        Character newCharacter;
         for (int j: m_sortIndex){
             const Surface &surf = m_surfaces[j];
             int r_x = x - surf.get_offset()[0];
@@ -46,22 +46,21 @@ void Screen::m_render(){
             if (r_x < surf.get_size()[0] && r_y < surf.get_size()[1]){
                 if (r_x >= 0 && r_y >= 0){
                     int index = (surf.get_size()[0] * r_y) + r_x;
-                    if (!surf[index].ch_def && ch.ch_def){
-                        ch.set_ch(surf[index].ch);
+                    const Character& currentCharacter = surf[index];
+                    if (!currentCharacter.ch_def && newCharacter.ch_def){
+                        newCharacter.set_ch(currentCharacter.ch);
                         def = false;
                     }
-                    if (!surf[index].fg_def && ch.fg_def){
-                        ch.set_fg(surf[index].fg[0], surf[index].fg[1], surf[index].fg[2]);
+                    if (!currentCharacter.fg_def && newCharacter.fg_def){
+                        newCharacter.set_fg(currentCharacter.fg[0], currentCharacter.fg[1], currentCharacter.fg[2]);
                         def = false;
                     }
-                    if (!surf[index].bg_def && ch.bg_def){
-                        ch.set_bg(surf[index].bg[0], surf[index].bg[1], surf[index].bg[2]);
+                    if (!currentCharacter.bg_def && newCharacter.bg_def){
+                        newCharacter.set_bg(currentCharacter.bg[0], currentCharacter.bg[1], currentCharacter.bg[2]);
                         def = false;
                     }
-                    if (!ch.bg_def && !ch.ch_def){
-                        if (!ch.fg_def){
-                            ch.genrate();
-                            m_screen[i] = ch.ansii;
+                    if (!newCharacter.bg_def && !newCharacter.ch_def){
+                        if (!newCharacter.fg_def){
                             break;
                         }
                     }
@@ -72,8 +71,8 @@ void Screen::m_render(){
             m_screen[i] = m_defaultCharacter;
         }
         else{
-            ch.genrate();
-            m_screen[i] = ch.ansii;
+            newCharacter.genrate();
+            m_screen[i] = newCharacter.ansii;
         }
         if (x == m_size[0]){
             x = 1;
@@ -113,4 +112,3 @@ Screen::~Screen(){
     clog << "[Screen] Shuting down"<< endl;
     m_file.close();
 }
-
