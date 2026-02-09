@@ -23,7 +23,7 @@ int main(){
     surf.fill_fg(0xDE, 0xDC, 0xD7);
     surf.fill_bg(0x3,0x3, 0x5);
     surf.register_keys({"q", "h", "j", "k", "l", "d", "Up", "Down", "Left", "Right"});
-    string str = "💀Hello world💀\n\n💀Hello world💀";
+    string str = "💀Hello world💀\n💀Hello world💀";
     Label lab{surf, str, {5, 2}};
 
     auto &surf2 = tui.append({40, 10}, offset2);

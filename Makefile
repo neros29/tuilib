@@ -14,7 +14,7 @@ SOURCES = \
 	src/core/widgets/Label.cpp \
 	src/core/utils/InputString.cpp \
 	src/api/api.cpp \
-	src/test.cpp
+	src/debug.cpp
 
 # Object / dependency files
 OBJECTS = $(SOURCES:.cpp=.o)
