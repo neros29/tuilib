@@ -6,42 +6,11 @@
 #include <fstream>
 #include "api.h"
 #include "core/tui.h"
-#include <thread>
+#include "test.h"
+
 
 using namespace std;
 
-inline void testChColorError(){
-    Character ch;
-    
-    try{
-        ch.set_bg(256, 257, 258);
-        cout << "❌ Test Character color error faild" << endl;
-    }
-    catch(invalid_argument){
-        cout << "✅ Test complteted succesfuly" << endl;
-
-    }
-}
-inline void testChCharacterError(){
-    Character ch;
-    try{
-        ch.set_ch("");
-        cout << "❌ Test Character charecter error faild" << endl;
-    }
-    catch(invalid_argument){
-        cout << "✅ Test complteted succesfuly" << endl;
-
-    }
-}
-
-void test(){
-    ofstream log("log", ios::app);
-    clog.rdbuf(log.rdbuf());
-    clog << "\n=====================================================\n" << endl;;
-    clog << "[TEST] Starting" << endl;;
-    testChCharacterError();
-    testChColorError();
-}
 
 void debug(){
     ofstream log("log", ios::app);
@@ -134,6 +103,15 @@ void debug(){
     cout << "the amount of frames skipped was " << tui.skipedFrames << endl;
     cout << "the amount of charecters renderd was " << tui.charactersRendered() << endl;
  
+}
+
+void test(){
+    ofstream log("log", ios::app);
+    clog.rdbuf(log.rdbuf());
+    clog << "\n=====================================================\n" << endl;;
+    clog << "[TEST] Starting" << endl;;
+    testChCharacterError();
+    testChColorError();
 }
 
 int main(int argc, char* argv[]){
