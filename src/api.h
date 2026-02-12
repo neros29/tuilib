@@ -9,6 +9,7 @@ private:
     bool m_isSurfaceSorted;
     void m_sortSurfaces();
 
+    int m_index;
     Screen m_screen;
     Input m_input;
     ofstream m_logFile; 

@@ -1,25 +1,60 @@
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <chrono>
 #include <fstream>
 #include "api.h"
+#include "core/tui.h"
+#include <thread>
 
 using namespace std;
 
+inline void testChColorError(){
+    Character ch;
+    
+    try{
+        ch.set_bg(256, 257, 258);
+        cout << "❌ Test Character color error faild" << endl;
+    }
+    catch(invalid_argument){
+        cout << "✅ Test complteted succesfuly" << endl;
 
-int main(){
+    }
+}
+inline void testChCharacterError(){
+    Character ch;
+    try{
+        ch.set_ch("");
+        cout << "❌ Test Character charecter error faild" << endl;
+    }
+    catch(invalid_argument){
+        cout << "✅ Test complteted succesfuly" << endl;
+
+    }
+}
+
+void test(){
+    ofstream log("log", ios::app);
+    clog.rdbuf(log.rdbuf());
+    clog << "\n=====================================================\n" << endl;;
+    clog << "[TEST] Starting" << endl;;
+    testChCharacterError();
+    testChColorError();
+}
+
+void debug(){
     ofstream log("log", ios::app);
     clog.rdbuf(log.rdbuf());
     clog << "\n=====================================================\n" << endl;;
     clog << "[Program] Starting" << endl;;
 
     Tui tui;
-
     array<int, 2> offset {20, 12};
     array<int, 2> offset2 {20, 22};
 
     auto &surf = tui.append({40, 10}, offset);
+    
     surf.fill_fg(0xDE, 0xDC, 0xD7);
     surf.fill_bg(0x3,0x3, 0x5);
     surf.register_keys({"q", "h", "j", "k", "l", "d", "Up", "Down", "Left", "Right"});
@@ -33,8 +68,6 @@ int main(){
     debug.fill_fg(0xDE, 0xDC, 0xD7);
     string debugStr = "";
     Label debugLabel{debug, debugStr, {1, 1}};
-
-
 
     
     system("clear");
@@ -101,4 +134,12 @@ int main(){
     cout << "the amount of frames skipped was " << tui.skipedFrames << endl;
     cout << "the amount of charecters renderd was " << tui.charactersRendered() << endl;
  
+}
+
+int main(int argc, char* argv[]){
+    if (argc > 1 && string{argv[1]} == "test"){
+        test();
+    }else {
+        debug();
+    }
 }

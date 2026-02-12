@@ -10,6 +10,8 @@
 
 using namespace std;
 
+#define HEARTBEAT cerr << "[HeartBeat] "<<__FILE__ << ":"<< __LINE__ << endl
+
 class InputString{
 private:
     int get_byte_len(unsigned char firstbyte);

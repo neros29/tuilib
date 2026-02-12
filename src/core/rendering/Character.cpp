@@ -1,9 +1,19 @@
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include "../tui.h"
 
 using namespace std;
+
+inline void cheakInput(int r, int g, int b){
+    if (r > 255 || g > 255 || b > 255){
+        throw invalid_argument{"colors must be bettween 0 and 255"};
+    }
+    if (r < 0 || g < 0 || b < 0){
+        throw invalid_argument{"colors must be none negative"};
+    }
+}
 
 void Character::genrate(){
     string ESC {"\x1B"};
@@ -20,16 +30,21 @@ void Character::genrate(){
     ansii = oss.str();
 }
 void Character::set_ch(string chi){
+    if (chi.empty()){
+        throw invalid_argument{"string must have some value"};
+    }
     ch = chi;
     ch_def = false;
 }
 void Character::set_bg(int r, int g, int b){
+    cheakInput(r, g, b);
     bg[0] = r;
     bg[1] = g;
     bg[2] = b;
     bg_def = false;
 }
 void Character::set_fg(int r, int g, int b){
+    cheakInput(r, g, b);
     fg[0] = r;
     fg[1] = g;
     fg[2] = b;

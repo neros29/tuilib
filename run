@@ -1,2 +1,2 @@
 make -j
-./build/test
+./build/test $1

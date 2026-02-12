@@ -5,7 +5,6 @@
 using namespace std;
 
 Surface &Tui::append(array<int, 2> size,  array<int, 2> offset, string ch, int z){
-    static int m_index;
     if (z == -1){
         z = m_index;
     }
@@ -16,7 +15,7 @@ Surface &Tui::append(array<int, 2> size,  array<int, 2> offset, string ch, int z
     return m_surfaces[m_index-1];
 }
 
-Tui::Tui():m_screen(Screen(m_surfaces, m_sortedSurfaceIndex)), m_input(Input(m_surfaces, m_sortedSurfaceIndex)){
+Tui::Tui():m_screen(Screen(m_surfaces, m_sortedSurfaceIndex)), m_input(Input(m_surfaces, m_sortedSurfaceIndex)), m_index(0){
     clog << "[API] Starting up" << endl;
 }
 
