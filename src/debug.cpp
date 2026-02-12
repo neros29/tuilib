@@ -13,7 +13,7 @@ using namespace std;
 
 
 void debug(){
-    ofstream log("log", ios::app);
+    ofstream log("logs/log", ios::app);
     clog.rdbuf(log.rdbuf());
     clog << "\n=====================================================\n" << endl;;
     clog << "[Program] Starting" << endl;;
@@ -106,7 +106,7 @@ void debug(){
 }
 
 void test(){
-    ofstream log("log", ios::app);
+    ofstream log("logs/test-log", ios::app);
     clog.rdbuf(log.rdbuf());
     clog << "\n=====================================================\n" << endl;;
     clog << "[TEST] Starting" << endl;;

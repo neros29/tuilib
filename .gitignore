@@ -4,4 +4,4 @@ Docs/
 .cache/
 **/*.o
 **/*.d
-log
+logs/
