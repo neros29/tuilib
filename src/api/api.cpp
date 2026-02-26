@@ -3,16 +3,15 @@
 #include <iostream>
 
 using namespace std;
-
-Surface &Tui::append(array<int, 2> size,  array<int, 2> offset, string ch, int z){
+Surface Tui::append(array<int, 2> size,  array<int, 2> offset, string ch, int z){
     if (z == -1){
         z = m_index;
     }
-    m_surfaces.emplace_back(size, ch, z, offset);
+    m_surfaces.emplace_back(size, ch, z, offset, m_input.keys);
     m_sortedSurfaceIndex.emplace_back(m_index);
     m_index ++;
     m_isSurfaceSorted = false;
-    return m_surfaces[m_index-1];
+    return Surface(m_surfaces[m_index-1]);
 }
 
 Tui::Tui():m_screen(Screen(m_surfaces, m_sortedSurfaceIndex)), m_input(Input(m_surfaces, m_sortedSurfaceIndex)), m_index(0){
@@ -26,7 +25,7 @@ Tui::~Tui(){
 void Tui::m_sortSurfaces(){
     sort(m_sortedSurfaceIndex.begin(), m_sortedSurfaceIndex.end(), 
         [&](const int& a, const int& b){
-            return m_surfaces[a].get_z() > m_surfaces[b].get_z();
+            return m_surfaces[a].z > m_surfaces[b].z;
         }
     );
     m_isSurfaceSorted = true;
@@ -35,7 +34,7 @@ void Tui::m_sortSurfaces(){
 void Tui::update(){
     bool isDirty = m_input.update();
     m_sortSurfaces();
-    for (Surface& surf: m_surfaces){
+    for (InternalSurface& surf: m_surfaces){
         if (surf.cheakDirty()){
             isDirty = true;
         }

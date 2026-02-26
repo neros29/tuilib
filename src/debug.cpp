@@ -1,11 +1,11 @@
 #include <iostream>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 #include <chrono>
 #include <fstream>
 #include "api.h"
 #include "core/tui.h"
+#include "widgets/Label.h"
 #include "test.h"
 
 
@@ -22,18 +22,16 @@ void debug(){
     array<int, 2> offset {20, 12};
     array<int, 2> offset2 {20, 22};
 
-    auto &surf = tui.append({40, 10}, offset);
-    
+    auto surf = tui.append({40, 10}, offset);
     surf.fill_fg(0xDE, 0xDC, 0xD7);
     surf.fill_bg(0x3,0x3, 0x5);
     surf.register_keys({"q", "h", "j", "k", "l", "d", "Up", "Down", "Left", "Right"});
     string str = "💀Hello world💀\n💀Hello world💀";
     Label lab{surf, str, {5, 2}};
-
-    auto &surf2 = tui.append({40, 10}, offset2);
+    auto surf2 = tui.append({40, 10}, offset2);
     surf2.fill_bg(0x57, 0xA4, 0x90);
 
-    auto &debug = tui.append({tui.getScreenSize()[0], tui.getScreenSize()[1]}, {-tui.getScreenSize()[0], -tui.getScreenSize()[1]}, " ", 1000);
+    auto debug = tui.append({tui.getScreenSize()[0], tui.getScreenSize()[1]}, {-tui.getScreenSize()[0], -tui.getScreenSize()[1]}, " ", 1000);
     debug.fill_fg(0xDE, 0xDC, 0xD7);
     string debugStr = "";
     Label debugLabel{debug, debugStr, {1, 1}};
@@ -109,9 +107,16 @@ void test(){
     ofstream log("logs/test-log", ios::app);
     clog.rdbuf(log.rdbuf());
     clog << "\n=====================================================\n" << endl;;
-    clog << "[TEST] Starting" << endl;;
+    clog << "[TEST] Starting" << endl;
+
+    cout << "Character Tests" << endl;
     testChCharacterError();
     testChColorError();
+
+    cout << "Surface Tests" << endl;
+    testSurfSizeError();
+    testSurfChError();
+    testSurfValidKeysError();
 }
 
 int main(int argc, char* argv[]){

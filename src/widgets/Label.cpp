@@ -1,6 +1,7 @@
-#include "../tui.h"
 #include <iostream>
 #include <fstream>
+#include "../api.h"
+#include "Label.h"
 
 using namespace std;
 

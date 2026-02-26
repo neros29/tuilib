@@ -1,2 +1,12 @@
+#!/bin/bash
 make -j
+# Save current terminal state
+stty_orig=$(stty -g)
+# Ensure we restore terminal on exit or signal
+cleanup() {
+    stty "$stty_orig"
+}
+trap cleanup EXIT INT TERM
+
+# run program
 ./build/test $1

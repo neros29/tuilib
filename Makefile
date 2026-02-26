@@ -2,18 +2,19 @@
 CXX = g++
 
 # Flags
-CXXFLAGS = -std=c++20 -MMD -MP -O0
+CXXFLAGS = -std=c++20 -MMD -MP -O0 -g
 LDFLAGS  = -lutf8proc -ltinfo
 
 # Source files
 SOURCES = \
 	src/core/rendering/Screen.cpp \
-	src/core/rendering/Surface.cpp \
+	src/core/rendering/InternalSurface.cpp \
 	src/core/rendering/Character.cpp \
 	src/core/input/input.cpp \
-	src/core/widgets/Label.cpp \
+	src/widgets/Label.cpp \
 	src/core/utils/InputString.cpp \
 	src/api/api.cpp \
+	src/api/surface.cpp\
 	src/debug.cpp
 
 # Object / dependency files

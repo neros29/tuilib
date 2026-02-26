@@ -8,37 +8,56 @@
 #include <term.h>
 
 using namespace std;
+// static helper functions
+static int getDataSize(){
+    int size;
+    ioctl(0, FIONREAD, &size);
+    return size;
+}
 
-Input::Input(deque<Surface>& surfaces, const vector<int>& sortIndex):m_surfaces(surfaces), m_sortIndex(sortIndex){
+static string getData(){
+    int dataSize = getDataSize();
+    if (dataSize){
+        char buff[dataSize + 1];
+        read(0, &buff, dataSize);
+        buff[dataSize] = '\0';
+        return buff;
+    }
+    return "";
+}
+
+// Input memeber functinos
+Input::Input(deque<InternalSurface>& surfaces, const vector<int>& sortIndex):m_surfaces(surfaces), m_sortIndex(sortIndex){
     clog << "[Input] Starting up" << endl;
     m_setRawMode();
-    m_initNamePair();
     m_initDb();
 }
 Input::~Input() {
     clog << "[Input] Shuting down" << endl;
     m_restoreMode();
 }
+void Input::m_add(string capname, string human){
+    keys.push_back(human);
+    m_namePair.push_back({capname, human});
+}
 
 inline void Input::m_initNamePair(){
     for (int i = 1; i <= 12; i++) {
         std::string capname = "kf" + std::to_string(i);
         std::string human = "F" + std::to_string(i);
-        m_namePair.push_back({capname, human});
+        m_add(capname, human);
     }
-    m_namePair.push_back({"kcuu1", "Up"});
-    m_namePair.push_back({"kcud1", "Down"});
-    m_namePair.push_back({"kcub1", "Left"});
-    m_namePair.push_back({"kcuf1", "Right"});
-    m_namePair.push_back({"khome", "Home"});
-    m_namePair.push_back({"kend",  "End"});
-    m_namePair.push_back({"kdch1", "Delete"});
-    m_namePair.push_back({"kich1", "Insert"});
-    m_namePair.push_back({"kpp",   "PageUp"});
-    m_namePair.push_back({"knp",   "PageDown"});
-    m_namePair.push_back({"kbs",   "Backspace"});
-
-
+    m_add("kcuu1", "Up");
+    m_add("kcud1", "Down");
+    m_add("kcub1", "Left");
+    m_add("kcuf1", "Right");
+    m_add("khome", "Home");
+    m_add("kend",  "End");
+    m_add("kdch1", "Delete");
+    m_add("kich1", "Insert");
+    m_add("kpp",   "PageUp");
+    m_add("knp",   "PageDown");
+    m_add("kbs",   "Backspace");
 }
 
 void Input::m_setRawMode() {
@@ -57,7 +76,8 @@ string Input::m_getCap(const char* name){
         if (s == (char*)-1 || s == nullptr) return {};
         return std::string(s);
 }
-void Input::m_initDb(){
+inline void Input::m_initDb(){
+    m_initNamePair();
     int err = 0;
     if (setupterm(nullptr, STDOUT_FILENO, &err) != 0) {
         clog << "[Input] error = " << err << endl;
@@ -81,26 +101,9 @@ void Input::m_initDb(){
     }
 }
 
-int Input::m_getDataSize(){
-    int size;
-    ioctl(0, FIONREAD, &size);
-    return size;
-}
-
-void Input::m_getData(){
-    m_buffer = "";
-    int dataSize = m_getDataSize();
-    if (dataSize){
-        char buff[dataSize + 1];
-        read(0, &buff, dataSize);
-        buff[dataSize] = '\0';
-        m_buffer = buff;
-    }
-}
-
-bool Input::m_parseBuffer(){
+bool Input::update(){
     string human;
-    m_getData();
+    m_buffer = getData();
     if (m_buffer.empty()){
         return false;
     }
@@ -115,7 +118,7 @@ bool Input::m_parseBuffer(){
         human = m_buffer; 
     }
     for (int i : m_sortIndex){
-        Surface& surf = m_surfaces[i];
+        InternalSurface& surf = m_surfaces[i];
         auto it = find(surf.keys.begin(), surf.keys.end(), human);
         if (it != surf.keys.end()){
             surf.events[human] = true;
@@ -124,6 +127,3 @@ bool Input::m_parseBuffer(){
     }
     return false;
 };
-bool Input::update(){
-    return m_parseBuffer();
-}

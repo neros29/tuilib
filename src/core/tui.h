@@ -10,8 +10,6 @@
 
 using namespace std;
 
-#define HEARTBEAT cerr << "[HeartBeat] "<<__FILE__ << ":"<< __LINE__ << endl
-
 class InputString{
 private:
     int get_byte_len(unsigned char firstbyte);
@@ -41,49 +39,32 @@ public:
     bool operator == (const Character ch) const;
 };
 
-class Surface {
-private:
+class InternalSurface {
+public:
     vector<Character> surface;
     vector<Character> m_old;
 
+    int z{0};
     bool m_dirty = true;
     array<int, 2> size;
     array<int, 2> r_cords;
 
-    int z{0};
-public:
+    const vector<string>* m_validKeys;
     unordered_map<string, bool> events;
     vector<string> keys;
 
-    Surface(array<int, 2> size, string ch, int z, array<int, 2> offset);
-    Surface();
-
+    InternalSurface(array<int, 2> size, string ch, int z, array<int, 2> offset, const vector<string>& keys);
+    InternalSurface(array<int, 2> size, string ch, int z, array<int, 2> offset);
     Character& operator[](int x);
     Character operator[](int x) const;
-
     bool cheakDirty();
-    bool get_event(string event);
-    void register_keys(vector<string> keys);
-
-    void fill_bg(int r, int g, int b);
-    void fill_fg(int r, int g, int b);
-
-    void set_z(int z);
-    int get_z() const;
-
-
-    void set_offset(int x, int y);
-    array<int, 2> get_offset() const;
-
-    array<int, 2> get_size() const; 
-    void blit(Surface& surf);
 };
 
 
 
 class Screen {
 private:
-    const deque<Surface>& m_surfaces;
+    const deque<InternalSurface>& m_surfaces;
     vector<string> m_screen;
     vector<string> m_lastScreen;
     const vector<int>& m_sortIndex;
@@ -100,7 +81,7 @@ private:
 
 public:
     int charactersRenderd;
-    Screen(const deque<Surface>& surfaces, const vector<int>& sortIndex);
+    Screen(const deque<InternalSurface>& surfaces, const vector<int>& sortIndex);
     ~Screen();
     array<int, 2> getSize();
     void flip();
@@ -110,7 +91,7 @@ public:
 class Input{
 private:
     // Surface data passed from api 
-    deque<Surface>& m_surfaces; 
+    deque<InternalSurface>& m_surfaces; 
     const vector<int>& m_sortIndex;
 
     // input stuff
@@ -122,47 +103,19 @@ private:
     string m_buffer;
 
     // member private functions
-    void m_initNamePair();
+    inline void m_initNamePair();
     void m_setRawMode();
     void m_restoreMode();
-    int m_getDataSize();
-    void m_getData();
-    bool m_parseBuffer();
     void m_initDb();
+    void m_add(string capname, string human);
     string m_getCap(const char* name);
 public:
+    vector<string> keys;
     // Constructers
-    Input(deque<Surface>& surfaces, const vector<int>& sortIndex);
+    Input(deque<InternalSurface>& surfaces, const vector<int>& sortIndex);
     ~Input();
 
     // member public functions
     bool update();
 };
 
-class Label{
-private:
-    Surface& root;
-    Surface surf;
-    const string& str;
-    string oldStr;
-    vector<string> text;
-    array<int, 2> size;
-    array<int, 2> offset;
-    void m_getSize();
-    void m_parseString(const string& i_str);
-public:
-    Label(Surface& i_root, const string& i_text, array<int, 2> i_offset);
-    void updateSurface();
-};
-//
-// class InputBox{
-// private:
-//     Surface& root;
-//     Surface surf;
-//     string& str;
-//     array<int, 3> offset;
-//
-// public:
-//     InputBox(Surface& i_root, string& i_str, array<int, 3> i_offset);
-//     void updateSurface();
-// };

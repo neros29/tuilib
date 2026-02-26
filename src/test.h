@@ -1,12 +1,14 @@
 #include <iostream>
 #include "core/tui.h"
+#include "api.h"
+
 using namespace std;
 inline void testChColorError(){
     Character ch;
     
     try{
         ch.set_bg(256, 257, 258);
-        cout << "❌ Test Character color error faild" << endl;
+        cout << "❌ Test " << __FUNCTION__ <<" Faild" <<  endl;
     }
     catch(invalid_argument){
         cout << "✅ Test complteted succesfuly" << endl;
@@ -17,7 +19,7 @@ inline void testChCharacterError(){
     Character ch;
     try{
         ch.set_ch("");
-        cout << "❌ Test Character charecter error faild" << endl;
+        cout << "❌ Test " << __FUNCTION__ <<" Faild" <<  endl;
     }
     catch(invalid_argument){
         cout << "✅ Test complteted succesfuly" << endl;
@@ -25,4 +27,36 @@ inline void testChCharacterError(){
     }
 }
 
+inline void testSurfSizeError(){
+    try{
+        InternalSurface surf({-1, -50}, " ", -10, {8, 4}, {"Up"});
+        cout << "❌ Test " << __FUNCTION__ <<" Faild" <<  endl;
+    }
+    catch(invalid_argument){
+        cout << "✅ Test complteted succesfuly" << endl;
 
+    }
+}
+
+inline void testSurfChError(){
+    try{
+        InternalSurface surf({1, 50}, "", -10, {8, 4}, {"Up"});
+        cout << "❌ Test " << __FUNCTION__ <<" Faild" <<  endl;
+    }
+    catch(invalid_argument){
+        cout << "✅ Test complteted succesfuly" << endl;
+
+    }
+}
+inline void testSurfValidKeysError(){
+    InternalSurface tsurf({1, 50}, " ", -10, {8, 4}, {"Up"});
+    Surface surf(tsurf);
+    try{
+        surf.register_keys({"NotAValidKey"});
+        cout << "❌ Test " << __FUNCTION__ <<" Faild" <<  endl;
+    }
+    catch(invalid_argument){
+        cout << "✅ Test complteted succesfuly" << endl;
+
+    }
+}
