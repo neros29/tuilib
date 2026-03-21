@@ -44,9 +44,9 @@ bool InternalSurface::cheakDirty(){
 }
 
 Character& InternalSurface::operator[](int x){
-    return surface.at(x);
+    return surface.at(x); //TODO Make this back to normal [] operator for better performance
 }
 Character InternalSurface::operator[](int x) const{
-    return surface.at(x);
+    return surface.at(x); //TODO Make this back to normal [] operator for better performance
 }
 

@@ -52,6 +52,7 @@ bool Surface::get_event(string event){
 }
 void Surface::register_keys(vector<string> i_keys){
     assert(m_is != nullptr);
+    clog << m_is->m_validKeys->size() << endl;
     for (string key: i_keys){
         if (find(m_is->m_validKeys->begin(), m_is->m_validKeys->end(), key) == m_is->m_validKeys->end() && key.size() > 1){
             throw invalid_argument{"The key " + key + " dose not exist in input's data base"};

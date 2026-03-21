@@ -49,7 +49,9 @@ inline void testSurfChError(){
     }
 }
 inline void testSurfValidKeysError(){
-    InternalSurface tsurf({1, 50}, " ", -10, {8, 4}, {"Up"});
+    std::vector<std::string> keys = {"Up"};
+    InternalSurface tsurf({1, 50}, " ", -10, {8, 4}, keys);
+
     Surface surf(tsurf);
     try{
         surf.register_keys({"NotAValidKey"});
