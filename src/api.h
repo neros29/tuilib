@@ -11,6 +11,7 @@ public:
     Surface(array<int, 2> size, string ch, int z, array<int, 2> offset);
     ~Surface();
     Surface();
+    Surface(Surface&& surf);
     Surface& operator=(Surface&&);
     Character& operator[](int x);
     Character operator[](int x) const;

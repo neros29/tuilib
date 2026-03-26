@@ -11,8 +11,14 @@ Surface::Surface(array<int, 2> size, string ch, int z, array<int, 2> offset):m_i
 }
 Surface::Surface():m_is(nullptr){
 }
+Surface::Surface(Surface&& surf){
+    m_is = surf.m_is;
+    m_del = surf.m_del;
+    surf.m_is = nullptr;
+}
 Surface::~Surface(){
     if (m_del){
+        assert(m_is != nullptr);
         delete m_is;
     }
 }

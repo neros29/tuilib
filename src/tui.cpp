@@ -5,6 +5,8 @@
 #include <string>
 
 #include "core/tui.h"
+#include "api.h"
+#include "widgets/Label.h"
 
 namespace py = pybind11;
 
@@ -29,7 +31,10 @@ struct PyLabel {
 
     const std::string& get_text() const { return text; }
 
-    void update() { label.updateSurface(); }
+    void update(string i_text) { 
+        text = i_text;
+        label.updateSurface();
+    }
 };
 
 PYBIND11_MODULE(tui, m) {
@@ -74,9 +79,11 @@ PYBIND11_MODULE(tui, m) {
         .def("set_z", &Surface::set_z, py::arg("z"))
         .def("get_z", &Surface::get_z)
         .def("set_offset", &Surface::set_offset, py::arg("x"), py::arg("y"))
-        .def("offset", &Surface::offset)
-        .def("size", &Surface::ssize)
+        .def("offset", &Surface::get_offset)
+        .def("size", &Surface::get_size)
         .def("blit", &Surface::blit, py::arg("surf"))
+        .def("register_keys", &Surface::register_keys, py::arg("keys"))
+        .def("get_event", &Surface::get_event, py::arg("event"))
         .def(
             "__getitem__",
             [](Surface& self, int idx) -> Character& { return self[idx]; },
@@ -87,17 +94,17 @@ PYBIND11_MODULE(tui, m) {
     // -----------------
     // Screen
     // -----------------
-    py::class_<Screen>(m, "Screen", py::dynamic_attr())
+    py::class_<Tui>(m, "Tui", py::dynamic_attr())
         .def(py::init<>())
         .def(
             "append",
-            [](Screen& self,
+            [](Tui& self,
                std::array<int, 2> size,
                std::array<int, 2> offset,
                std::string ch,
-               int z) -> Surface& {
+               int z) -> Surface {
                 // Screen::append signature: (size, offset, ch, z)
-                return self.append(size, offset, std::move(ch), z);
+                return self.append(size, offset, ch, z);
             },
             py::arg("size"),
             py::arg("offset"),
@@ -105,9 +112,8 @@ PYBIND11_MODULE(tui, m) {
             py::arg("z") = -1,
             py::return_value_policy::reference_internal
         )
-        .def("get_size", &Screen::getSize)
-        .def("flip", &Screen::flip)
-        .def_readwrite("amount", &Screen::amount);
+        .def("getScreenSize", &Tui::getScreenSize)
+        .def("update", &Tui::update);
 
     // -----------------
     // Label (safe wrapper)
@@ -115,13 +121,9 @@ PYBIND11_MODULE(tui, m) {
     py::class_<PyLabel>(m, "Label", py::dynamic_attr())
         .def(py::init<Surface&, std::string, std::array<int, 2>>(),
              py::arg("root"), py::arg("text"), py::arg("offset"))
-        .def("update", &PyLabel::update)
-        .def_property("text", &PyLabel::get_text, &PyLabel::set_text);
+        .def("update", &PyLabel::update, py::arg("text"));
 
     // -----------------
     // Input
     // -----------------
-    py::class_<Input>(m, "Input", py::dynamic_attr())
-        .def(py::init<>())
-        .def("get_char", &Input::get_char);
 }
