@@ -34,6 +34,7 @@ void Tui::m_sortSurfaces(){
 void Tui::update(){
     bool isDirty = m_input.update();
     m_sortSurfaces();
+    // isDirty = true;
     for (InternalSurface& surf: m_surfaces){
         if (surf.cheakDirty()){
             isDirty = true;

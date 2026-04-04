@@ -16,24 +16,32 @@ inline void cheakInput(int r, int g, int b){
 }
 
 void Character::genrate(){
-    string ESC {"\x1B"};
-    ostringstream oss;
-    ostringstream _fg;
-    ostringstream _bg;
-    if (!fg_def){
-        _fg << ESC << "[38;2;"<< fg[0] << ";" << fg[1] << ";"<< fg[2] <<"m";
+    static string ESC {"\x1B"};
+    static string colors[256];
+    if (colors[1].empty()){
+        clog << "[Character] Creating colors cache" << endl;
+        for (int i = 0; i <= 255; i++){
+            colors[i] = to_string(i);
+        }
     }
-    if (!bg_def){
-        _bg << ESC << "[48;2;"<< bg[0] << ";" << bg[1] << ";" << bg[2] << "m";
+    if (!defualt){
+        ansii.clear();
+        if (!fg_def){
+            ansii += ESC + "[38;2;" + colors[fg[0]] + ";" + colors[fg[1]] + ";" + colors[fg[2]]  + "m";
+        }
+        if (!bg_def){
+            ansii += ESC + "[48;2;"+ colors[bg[0]] + ";" + colors[bg[1]] + ";" + colors[bg[2]] + "m";
+        }
+        ansii += ch + ESC + "[0m";
+        defualt = true;
     }
-    oss << _bg.str() << _fg.str() << ch << ESC << "[0m";
-    ansii = oss.str();
 }
 void Character::set_ch(string chi){
     if (chi.empty()){
         throw invalid_argument{"string must have some value"};
     }
     ch = chi;
+    defualt = false;
     ch_def = false;
 }
 void Character::set_bg(int r, int g, int b){
@@ -41,6 +49,8 @@ void Character::set_bg(int r, int g, int b){
     bg[0] = r;
     bg[1] = g;
     bg[2] = b;
+
+    defualt = false;
     bg_def = false;
 }
 void Character::set_fg(int r, int g, int b){
@@ -48,6 +58,7 @@ void Character::set_fg(int r, int g, int b){
     fg[0] = r;
     fg[1] = g;
     fg[2] = b;
+    defualt = false;
     fg_def = false;
 }
 bool Character::operator ==(const Character chi) const{

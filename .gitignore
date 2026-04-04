@@ -5,3 +5,4 @@ Docs/
 **/*.o
 **/*.d
 logs/
+perf*

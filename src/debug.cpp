@@ -50,7 +50,7 @@ void debug(){
     while (true){
         int diff = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now() - start).count();
         if ((diff*1000) % (60/20) == 0 && frameCount > 0){
-            double fps = (static_cast<double>(frameCount - tui.skipedFrames) / static_cast<double>(diff)) * 1000;
+            double fps = (static_cast<double>(frameCount) / static_cast<double>(diff)) * 1000;
             int cpf = tui.charactersRendered() / (frameCount - tui.skipedFrames);
             ostringstream s;
             s << "fps = " << static_cast<int>(fps) << " Total frames = " << frameCount << "\n" <<  "Charecters per frame = " << cpf << " Total Charecters = " << tui.charactersRendered() << "\n" << "run time = " << static_cast<float>(diff) / 1000 << " secounds\n";

@@ -22,6 +22,8 @@ public:
 };
 
 struct Character {
+private:
+    bool defualt {false};
 public:
     bool bg_def {true};
     bool fg_def {true};
