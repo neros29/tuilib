@@ -67,8 +67,8 @@ public:
 class Screen {
 private:
     const deque<InternalSurface>& m_surfaces;
-    vector<string> m_screen;
-    vector<string> m_lastScreen;
+    vector<Character> m_screen;
+    vector<Character> m_lastScreen;
     const vector<int>& m_sortIndex;
     array<int, 2> m_size;
     ofstream m_file;

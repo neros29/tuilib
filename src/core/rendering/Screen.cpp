@@ -25,8 +25,10 @@ array<int, 2> Screen::getSize(){
 }
 
 void Screen::m_initScreen(){
-    m_screen.assign(m_size[0] * m_size[1], m_defaultCharacter);
-    m_lastScreen.assign(m_size[0] * m_size[1], m_defaultCharacter);
+    Character character;
+    character.set_ch(m_defaultCharacter);
+    m_screen.assign(m_size[0] * m_size[1],character);
+    m_lastScreen.assign(m_size[0] * m_size[1], character);
 }
 
 void Screen::m_render(){
@@ -68,11 +70,11 @@ void Screen::m_render(){
             }
         }
         if (def){
-            m_screen[i] = m_defaultCharacter;
+            newCharacter.set_ch(m_defaultCharacter);
+            m_screen[i] = newCharacter;
         }
         else{
-            newCharacter.genrate();
-            m_screen[i] = newCharacter.ansii;
+            m_screen[i] = newCharacter;
         }
         if (x == m_size[0]){
             x = 1;
@@ -90,8 +92,12 @@ void Screen::flip(){
     for (int i = m_screen.size()-1; i >= 0; i--){
         int y = i / m_size[0];
         int x = i % m_size[0];
-        if (m_screen[i] != m_lastScreen[i]){
-            m_file <<"\x1b[" << y << ";"<< x << "H" << m_screen[i];
+        if (m_screen[i] == m_lastScreen[i]){
+            continue;
+        }
+        else {
+            m_screen[i].genrate();
+            m_file <<"\x1b[" << y << ";"<< x << "H" << m_screen[i].ansii;
             charactersRenderd++;
         }
     }
