@@ -1,2 +1,0 @@
-- only genrate ansii at run time instead of doing it only in certen places 
-- 
