@@ -24,7 +24,7 @@ Tui::~Tui(){
 
 void Tui::m_sortSurfaces(){
     sort(m_sortedSurfaceIndex.begin(), m_sortedSurfaceIndex.end(), 
-        [&](const int& a, const int& b){
+        [this](const int& a, const int& b){
             return m_surfaces[a].z > m_surfaces[b].z;
         }
     );

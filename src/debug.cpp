@@ -24,12 +24,15 @@ void debug(){
 
     auto surf = tui.append({40, 10}, offset);
     surf.fill_fg(0xDE, 0xDC, 0xD7);
-    surf.fill_bg(0x3,0x3, 0x5);
+    surf.fill_bg(0x10,0x50, 0x10);
     surf.register_keys({"q", "h", "j", "k", "l", "d", "Up", "Down", "Left", "Right"});
-    string str = "💀Hello world💀\n💀Hello world💀";
+    string str = "Terrminal User Interface\nbuilt by Soren Mile";
     Label lab{surf, str, {5, 2}};
+
     auto surf2 = tui.append({40, 10}, offset2);
     surf2.fill_bg(0x57, 0xA4, 0x90);
+    string test = "Unicode test.\nCat >🐈️ Map of Japan >🗾";
+    Label lab2{surf2, test, {5, 2}};
 
     auto debug = tui.append({tui.getScreenSize()[0], tui.getScreenSize()[1]}, {-tui.getScreenSize()[0], -tui.getScreenSize()[1]}, " ", 1000);
     debug.fill_fg(0xDE, 0xDC, 0xD7);
@@ -53,6 +56,7 @@ void debug(){
             double fps = (static_cast<double>(frameCount) / static_cast<double>(diff)) * 1000;
             int cpf = tui.charactersRendered() / (frameCount - tui.skipedFrames);
             ostringstream s;
+            s << "Tui lib, A custom tui built by Soren Mile\n";
             s << "fps = " << static_cast<int>(fps) << " Total frames = " << frameCount << "\n" <<  "Charecters per frame = " << cpf << " Total Charecters = " << tui.charactersRendered() << "\n" << "run time = " << static_cast<float>(diff) / 1000 << " secounds\n";
             s << "avg Frame Time " << (static_cast<float>(avgFrameTime) / static_cast<float>(frameCount)) / 1000000.0f  << " ms\n";
 
