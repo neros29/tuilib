@@ -1,6 +1,5 @@
 #include <termios.h>
 #include <unistd.h>
-#include <sys/select.h>
 #include <sys/ioctl.h>
 #include <iostream>
 #include <algorithm>

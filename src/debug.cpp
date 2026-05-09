@@ -3,6 +3,8 @@
 #include <string>
 #include <chrono>
 #include <fstream>
+#include <thread>
+#include <unistd.h>
 #include "api.h"
 #include "core/tui.h"
 #include "widgets/Label.h"
@@ -10,7 +12,11 @@
 
 
 using namespace std;
-
+void clear(){
+    system("clear");
+    // char code[] {"\x1b[2j"};
+    // write(1, &code, sizeof(code));
+}
 
 void debug(){
     ofstream log("logs/log", ios::app);
@@ -19,6 +25,7 @@ void debug(){
     clog << "[Program] Starting" << endl;;
 
     Tui tui;
+    clog << "[Program] Size of screen is " << tui.getScreenSize()[0] << ", " << tui.getScreenSize()[1] << endl;
     array<int, 2> offset {20, 12};
     array<int, 2> offset2 {20, 22};
 
@@ -40,8 +47,7 @@ void debug(){
     Label debugLabel{debug, debugStr, {1, 1}};
 
     
-    system("clear");
-
+    clear();
     unsigned long frameCount = 0;
 
     short color = 1;
@@ -95,11 +101,10 @@ void debug(){
         avgFrameTime += chrono::duration_cast<chrono::nanoseconds>(total - before).count();
 
         frameCount ++;
-
-        // system("sleep .05");
+        this_thread::sleep_for(chrono::milliseconds(10));
     }
     clog << "[Program] Ending" << endl;;
-    system("clear");
+    clear();
     cout << "the amount of frames render was " << frameCount - tui.skipedFrames << endl;
     cout << "the avargae update time was " << (static_cast<float>(avgFrameTime) / static_cast<float>(frameCount)) / 1000000.0f   << endl;
     cout << "the amount of frames skipped was " << tui.skipedFrames << endl;
