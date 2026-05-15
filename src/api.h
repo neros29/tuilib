@@ -49,6 +49,12 @@ public:
     int skipedFrames = 0;
     Tui();
     ~Tui();
+    int amontOfSurfaces(){
+        return m_surfaces.size();
+    }
+    int amontOfCharacters(){
+        return m_screen.getSize()[0] * m_screen.getSize()[1];
+    }
     Surface append(array<int, 2> size, array<int, 2> offset, string ch = " ", int z = -1);
     void update();
     array<int, 2> getScreenSize();
