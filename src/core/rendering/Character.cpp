@@ -37,9 +37,9 @@ void Character::genrate(){
     }
 }
 void Character::set_ch(string chi){
-    if (chi.empty()){
-        throw invalid_argument{"string must have some value"};
-    }
+    // if (chi.empty()){
+    //     throw invalid_argument{"string must have some value"};
+    // }
     ch = chi;
     defualt = false;
     ch_def = false;

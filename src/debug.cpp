@@ -1,3 +1,4 @@
+#include <array>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -12,23 +13,47 @@
 
 
 using namespace std;
+
 void clear(){
-    system("clear");
-    // char code[] {"\x1b[2j"};
-    // write(1, &code, sizeof(code));
+    char code[] {"\x1b[2J\x1b[H"};
+    write(1, &code, sizeof(code));
 }
 
+void too_many_surfaces(Tui& tui){
+    for (int y = 0; y <= tui.getScreenSize()[1] ; y++){
+        for (int x = 0; x <= tui.getScreenSize()[0]; x++){
+            auto tmp = tui.append({1, 1}, {x, y}, " ", x * y);
+            int blue = x % 255;
+            int red = y % 255;
+            tmp.fill_bg(red, 0, blue);
+        }
+    }
+}
+void good_amont_surfaces(Tui& tui){
+    for (int x = 0; x <= tui.getScreenSize()[0]; x++){
+        auto tmp = tui.append({1, tui.getScreenSize()[1]}, {x, 1}, " ", x);
+        int blue = x % 255;
+        tmp.fill_bg(0, 0, blue);
+    }
+
+}
 void debug(){
     ofstream log("logs/log", ios::app);
     clog.rdbuf(log.rdbuf());
     clog << "\n=====================================================\n" << endl;;
     clog << "[Program] Starting" << endl;;
 
-    Tui tui;
+    Tui tui; // initialize tui
     clog << "[Program] Size of screen is " << tui.getScreenSize()[0] << ", " << tui.getScreenSize()[1] << endl;
+
+    // defined offsets
     array<int, 2> offset {20, 12};
     array<int, 2> offset2 {20, 22};
 
+    // surfaces stress test
+    // many_surfaces_background(tui);
+    // good_amont_surfaces(tui);
+    
     auto surf = tui.append({40, 10}, offset);
     surf.fill_fg(0xDE, 0xDC, 0xD7);
     surf.fill_bg(0x10,0x50, 0x10);
@@ -38,7 +63,7 @@ void debug(){
 
     auto surf2 = tui.append({40, 10}, offset2);
     surf2.fill_bg(0x57, 0xA4, 0x90);
-    string test = "Unicode test.\nCat >🐈️ Map of Japan >🗾";
+    string test = "Unicode test.\n　それん";
     Label lab2{surf2, test, {5, 2}};
 
     auto debug = tui.append({tui.getScreenSize()[0], tui.getScreenSize()[1]}, {-tui.getScreenSize()[0], -tui.getScreenSize()[1]}, " ", 1000);
@@ -62,10 +87,11 @@ void debug(){
             double fps = (static_cast<double>(frameCount) / static_cast<double>(diff)) * 1000;
             int cpf = tui.charactersRendered() / (frameCount - tui.skipedFrames);
             ostringstream s;
-            s << "Tui lib, A custom tui built by Soren Mile\n";
+            s << "Debug Screen\n";
             s << "fps = " << static_cast<int>(fps) << " Total frames = " << frameCount << "\n" <<  "Charecters per frame = " << cpf << " Total Charecters = " << tui.charactersRendered() << "\n" << "run time = " << static_cast<float>(diff) / 1000 << " secounds\n";
             s << "avg Frame Time " << (static_cast<float>(avgFrameTime) / static_cast<float>(frameCount)) / 1000000.0f  << " ms\n";
-
+            s << "Total surfaces rendered " << tui.amontOfSurfaces() << endl;
+            s << "Total characters in terminal " << tui.amontOfCharacters() << endl;
             debugStr = s.str();
             debugLabel.updateSurface();
         }
@@ -99,9 +125,8 @@ void debug(){
         tui.update();
         auto total = chrono::system_clock::now();
         avgFrameTime += chrono::duration_cast<chrono::nanoseconds>(total - before).count();
-
         frameCount ++;
-        this_thread::sleep_for(chrono::milliseconds(10));
+        // this_thread::sleep_for(chrono::milliseconds(10));
     }
     clog << "[Program] Ending" << endl;;
     clear();
