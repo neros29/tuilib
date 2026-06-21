@@ -37,14 +37,12 @@ void Surface::fill_bg(int r, int g, int b) {
   assert(m_is != nullptr);
   for (int i = 0; i != m_is->surface.size(); i++) {
     m_is->surface[i].set_bg(r, g, b);
-    m_is->surface[i].genrate();
   }
 }
 void Surface::fill_fg(int r, int g, int b) {
   assert(m_is != nullptr);
   for (int i = 0; i != m_is->surface.size(); i++) {
     m_is->surface[i].set_fg(r, g, b);
-    m_is->surface[i].genrate();
   }
 }
 
@@ -120,7 +118,6 @@ void Surface::blit(Surface &surf) {
         if (!surf[index].ch_def) {
           m_is->surface[i].set_ch(surf[index].ch);
         }
-        m_is->surface[i].genrate();
       }
     }
     if (x == m_is->size[0] - 1) {

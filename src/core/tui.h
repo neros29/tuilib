@@ -7,6 +7,7 @@
 #include <array>
 #include <termios.h>
 #include <term.h>
+#include <cinttypes>
 
 using namespace std;
 
@@ -33,12 +34,10 @@ public:
     array<int, 3> fg {256, 256, 256};
     array<int, 3> bg {256, 256, 256};
     string ch = "";
-    string ansii{""};
 
     void set_fg(int r, int g, int b);
     void set_bg(int r, int g, int b);
     void set_ch(string chi);
-    void genrate();
     bool operator == (const Character ch) const;
 };
 
@@ -80,6 +79,7 @@ private:
 
     void m_getWinSize();
     void m_initScreen();
+    string m_genrate(Character& ch);
     void m_render();
 
 public:

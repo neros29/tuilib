@@ -26,7 +26,6 @@ void Label::updateSurface(){
                 index++;
                 int width = istr.getWidth(ch);
                 surf[y * size[0] + x].set_ch(ch);
-                surf[y * size[0] + x].genrate();
                 x++;
                 for (int i = 2; i <= width; i++){
                     if (index <= istr.size()){

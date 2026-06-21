@@ -86,6 +86,27 @@ void Screen::m_render(){
     }
 }
 
+string Screen::m_genrate(Character& ch){
+    static string ESC {"\x1B"};
+    static string colors[256];
+    if (colors[1].empty()){
+        clog << "[Character] Creating colors cache" << endl;
+        for (int i = 0; i <= 255; i++){
+            colors[i] = to_string(i);
+        }
+    }
+    string ansii;
+    ansii.clear();
+    if (!ch.fg_def){
+        ansii += ESC + "[38;2;" + colors[ch.fg[0]] + ";" + colors[ch.fg[1]] + ";" + colors[ch.fg[2]]  + "m";
+    }
+    if (!ch.bg_def){
+        ansii += ESC + "[48;2;"+ colors[ch.bg[0]] + ";" + colors[ch.bg[1]] + ";" + colors[ch.bg[2]] + "m";
+    }
+    ansii += ch.ch + ESC + "[0m";
+    return ansii;
+}
+
 void Screen::flip(){
     m_render();
     m_file << "\x1b[?25l";
@@ -96,8 +117,7 @@ void Screen::flip(){
             continue;
         }
         else {
-            m_screen[i].genrate();
-            m_file <<"\x1b[" << y << ";"<< x << "H" << m_screen[i].ansii;
+            m_file <<"\x1b[" << y << ";"<< x << "H" << m_genrate(m_screen[i]);
             charactersRenderd++;
         }
     }

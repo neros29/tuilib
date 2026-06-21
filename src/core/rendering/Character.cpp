@@ -1,5 +1,3 @@
-#include <iostream>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include "../tui.h"
@@ -15,31 +13,7 @@ inline void cheakInput(int r, int g, int b){
     }
 }
 
-void Character::genrate(){
-    static string ESC {"\x1B"};
-    static string colors[256];
-    if (colors[1].empty()){
-        clog << "[Character] Creating colors cache" << endl;
-        for (int i = 0; i <= 255; i++){
-            colors[i] = to_string(i);
-        }
-    }
-    if (!defualt){
-        ansii.clear();
-        if (!fg_def){
-            ansii += ESC + "[38;2;" + colors[fg[0]] + ";" + colors[fg[1]] + ";" + colors[fg[2]]  + "m";
-        }
-        if (!bg_def){
-            ansii += ESC + "[48;2;"+ colors[bg[0]] + ";" + colors[bg[1]] + ";" + colors[bg[2]] + "m";
-        }
-        ansii += ch + ESC + "[0m";
-        defualt = true;
-    }
-}
 void Character::set_ch(string chi){
-    // if (chi.empty()){
-    //     throw invalid_argument{"string must have some value"};
-    // }
     ch = chi;
     defualt = false;
     ch_def = false;

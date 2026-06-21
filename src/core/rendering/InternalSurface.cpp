@@ -20,14 +20,12 @@ InternalSurface::InternalSurface(array<int, 2> size, string ch, int z, array<int
     cheakVariables(size, ch);
     Character chr;
     chr.set_ch(ch);
-    chr.genrate();
     surface.assign(size[0]*size[1], chr);
 }
 InternalSurface::InternalSurface(array<int, 2> size, string ch, int z, array<int, 2> offset):z(z), r_cords{offset[0], offset[1]}, size{size[0], size[1]}, m_validKeys(nullptr){
     cheakVariables(size, ch);
     Character chr;
     chr.set_ch(ch);
-    chr.genrate();
     surface.assign(size[0]*size[1], chr);
 }
 
