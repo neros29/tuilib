@@ -48,15 +48,13 @@ PYBIND11_MODULE(tui, m) {
         .def("set_bg", &Character::set_bg, py::arg("r"), py::arg("g"), py::arg("b"))
         .def("set_fg", &Character::set_fg, py::arg("r"), py::arg("g"), py::arg("b"))
         .def("set_ch", &Character::set_ch, py::arg("ch"))
-        .def("genrate", &Character::genrate)
         // raw fields (handy from Python)
         .def_readwrite("bg_def", &Character::bg_def)
         .def_readwrite("fg_def", &Character::fg_def)
         .def_readwrite("ch_def", &Character::ch_def)
         .def_readwrite("fg", &Character::fg)
         .def_readwrite("bg", &Character::bg)
-        .def_readwrite("ch", &Character::ch)
-        .def_readwrite("ansi", &Character::ansii);
+        .def_readwrite("ch", &Character::ch);
 
     // -----------------
     // Surface

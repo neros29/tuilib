@@ -90,7 +90,7 @@ string Screen::m_genrate(Character& ch){
     static string ESC {"\x1B"};
     static string colors[256];
     if (colors[1].empty()){
-        clog << "[Character] Creating colors cache" << endl;
+        // clog << "[Character] Creating colors cache" << endl;
         for (int i = 0; i <= 255; i++){
             colors[i] = to_string(i);
         }
