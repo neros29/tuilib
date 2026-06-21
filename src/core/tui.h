@@ -29,8 +29,9 @@ public:
     bool fg_def {true};
     bool ch_def {true};
 
-    array<int, 3> fg;
-    array<int, 3> bg;
+    // Initialize to invalid color to make sure the == operator works correctly.
+    array<int, 3> fg {256, 256, 256};
+    array<int, 3> bg {256, 256, 256};
     string ch = "";
     string ansii{""};
 
@@ -67,8 +68,8 @@ public:
 class Screen {
 private:
     const deque<InternalSurface>& m_surfaces;
-    vector<string> m_screen;
-    vector<string> m_lastScreen;
+    vector<Character> m_screen;
+    vector<Character> m_lastScreen;
     const vector<int>& m_sortIndex;
     array<int, 2> m_size;
     ofstream m_file;
