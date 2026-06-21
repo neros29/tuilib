@@ -9,4 +9,4 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 # run program
-perf record -g ./build/test $1
+./build/test $1

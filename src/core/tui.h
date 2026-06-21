@@ -29,8 +29,9 @@ public:
     bool fg_def {true};
     bool ch_def {true};
 
-    array<int, 3> fg;
-    array<int, 3> bg;
+    // Initialize to black to make sure the == operator works correctly.
+    array<int, 3> fg {0, 0, 0};
+    array<int, 3> bg {0, 0, 0};
     string ch = "";
     string ansii{""};
 
