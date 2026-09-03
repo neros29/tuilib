@@ -13,6 +13,8 @@ public:
     Surface();
     Surface(Surface&& surf);
     Surface& operator=(Surface&&);
+    Surface(const Surface& surf) = delete;
+    Surface& operator=(const Surface&) = delete;
     Character& operator[](int x);
     Character operator[](int x) const;
 

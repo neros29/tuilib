@@ -63,7 +63,7 @@ void debug(){
 
     auto surf2 = tui.append({40, 10}, offset2);
     surf2.fill_bg(0x57, 0xA4, 0x90);
-    string test = "Unicode test.\n　それん";
+    string test = "Unicode test.\nそれん\nソレン";
     Label lab2{surf2, test, {5, 2}};
 
     auto debug = tui.append({tui.getScreenSize()[0], tui.getScreenSize()[1]}, {-tui.getScreenSize()[0], -tui.getScreenSize()[1]}, " ", 1000);
