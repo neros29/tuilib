@@ -38,7 +38,7 @@ void good_amont_surfaces(Tui& tui){
 
 }
 void debug(){
-    ofstream log("logs/log", ios::app);
+    ofstream log("logs/debug.log", ios::app);
     clog.rdbuf(log.rdbuf());
     clog << "\n=====================================================\n" << endl;;
     clog << "[Program] Starting" << endl;;

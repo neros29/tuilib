@@ -6,6 +6,7 @@
 #include <deque>
 
 #include "../tui.h"
+#include "../utils/logging.h"
 
 void Screen::m_getWinSize(){
     struct winsize ws = {(struct winsize){0,0,0,0}};
@@ -90,7 +91,7 @@ string Screen::m_genrate(Character& ch){
     static string ESC {"\x1B"};
     static string colors[256];
     if (colors[1].empty()){
-        // clog << "[Character] Creating colors cache" << endl;
+        logger::info("[Character] Creating colors cache");
         for (int i = 0; i <= 255; i++){
             colors[i] = to_string(i);
         }
@@ -128,13 +129,12 @@ void Screen::flip(){
 }
 
 Screen::Screen(const deque<InternalSurface>& surfaces, const vector<int>& sortIndex):m_surfaces(surfaces), m_sortIndex(sortIndex){
-    clog << "[Screen] Starting up"<< endl;
+    logger::info("[Screen] Starting up");
     m_getWinSize();
     m_initScreen();
     m_file.open("/dev/stdout");
 }
 
 Screen::~Screen(){
-    clog << "[Screen] Shuting down"<< endl;
     m_file.close();
 }

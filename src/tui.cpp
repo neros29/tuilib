@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/functional.h>
 
 #include <array>
 #include <string>
@@ -7,6 +8,7 @@
 #include "core/tui.h"
 #include "api.h"
 #include "widgets/Label.h"
+#include "core/utils/logging.h"
 
 namespace py = pybind11;
 
@@ -39,7 +41,7 @@ struct PyLabel {
 
 PYBIND11_MODULE(tui, m) {
     m.doc() = "lightweight TUI library (pybind11 bindings)";
-
+    m.def("set_logger", &Logger::set_callback);
     // -----------------
     // Character
     // -----------------

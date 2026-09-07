@@ -13,6 +13,7 @@ public:
     Surface();
     Surface(Surface&& surf);
     Surface& operator=(Surface&&);
+
     Surface(const Surface& surf) = delete;
     Surface& operator=(const Surface&) = delete;
     Character& operator[](int x);
@@ -50,7 +51,6 @@ private:
 public:
     int skipedFrames = 0;
     Tui();
-    ~Tui();
     int amontOfSurfaces(){
         return m_surfaces.size();
     }

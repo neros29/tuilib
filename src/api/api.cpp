@@ -1,6 +1,7 @@
 #include "../api.h"
 #include <algorithm>
 #include <iostream>
+#include "../core/utils/logging.h"
 
 using namespace std;
 Surface Tui::append(array<int, 2> size,  array<int, 2> offset, string ch, int z){
@@ -15,11 +16,7 @@ Surface Tui::append(array<int, 2> size,  array<int, 2> offset, string ch, int z)
 }
 
 Tui::Tui():m_screen(Screen(m_surfaces, m_sortedSurfaceIndex)), m_input(Input(m_surfaces, m_sortedSurfaceIndex)), m_index(0){
-    clog << "[API] Starting up" << endl;
-}
-
-Tui::~Tui(){
-    clog << "[API] Shutting down" << endl;
+    logger::info("[API] Starting up");
 }
 
 void Tui::m_sortSurfaces(){

@@ -1,10 +1,10 @@
 #include <termios.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include <iostream>
 #include <algorithm>
-#include "../tui.h"
 #include <term.h>
+#include "../tui.h"
+#include "../utils/logging.h"
 
 using namespace std;
 // static helper functions
@@ -27,12 +27,11 @@ static string getData(){
 
 // Input memeber functinos
 Input::Input(deque<InternalSurface>& surfaces, const vector<int>& sortIndex):m_surfaces(surfaces), m_sortIndex(sortIndex){
-    clog << "[Input] Starting up" << endl;
+    logger::info("[Input] Starting up");
     m_setRawMode();
     m_initDb();
 }
 Input::~Input() {
-    clog << "[Input] Shuting down" << endl;
     m_restoreMode();
 }
 void Input::m_add(string capname, string human){
@@ -79,7 +78,7 @@ inline void Input::m_initDb(){
     m_initNamePair();
     int err = 0;
     if (setupterm(nullptr, STDOUT_FILENO, &err) != 0) {
-        clog << "[Input] error = " << err << endl;
+        logger::critical("[Input] error in setupterm " + to_string(err));
         terminate();
     }
 
@@ -93,7 +92,8 @@ inline void Input::m_initDb(){
         string capname = pair[0];
         string s = m_getCap(capname.c_str());
         if (s.empty()) {
-            clog << "[Input] "<< capname << " dose not exist in terminfo " << endl;
+            logger::info("[Input] " + capname + " dose not exist in terminfo ");
+           ;
         } else {
             m_termDb[s] = human;
         }
