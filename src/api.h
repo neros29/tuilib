@@ -31,6 +31,8 @@ public:
 
     void set_offset(int x, int y);
     array<int, 2> get_offset() const;
+    
+    void extend_size(string direction, int amount);
 
     array<int, 2> get_size() const; 
     void blit(Surface& surf);

@@ -79,6 +79,7 @@ PYBIND11_MODULE(tui, m) {
         .def("set_z", &Surface::set_z, py::arg("z"))
         .def("get_z", &Surface::get_z)
         .def("set_offset", &Surface::set_offset, py::arg("x"), py::arg("y"))
+        .def("extend_size", &Surface::extend_size, py::arg("direction"), py::arg("amount"))
         .def("offset", &Surface::get_offset)
         .def("size", &Surface::get_size)
         .def("blit", &Surface::blit, py::arg("surf"))

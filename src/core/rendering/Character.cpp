@@ -47,3 +47,16 @@ bool Character::operator ==(const Character chi) const{
     }
     return true;
 }
+
+bool Character::operator !=(const Character chi) const{
+    if (chi.bg != bg){
+        return true;
+    }
+    if (chi.fg != fg){
+        return true;
+    }
+    if (chi.ch != ch){
+        return true;
+    }
+    return false;
+}

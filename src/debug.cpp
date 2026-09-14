@@ -53,13 +53,22 @@ void debug(){
     // surfaces stress test
     // many_surfaces_background(tui);
     // good_amont_surfaces(tui);
-    
+
     auto surf = tui.append({40, 10}, offset);
+    string str = "Terrminal User Interface\nbuilt by Soren Mile";
+    surf.extend_size("Down", 5);
+    surf.extend_size("Down", -5);
+    surf.extend_size("Right", 10);
+    surf.extend_size("Right", -10);
+    surf.extend_size("Up", 10);
+    surf.extend_size("Up", -10);
+    surf.extend_size("Left", 10);
+    surf.extend_size("Left", -10);
+
+    Label lab{surf, str, {5, 2}};
     surf.fill_fg(0xDE, 0xDC, 0xD7);
     surf.fill_bg(0x10,0x50, 0x10);
     surf.register_keys({"q", "h", "j", "k", "l", "d", "Up", "Down", "Left", "Right"});
-    string str = "Terrminal User Interface\nbuilt by Soren Mile";
-    Label lab{surf, str, {5, 2}};
 
     auto surf2 = tui.append({40, 10}, offset2);
     surf2.fill_bg(0x57, 0xA4, 0x90);

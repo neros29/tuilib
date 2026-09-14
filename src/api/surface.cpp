@@ -1,8 +1,12 @@
 #include "../api.h"
 #include "../core/tui.h"
+#include "../core/utils/logging.h"
 #include <algorithm>
 #include <cassert>
-#include <iostream>
+#include <cstdlib>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 using namespace std;
 Surface::Surface(InternalSurface &is) : m_is(&is) {}
@@ -95,37 +99,94 @@ void Surface::set_offset(int x, int y) {
   }
 }
 
+void Surface::extend_size(string direction, int amount) {
+    Character chr;
+    chr.set_ch(m_is->defulat_ch);
+    if (direction == "Down"){
+        m_is->size[1] += amount;
+        if (amount > 0){
+            m_is->surface.resize(m_is->size[0] * m_is->size[1], chr);
+        } else {
+            int ammont_to_erase = std::abs(amount);
+            if (ammont_to_erase > m_is->size[1]){
+                throw invalid_argument("Size must not be zero.");
+            } else {
+                m_is->surface.erase(m_is->surface.begin(), m_is->surface.begin() + ammont_to_erase * m_is->size[0]);
+            }
+        }
+    }
+    if (direction == "Up"){
+        m_is->size[1] += amount;
+        if (amount > 0){
+            m_is->surface.insert(m_is->surface.begin(), amount * m_is->size[0], chr);
+        } else {
+            int ammont_to_erase = std::abs(amount);
+            if (ammont_to_erase > m_is->size[1]){
+                throw invalid_argument("Size must not be zero.");
+            } else {
+                m_is->surface.erase(m_is->surface.end() - ammont_to_erase * m_is->size[0], m_is->surface.end());
+            }
+        }
+    }
+    if (direction == "Right" || direction == "Left"){
+        int left_padding = 0;
+        int smaller = amount;
+        if (direction == "Left"){
+            left_padding = amount;
+        }
+        if (amount < 0){
+            if (std::abs(amount) > m_is->size[1]){
+                throw invalid_argument("Size must not be zero.");
+            }
+            smaller = 0;
+        }
+        m_is->size[0] += amount;
+        vector<Character> new_vec(m_is->size[0] * m_is->size[1], chr);
+        for (int y = 0; y < m_is->size[1] - smaller; y++){
+            for (int x = 0; x < m_is->size[0] - smaller; x++){
+                int old_idx = y * (m_is->size[0] - amount) + x;
+                Character& ch = m_is->surface[old_idx];
+                if (ch != chr){
+                    int new_idx = y * m_is->size[0] + x + left_padding;
+                    new_vec[new_idx] = ch;
+                }
+            }
+        }
+        m_is->surface.swap(new_vec);
+    }
+}
+
 void Surface::blit(Surface &surf) {
-  assert(m_is->surface.size() == m_is->size[0] * m_is->size[1]);
-  int x = 0;
-  int y = 0;
-  for (int i = 0; i != m_is->surface.size(); i++) {
-    bool def{true};
-    int r_x = x - surf.m_is->r_cords[0];
-    int r_y = y - surf.m_is->r_cords[1];
-    if (r_x < surf.m_is->size[0] && r_y < surf.m_is->size[1]) {
-      if (r_x >= 0 && r_y >= 0) {
-        int index = (surf.m_is->size[0] * r_y) + r_x;
-        if (!surf[index].bg_def) {
-          m_is->surface[i].set_bg(surf[index].bg[0], surf[index].bg[1],
-                                  surf[index].bg[2]);
+    assert(m_is->surface.size() == m_is->size[0] * m_is->size[1]);
+    int x = 0;
+    int y = 0;
+    for (int i = 0; i != m_is->surface.size(); i++) {
+        bool def{true};
+        int r_x = x - surf.m_is->r_cords[0];
+        int r_y = y - surf.m_is->r_cords[1];
+        if (r_x < surf.m_is->size[0] && r_y < surf.m_is->size[1]) {
+            if (r_x >= 0 && r_y >= 0) {
+                int index = (surf.m_is->size[0] * r_y) + r_x;
+                if (!surf[index].bg_def) {
+                    m_is->surface[i].set_bg(surf[index].bg[0], surf[index].bg[1],
+                            surf[index].bg[2]);
+                }
+                if (!surf[index].fg_def) {
+                    m_is->surface[i].set_fg(surf[index].fg[0], surf[index].fg[1],
+                            surf[index].fg[2]);
+                }
+                if (!surf[index].ch_def) {
+                    m_is->surface[i].set_ch(surf[index].ch);
+                }
+            }
         }
-        if (!surf[index].fg_def) {
-          m_is->surface[i].set_fg(surf[index].fg[0], surf[index].fg[1],
-                                  surf[index].fg[2]);
+        if (x == m_is->size[0] - 1) {
+            x = 0;
+            y++;
+        } else {
+            x++;
         }
-        if (!surf[index].ch_def) {
-          m_is->surface[i].set_ch(surf[index].ch);
-        }
-      }
     }
-    if (x == m_is->size[0] - 1) {
-      x = 0;
-      y++;
-    } else {
-      x++;
-    }
-  }
 }
 
 Character &Surface::operator[](int x) { return m_is->surface[x]; }

@@ -39,6 +39,7 @@ public:
     void set_bg(int r, int g, int b);
     void set_ch(string chi);
     bool operator == (const Character ch) const;
+    bool operator != (const Character ch) const;
 };
 
 class InternalSurface {
@@ -50,6 +51,7 @@ public:
     bool m_dirty = true;
     array<int, 2> size;
     array<int, 2> r_cords;
+    string defulat_ch = {" "};
 
     const vector<string>* m_validKeys;
     unordered_map<string, bool> events;

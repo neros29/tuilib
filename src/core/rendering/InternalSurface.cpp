@@ -18,12 +18,14 @@ inline void cheakVariables(const array<int, 2>& size, const string& ch){
 }
 InternalSurface::InternalSurface(array<int, 2> size, string ch, int z, array<int, 2> offset, const vector<string>& keys):z(z), r_cords{offset[0], offset[1]}, size{size[0], size[1]}, m_validKeys(&keys){
     cheakVariables(size, ch);
+    defulat_ch = ch;
     Character chr;
     chr.set_ch(ch);
     surface.assign(size[0]*size[1], chr);
 }
 InternalSurface::InternalSurface(array<int, 2> size, string ch, int z, array<int, 2> offset):z(z), r_cords{offset[0], offset[1]}, size{size[0], size[1]}, m_validKeys(nullptr){
     cheakVariables(size, ch);
+    defulat_ch = ch;
     Character chr;
     chr.set_ch(ch);
     surface.assign(size[0]*size[1], chr);
