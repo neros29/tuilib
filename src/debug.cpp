@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include "api.h"
 #include "widgets/Label.h"
-#include "test.h"
 
 
 using namespace std;
@@ -144,26 +143,6 @@ void debug(){
  
 }
 
-void test(){
-    ofstream log("logs/test-log", ios::app);
-    clog.rdbuf(log.rdbuf());
-    clog << "\n=====================================================\n" << endl;;
-    clog << "[TEST] Starting" << endl;
-
-    cout << "Character Tests" << endl;
-    testChCharacterError();
-    testChColorError();
-
-    cout << "Surface Tests" << endl;
-    testSurfSizeError();
-    testSurfChError();
-    testSurfValidKeysError();
-}
-
 int main(int argc, char* argv[]){
-    if (argc > 1 && string{argv[1]} == "test"){
-        test();
-    }else {
-        debug();
-    }
+    debug();
 }
