@@ -11,6 +11,7 @@
 #include "core/utils/logging.h"
 
 namespace py = pybind11;
+using namespace std;
 
 // Safe Python-facing wrapper for Label.
 //
@@ -45,18 +46,18 @@ PYBIND11_MODULE(tui, m) {
     // -----------------
     // Character
     // -----------------
-    py::class_<Character>(m, "Character", py::dynamic_attr())
+    py::class_<core::Character>(m, "Character", py::dynamic_attr())
         .def(py::init<>())
-        .def("set_bg", &Character::set_bg, py::arg("r"), py::arg("g"), py::arg("b"))
-        .def("set_fg", &Character::set_fg, py::arg("r"), py::arg("g"), py::arg("b"))
-        .def("set_ch", &Character::set_ch, py::arg("ch"))
+        .def("set_bg", &core::Character::set_bg, py::arg("r"), py::arg("g"), py::arg("b"))
+        .def("set_fg", &core::Character::set_fg, py::arg("r"), py::arg("g"), py::arg("b"))
+        .def("set_ch", &core::Character::set_ch, py::arg("ch"))
         // raw fields (handy from Python)
-        .def_readwrite("bg_def", &Character::bg_def)
-        .def_readwrite("fg_def", &Character::fg_def)
-        .def_readwrite("ch_def", &Character::ch_def)
-        .def_readwrite("fg", &Character::fg)
-        .def_readwrite("bg", &Character::bg)
-        .def_readwrite("ch", &Character::ch);
+        .def_readwrite("bg_def", &core::Character::bg_def)
+        .def_readwrite("fg_def", &core::Character::fg_def)
+        .def_readwrite("ch_def", &core::Character::ch_def)
+        .def_readwrite("fg", &core::Character::fg)
+        .def_readwrite("bg", &core::Character::bg)
+        .def_readwrite("ch", &core::Character::ch);
 
     // -----------------
     // Surface
@@ -87,7 +88,7 @@ PYBIND11_MODULE(tui, m) {
         .def("get_event", &Surface::get_event, py::arg("event"))
         .def(
             "__getitem__",
-            [](Surface& self, int idx) -> Character& { return self[idx]; },
+            [](Surface& self, int idx) -> core::Character& { return self[idx]; },
             py::arg("idx"),
             py::return_value_policy::reference_internal
         );
@@ -124,7 +125,4 @@ PYBIND11_MODULE(tui, m) {
              py::arg("root"), py::arg("text"), py::arg("offset"))
         .def("update", &PyLabel::update, py::arg("text"));
 
-    // -----------------
-    // Input
-    // -----------------
 }
