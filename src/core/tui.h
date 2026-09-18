@@ -9,17 +9,16 @@
 #include <term.h>
 #include <cinttypes>
 
-using namespace std;
 
 class InputString{
 private:
     int get_byte_len(unsigned char firstbyte);
-    vector<string> str;
+    std::vector<std::string> str;
 public:
     size_t size();
-    int getWidth(string ch); 
-    InputString(string s);
-    string operator[](int i);
+    int getWidth(std::string ch); 
+    InputString(std::string s);
+    std::string operator[](int i);
 };
 
 struct Character {
@@ -31,34 +30,34 @@ public:
     bool ch_def {true};
 
     // Initialize to invalid color to make sure the == operator works correctly.
-    array<int, 3> fg {256, 256, 256};
-    array<int, 3> bg {256, 256, 256};
-    string ch = "";
+    std::array<int, 3> fg {256, 256, 256};
+    std::array<int, 3> bg {256, 256, 256};
+    std::string ch = "";
 
     void set_fg(int r, int g, int b);
     void set_bg(int r, int g, int b);
-    void set_ch(string chi);
+    void set_ch(std::string chi);
     bool operator == (const Character ch) const;
     bool operator != (const Character ch) const;
 };
 
 class InternalSurface {
 public:
-    vector<Character> surface;
-    vector<Character> m_old;
+    std::vector<Character> surface;
+    std::vector<Character> m_old;
 
     int z{0};
     bool m_dirty = true;
-    array<int, 2> size;
-    array<int, 2> r_cords;
-    string defulat_ch = {" "};
+    std::array<int, 2> size;
+    std::array<int, 2> r_cords;
+    std::string defulat_ch = {" "};
 
-    const vector<string>* m_validKeys;
-    unordered_map<string, bool> events;
-    vector<string> keys;
+    const std::vector<std::string>* m_validKeys;
+    std::unordered_map<std::string, bool> events;
+    std::vector<std::string> keys;
 
-    InternalSurface(array<int, 2> size, string ch, int z, array<int, 2> offset, const vector<string>& keys);
-    InternalSurface(array<int, 2> size, string ch, int z, array<int, 2> offset);
+    InternalSurface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys);
+    InternalSurface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset);
     Character& operator[](int x);
     Character operator[](int x) const;
     bool cheakDirty();
@@ -68,27 +67,27 @@ public:
 
 class Screen {
 private:
-    const deque<InternalSurface>& m_surfaces;
-    vector<Character> m_screen;
-    vector<Character> m_lastScreen;
-    const vector<int>& m_sortIndex;
-    array<int, 2> m_size;
-    ofstream m_file;
+    const std::deque<InternalSurface>& m_surfaces;
+    std::vector<Character> m_screen;
+    std::vector<Character> m_lastScreen;
+    const std::vector<int>& m_sortIndex;
+    std::array<int, 2> m_size;
+    std::ofstream m_file;
     int m_index{0};
-    string m_defaultCharacter {" "};
+    std::string m_defaultCharacter {" "};
     bool m_sizeChange {true};
     bool m_sorted {false};
 
     void m_getWinSize();
     void m_initScreen();
-    string m_genrate(Character& ch);
+    std::string m_genrate(Character& ch);
     void m_render();
 
 public:
     int charactersRenderd;
-    Screen(const deque<InternalSurface>& surfaces, const vector<int>& sortIndex);
+    Screen(const std::deque<InternalSurface>& surfaces, const std::vector<int>& sortIndex);
     ~Screen();
-    array<int, 2> getSize();
+    std::array<int, 2> getSize();
     void flip();
 };
 
@@ -96,28 +95,28 @@ public:
 class Input{
 private:
     // Surface data passed from api 
-    deque<InternalSurface>& m_surfaces; 
-    const vector<int>& m_sortIndex;
+    std::deque<InternalSurface>& m_surfaces; 
+    const std::vector<int>& m_sortIndex;
 
     // input stuff
     struct termios m_old;
-    vector<array<string, 2>> m_namePair;
-    unordered_map<string, string> m_termDb;
+    std::vector<std::array<std::string, 2>> m_namePair;
+    std::unordered_map<std::string, std::string> m_termDb;
 
     // input buffer
-    string m_buffer;
+    std::string m_buffer;
 
     // member private functions
     inline void m_initNamePair();
     void m_setRawMode();
     void m_restoreMode();
     void m_initDb();
-    void m_add(string capname, string human);
-    string m_getCap(const char* name);
+    void m_add(std::string capname, std::string human);
+    std::string m_getCap(const char* name);
 public:
-    vector<string> keys;
+    std::vector<std::string> keys;
     // Constructers
-    Input(deque<InternalSurface>& surfaces, const vector<int>& sortIndex);
+    Input(std::deque<InternalSurface>& surfaces, const std::vector<int>& sortIndex);
     ~Input();
 
     // member public functions

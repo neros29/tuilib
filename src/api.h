@@ -8,7 +8,7 @@ private:
     bool m_del = false;
 public:
     Surface(InternalSurface& is);
-    Surface(array<int, 2> size, string ch, int z, array<int, 2> offset);
+    Surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset);
     ~Surface();
     Surface();
     Surface(Surface&& surf);
@@ -19,8 +19,8 @@ public:
     Character& operator[](int x);
     Character operator[](int x) const;
 
-    bool get_event(string event);
-    void register_keys(vector<string> keys);
+    bool get_event(std::string event);
+    void register_keys(std::vector<std::string> keys);
 
     void fill_bg(int r, int g, int b);
     void fill_fg(int r, int g, int b);
@@ -30,18 +30,18 @@ public:
 
 
     void set_offset(int x, int y);
-    array<int, 2> get_offset() const;
+    std::array<int, 2> get_offset() const;
     
-    void extend_size(string direction, int amount);
+    void extend_size(std::string direction, int amount);
 
-    array<int, 2> get_size() const; 
+    std::array<int, 2> get_size() const; 
     void blit(Surface& surf);
 };
 
 class Tui{
 private:
-    deque<InternalSurface> m_surfaces;
-    vector<int> m_sortedSurfaceIndex;
+    std::deque<InternalSurface> m_surfaces;
+    std::vector<int> m_sortedSurfaceIndex;
 
     bool m_isSurfaceSorted;
     void m_sortSurfaces();
@@ -49,7 +49,7 @@ private:
     int m_index;
     Screen m_screen;
     Input m_input;
-    ofstream m_logFile; 
+    std::ofstream m_logFile; 
 public:
     int skipedFrames = 0;
     Tui();
@@ -59,9 +59,9 @@ public:
     int amontOfCharacters(){
         return m_screen.getSize()[0] * m_screen.getSize()[1];
     }
-    Surface append(array<int, 2> size, array<int, 2> offset, string ch = " ", int z = -1);
+    Surface append(std::array<int, 2> size, std::array<int, 2> offset, std::string ch = " ", int z = -1);
     void update();
-    array<int, 2> getScreenSize();
+    std::array<int, 2> getScreenSize();
     int charactersRendered();
 
 };

@@ -3,15 +3,15 @@ class Label{
 private:
     Surface& root;
     Surface surf;
-    const string& str;
-    string oldStr;
-    vector<string> text;
-    array<int, 2> size;
-    array<int, 2> offset;
+    const std::string& str;
+    std::string oldStr;
+    std::vector<std::string> text;
+    std::array<int, 2> size;
+    std::array<int, 2> offset;
     void m_getSize();
-    void m_parseString(const string& i_str);
+    void m_parseString(const std::string& i_str);
 public:
-    Label(Surface& i_root, const string& i_text, array<int, 2> i_offset);
+    Label(Surface& i_root, const std::string& i_text, std::array<int, 2> i_offset);
     void updateSurface();
 };
 
