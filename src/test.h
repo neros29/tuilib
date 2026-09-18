@@ -31,7 +31,7 @@ inline void testChCharacterError(){
 
 inline void testSurfSizeError(){
     try{
-        InternalSurface surf({-1, -50}, " ", -10, {8, 4}, {"Up"});
+        c_surface surf({-1, -50}, " ", -10, {8, 4}, {"Up"});
         cout << "❌ Test " << __FUNCTION__ <<" Faild" <<  endl;
     }
     catch(invalid_argument){
@@ -42,7 +42,7 @@ inline void testSurfSizeError(){
 
 inline void testSurfChError(){
     try{
-        InternalSurface surf({1, 50}, "", -10, {8, 4}, {"Up"});
+        c_surface surf({1, 50}, "", -10, {8, 4}, {"Up"});
         cout << "❌ Test " << __FUNCTION__ <<" Faild" <<  endl;
     }
     catch(invalid_argument){
@@ -52,7 +52,7 @@ inline void testSurfChError(){
 }
 inline void testSurfValidKeysError(){
     std::vector<std::string> keys = {"Up"};
-    InternalSurface tsurf({1, 50}, " ", -10, {8, 4}, keys);
+    c_surface tsurf({1, 50}, " ", -10, {8, 4}, keys);
 
     Surface surf(tsurf);
     try{

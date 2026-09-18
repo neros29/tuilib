@@ -43,7 +43,7 @@ namespace core {
         bool operator != (const Character ch) const;
     };
 
-    class InternalSurface {
+    class c_surface {
     public:
         std::vector<Character> surface;
         std::vector<Character> m_old;
@@ -58,8 +58,8 @@ namespace core {
         std::unordered_map<std::string, bool> events;
         std::vector<std::string> keys;
 
-        InternalSurface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys);
-        InternalSurface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset);
+        c_surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys);
+        c_surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset);
         Character& operator[](int x);
         Character operator[](int x) const;
         bool cheakDirty();
@@ -69,7 +69,7 @@ namespace core {
 
     class Screen {
     private:
-        const std::deque<InternalSurface>& m_surfaces;
+        const std::deque<c_surface>& m_surfaces;
         std::vector<Character> m_screen;
         std::vector<Character> m_lastScreen;
         const std::vector<int>& m_sortIndex;
@@ -87,7 +87,7 @@ namespace core {
 
     public:
         int charactersRenderd;
-        Screen(const std::deque<InternalSurface>& surfaces, const std::vector<int>& sortIndex);
+        Screen(const std::deque<c_surface>& surfaces, const std::vector<int>& sortIndex);
         ~Screen();
         std::array<int, 2> getSize();
         void flip();
@@ -97,7 +97,7 @@ namespace core {
     class Input{
     private:
         // Surface data passed from api 
-        std::deque<InternalSurface>& m_surfaces; 
+        std::deque<c_surface>& m_surfaces; 
         const std::vector<int>& m_sortIndex;
 
         // input stuff
@@ -118,7 +118,7 @@ namespace core {
     public:
         std::vector<std::string> keys;
         // Constructers
-        Input(std::deque<InternalSurface>& surfaces, const std::vector<int>& sortIndex);
+        Input(std::deque<c_surface>& surfaces, const std::vector<int>& sortIndex);
         ~Input();
 
         // member public functions

@@ -3,11 +3,11 @@
 
 class Surface{
 private:
-    // InternalSurface& m_is;
-    core::InternalSurface* m_is;
+    // c_surface& m_is;
+    core::c_surface* m_is;
     bool m_del = false;
 public:
-    Surface(core::InternalSurface& is);
+    Surface(core::c_surface& is);
     Surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset);
     ~Surface();
     Surface();
@@ -40,7 +40,7 @@ public:
 
 class Tui{
 private:
-    std::deque<core::InternalSurface> m_surfaces;
+    std::deque<core::c_surface> m_surfaces;
     std::vector<int> m_sortedSurfaceIndex;
 
     bool m_isSurfaceSorted;

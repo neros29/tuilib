@@ -1,6 +1,5 @@
 #include "../api.h"
 #include <algorithm>
-#include <iostream>
 #include "../core/utils/logging.h"
 
 using namespace std;
@@ -33,7 +32,7 @@ void Tui::update(){
     bool isDirty = m_input.update();
     m_sortSurfaces();
     // isDirty = true;
-    for (InternalSurface& surf: m_surfaces){
+    for (c_surface& surf: m_surfaces){
         if (surf.cheakDirty()){
             isDirty = true;
         }

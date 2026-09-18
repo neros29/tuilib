@@ -46,7 +46,7 @@ void Screen::m_render(){
         bool def {true};
         Character newCharacter;
         for (int j: m_sortIndex){
-            const InternalSurface &surf = m_surfaces[j];
+            const c_surface &surf = m_surfaces[j];
             int r_x = x - surf.r_cords[0];
             int r_y = y - surf.r_cords[1];
             if (r_x < surf.size[0] && r_y < surf.size[1]){
@@ -131,7 +131,7 @@ void Screen::flip(){
     m_file.flush();
 }
 
-Screen::Screen(const deque<InternalSurface>& surfaces, const vector<int>& sortIndex):m_surfaces(surfaces), m_sortIndex(sortIndex){
+Screen::Screen(const deque<c_surface>& surfaces, const vector<int>& sortIndex):m_surfaces(surfaces), m_sortIndex(sortIndex){
     logger::info("[Screen] Starting up");
     m_getWinSize();
     m_initScreen();
