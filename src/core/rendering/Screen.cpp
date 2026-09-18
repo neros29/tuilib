@@ -7,7 +7,9 @@
 
 #include "../tui.h"
 #include "../utils/logging.h"
+
 using namespace std;
+using namespace core;
 
 void Screen::m_getWinSize(){
     struct winsize ws = {(struct winsize){0,0,0,0}};

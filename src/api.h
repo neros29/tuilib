@@ -4,10 +4,10 @@
 class Surface{
 private:
     // InternalSurface& m_is;
-    InternalSurface* m_is;
+    core::InternalSurface* m_is;
     bool m_del = false;
 public:
-    Surface(InternalSurface& is);
+    Surface(core::InternalSurface& is);
     Surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset);
     ~Surface();
     Surface();
@@ -16,8 +16,8 @@ public:
 
     Surface(const Surface& surf) = delete;
     Surface& operator=(const Surface&) = delete;
-    Character& operator[](int x);
-    Character operator[](int x) const;
+    core::Character& operator[](int x);
+    core::Character operator[](int x) const;
 
     bool get_event(std::string event);
     void register_keys(std::vector<std::string> keys);
@@ -40,15 +40,15 @@ public:
 
 class Tui{
 private:
-    std::deque<InternalSurface> m_surfaces;
+    std::deque<core::InternalSurface> m_surfaces;
     std::vector<int> m_sortedSurfaceIndex;
 
     bool m_isSurfaceSorted;
     void m_sortSurfaces();
 
     int m_index;
-    Screen m_screen;
-    Input m_input;
+    core::Screen m_screen;
+    core::Input m_input;
     std::ofstream m_logFile; 
 public:
     int skipedFrames = 0;

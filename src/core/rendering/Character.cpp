@@ -3,6 +3,7 @@
 #include "../tui.h"
 
 using namespace std;
+using namespace core;
 
 inline void cheakInput(int r, int g, int b){
     if (r > 255 || g > 255 || b > 255){

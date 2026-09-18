@@ -3,6 +3,8 @@
 #include "api.h"
 
 using namespace std;
+using namespace core;
+
 inline void testChColorError(){
     Character ch;
     

@@ -1,12 +1,12 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <iostream>
 #include <sys/ioctl.h>
 #include "../tui.h"
 #include <cassert>
 
 using namespace std;
+using namespace core;
 
 inline void cheakVariables(const array<int, 2>& size, const string& ch){
     if (size[0] < 0 || size[1] < 0){

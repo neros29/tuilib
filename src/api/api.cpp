@@ -4,6 +4,7 @@
 #include "../core/utils/logging.h"
 
 using namespace std;
+using namespace core;
 Surface Tui::append(array<int, 2> size,  array<int, 2> offset, string ch, int z){
     if (z == -1){
         z = m_index;

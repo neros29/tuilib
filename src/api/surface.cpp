@@ -9,6 +9,8 @@
 #include <vector>
 
 using namespace std;
+using namespace core;
+
 Surface::Surface(InternalSurface &is) : m_is(&is) {}
 Surface::Surface(array<int, 2> size, string ch, int z, array<int, 2> offset)
     : m_is(new InternalSurface(size, ch, z, offset)) {

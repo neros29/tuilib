@@ -7,6 +7,7 @@
 #include "../utils/logging.h"
 
 using namespace std;
+using namespace core;
 // static helper functions
 static int getDataSize(){
     int size;

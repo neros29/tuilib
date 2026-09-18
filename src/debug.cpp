@@ -4,10 +4,8 @@
 #include <string>
 #include <chrono>
 #include <fstream>
-#include <thread>
 #include <unistd.h>
 #include "api.h"
-#include "core/tui.h"
 #include "widgets/Label.h"
 #include "test.h"
 
