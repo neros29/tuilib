@@ -7,7 +7,6 @@
 #include <array>
 #include <termios.h>
 #include <term.h>
-#include <cinttypes>
 
 class InputString{
 private:
@@ -15,30 +14,36 @@ private:
     std::vector<std::string> str;
 public:
     size_t size();
-    int getWidth(std::string ch); 
+    static int getWidth(std::string ch); 
     InputString(std::string s);
     std::string operator[](int i);
 };
 
 namespace core {
 
-
     struct Character {
     private:
-        bool defualt {false};
-    public:
-        bool bg_def {true};
-        bool fg_def {true};
-        bool ch_def {true};
-
         // Initialize to invalid color to make sure the == operator works correctly.
-        std::array<int, 3> fg {256, 256, 256};
-        std::array<int, 3> bg {256, 256, 256};
-        std::string ch = "";
+        std::array<int, 4> fg {0, 0, 0, 0};
+        std::array<int, 4> bg {255, 0, 0, 0};
+        std::string ch = " ";
+        bool ch_def {true};
+        bool fg_def {true};
+        bool bg_def {true};
 
-        void set_fg(int r, int g, int b);
-        void set_bg(int r, int g, int b);
+    public:
+
+
+        void set_fg(int r, int g, int b, int a = 255);
+        void set_bg(int r, int g, int b, int a = 255);
         void set_ch(std::string chi);
+
+        bool is_def(std::string value) const;
+
+        std::array<int, 4> get_fg() const;
+        std::array<int, 4> get_bg() const;
+        std::string get_ch() const;
+
         bool operator == (const Character ch) const;
         bool operator != (const Character ch) const;
     };

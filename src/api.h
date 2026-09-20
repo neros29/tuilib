@@ -22,8 +22,8 @@ public:
     bool get_event(std::string event);
     void register_keys(std::vector<std::string> keys);
 
-    void fill_bg(int r, int g, int b);
-    void fill_fg(int r, int g, int b);
+    void fill_bg(int r, int g, int b, int a = 255);
+    void fill_fg(int r, int g, int b, int a = 255);
 
     void set_z(int z);
     int get_z() const;

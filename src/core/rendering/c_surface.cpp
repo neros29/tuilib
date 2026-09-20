@@ -44,9 +44,11 @@ bool c_surface::cheakDirty(){
 }
 
 Character& c_surface::operator[](int x){
-    return surface.at(x); //TODO Make this back to normal [] operator for better performance
+    // return surface.at(x); //TODO Make this back to normal [] operator for better performance
+    return surface[x];
 }
 Character c_surface::operator[](int x) const{
-    return surface.at(x); //TODO Make this back to normal [] operator for better performance
+    // return surface.at(x); //TODO Make this back to normal [] operator for better performance
+    return surface[x];
 }
 

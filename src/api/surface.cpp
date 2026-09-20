@@ -7,10 +7,44 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <cmath>
 
 using namespace std;
 using namespace core;
 
+/**
+ * Blends two RGBA color arrays.
+ * @param src The foreground color array [R, G, B, A] (0-255)
+ * @param dst The background color array [R, G, B, A] (0-255)
+ * @return A new 4-element array containing the blended color.
+ */
+static array<int, 4> blendColors(const std::array<int, 4>& src, const std::array<int, 4>& dst) {
+    if (src[3] <= 0){
+        return dst;
+    }
+    else if (dst[3] <= 0){
+        return src;
+    }
+    array<int, 4> result;
+
+    // Convert alpha to 0.0 - 1.0 range for math
+    float alpha_src = src[3] / 255.0f;
+    float alpha_dst = dst[3] / 255.0f;
+    float inv_alpha_src = 1.0f - alpha_src;
+
+    // 1. Blend RGB channels
+    // Formula: C_out = (C_src * alpha_src) + (C_dst * (1 - alpha_src))
+    result[0] = static_cast<int>(round(src[0] * alpha_src + dst[0] * inv_alpha_src));
+    result[1] = static_cast<int>(round(src[1] * alpha_src + dst[1] * inv_alpha_src));
+    result[2] = static_cast<int>(round(src[2] * alpha_src + dst[2] * inv_alpha_src));
+
+    // 2. Accumulate the Alpha channel
+    // Formula: A_out = A_src + A_dst * (1 - A_src)
+    float alpha_out = alpha_src + (alpha_dst * inv_alpha_src);
+    result[3] = static_cast<int>(round(alpha_out * 255.0f));
+
+    return result;
+}
 Surface::Surface(c_surface &is) : m_is(&is) {}
 Surface::Surface(array<int, 2> size, string ch, int z, array<int, 2> offset)
     : m_is(new c_surface(size, ch, z, offset)) {
@@ -39,13 +73,13 @@ Surface &Surface::operator=(Surface &&surf) {
   return *this;
 }
 
-void Surface::fill_bg(int r, int g, int b) {
+void Surface::fill_bg(int r, int g, int b, int a) {
   assert(m_is != nullptr);
   for (int i = 0; i != m_is->surface.size(); i++) {
-    m_is->surface[i].set_bg(r, g, b);
+    m_is->surface[i].set_bg(r, g, b, a);
   }
 }
-void Surface::fill_fg(int r, int g, int b) {
+void Surface::fill_fg(int r, int g, int b, int a) {
   assert(m_is != nullptr);
   for (int i = 0; i != m_is->surface.size(); i++) {
     m_is->surface[i].set_fg(r, g, b);
@@ -169,17 +203,19 @@ void Surface::blit(Surface &surf) {
         if (r_x < surf.m_is->size[0] && r_y < surf.m_is->size[1]) {
             if (r_x >= 0 && r_y >= 0) {
                 int index = (surf.m_is->size[0] * r_y) + r_x;
-                if (!surf[index].bg_def) {
-                    m_is->surface[i].set_bg(surf[index].bg[0], surf[index].bg[1],
-                            surf[index].bg[2]);
-                }
-                if (!surf[index].fg_def) {
-                    m_is->surface[i].set_fg(surf[index].fg[0], surf[index].fg[1],
-                            surf[index].fg[2]);
-                }
-                if (!surf[index].ch_def) {
-                    m_is->surface[i].set_ch(surf[index].ch);
-                }
+                Character& newCharacter = surf[index];
+                Character& oldCharacter = m_is->surface[i];
+
+                if (!newCharacter.is_def("ch")){
+                    oldCharacter.set_ch(newCharacter.get_ch());
+                    if (!newCharacter.is_def("fg")){
+                        auto fg = newCharacter.get_fg();
+                        oldCharacter.set_fg(fg[0], fg[1], fg[2], fg[3]);
+                    }
+                } 
+
+                auto bg = blendColors(oldCharacter.get_bg(), newCharacter.get_bg());
+                oldCharacter.set_bg(bg[0], bg[1], bg[2], bg[3]);
             }
         }
         if (x == m_is->size[0] - 1) {

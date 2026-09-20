@@ -63,17 +63,19 @@ void debug(){
     surf.extend_size("Left", -10);
 
     Label lab{surf, str, {5, 2}};
-    surf.fill_fg(0xDE, 0xDC, 0xD7);
+    surf.fill_fg(0xbf, 0xc1, 0xc8);
     surf.fill_bg(0x10,0x50, 0x10);
     surf.register_keys({"q", "h", "j", "k", "l", "d", "Up", "Down", "Left", "Right"});
 
     auto surf2 = tui.append({40, 10}, offset2);
-    surf2.fill_bg(0x57, 0xA4, 0x90);
+    surf2.fill_fg(0xbf, 0xc1, 0xc8);
+    surf2.fill_bg(0x57, 0xA4, 0x90, 200);
     string test = "Unicode test.\nそれん\nソレン";
     Label lab2{surf2, test, {5, 2}};
 
     auto debug = tui.append({tui.getScreenSize()[0], tui.getScreenSize()[1]}, {-tui.getScreenSize()[0], -tui.getScreenSize()[1]}, " ", 1000);
-    debug.fill_fg(0xDE, 0xDC, 0xD7);
+    debug.fill_fg(0xbf, 0xc1, 0xc8);
+    debug.fill_bg(0, 0, 0, 100);
     string debugStr = "";
     Label debugLabel{debug, debugStr, {1, 1}};
 

@@ -48,16 +48,10 @@ PYBIND11_MODULE(tui, m) {
     // -----------------
     py::class_<core::Character>(m, "Character", py::dynamic_attr())
         .def(py::init<>())
-        .def("set_bg", &core::Character::set_bg, py::arg("r"), py::arg("g"), py::arg("b"))
-        .def("set_fg", &core::Character::set_fg, py::arg("r"), py::arg("g"), py::arg("b"))
-        .def("set_ch", &core::Character::set_ch, py::arg("ch"))
+        .def("set_bg", &core::Character::set_bg, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
+        .def("set_fg", &core::Character::set_fg, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
+        .def("set_ch", &core::Character::set_ch, py::arg("ch"));
         // raw fields (handy from Python)
-        .def_readwrite("bg_def", &core::Character::bg_def)
-        .def_readwrite("fg_def", &core::Character::fg_def)
-        .def_readwrite("ch_def", &core::Character::ch_def)
-        .def_readwrite("fg", &core::Character::fg)
-        .def_readwrite("bg", &core::Character::bg)
-        .def_readwrite("ch", &core::Character::ch);
 
     // -----------------
     // Surface
@@ -75,8 +69,8 @@ PYBIND11_MODULE(tui, m) {
             py::arg("z") = 0,
             py::arg("offset") = std::array<int, 2>{0, 0}
         )
-        .def("fill_bg", &Surface::fill_bg, py::arg("r"), py::arg("g"), py::arg("b"))
-        .def("fill_fg", &Surface::fill_fg, py::arg("r"), py::arg("g"), py::arg("b"))
+        .def("fill_bg", &Surface::fill_bg, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
+        .def("fill_fg", &Surface::fill_fg, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
         .def("set_z", &Surface::set_z, py::arg("z"))
         .def("get_z", &Surface::get_z)
         .def("set_offset", &Surface::set_offset, py::arg("x"), py::arg("y"))

@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Use modern Python lookup in pybind11
 set(PYBIND11_FINDPYTHON NEW)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Find pybind11 (installed via pacman/apt/pip/etc)
 find_package(pybind11 CONFIG REQUIRED)
