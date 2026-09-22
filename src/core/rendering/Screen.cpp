@@ -76,29 +76,31 @@ void Screen::m_render(){
     if (m_sizeChange){
         m_initScreen();
     }
-    int x = 1;
-    int y = 1;
-    for (int i = 0; i != m_screen.size(); i++){
-        array<int, 4> bg {0, 0, 0, 0};
-        array<int, 4> fg {0, 0, 0, 0};
+    array<int, 4> bg {0, 0, 0, 0}; // pre make these so we aren't allocating and destroying for every single cell. Probably not necessary.
+    array<int, 4> fg {0, 0, 0, 0};
+    for (int i = 0; i < m_screen.size(); i++){
+        int y = i / m_size[0];
+        int x = i % m_size[0];
         Character newCharacter;
-        for (int j: m_sortIndex){
+        for (int j: m_sortIndex){ // m_sortIndex is from highest z to lowest z
             const c_surface &surf = m_surfaces[j];
             int r_x = x - surf.r_cords[0];
             int r_y = y - surf.r_cords[1];
             if (r_x < surf.size[0] && r_y < surf.size[1]){
                 if (r_x >= 0 && r_y >= 0){
-                    int index = (surf.size[0] * r_y) + r_x;
+                    int index = surf.size[0] * r_y + r_x;
                     const Character& currentCharacter = surf[index];
 
                     if (!currentCharacter.is_def("ch") && newCharacter.is_def("ch") && currentCharacter.get_ch() != m_defaultCharacter){
                         newCharacter.set_ch(currentCharacter.get_ch());
-                        fg = blendColors(bg, currentCharacter.get_fg());
+                        fg = blendColors(newCharacter.get_fg(), currentCharacter.get_fg());
                         newCharacter.set_fg(fg[0], fg[1], fg[2], fg[3]);
                     } 
-
                     bg = blendColors(newCharacter.get_bg(), currentCharacter.get_bg());
                     newCharacter.set_bg(bg[0], bg[1], bg[2], bg[3]);
+
+                    fg = blendColors(newCharacter.get_fg(), currentCharacter.get_bg());
+                    newCharacter.set_fg(fg[0], fg[1], fg[2], fg[3]);
 
                     if (bg[3] >= 255 && !newCharacter.is_def("ch")){
                         break;
@@ -107,13 +109,6 @@ void Screen::m_render(){
             }
         }
         m_screen[i] = newCharacter;
-        if (x == m_size[0]){
-            x = 1;
-            y ++;
-        }
-        else{
-            x++;
-        }
     }
 }
 
@@ -152,14 +147,14 @@ void Screen::flip(){
     m_file << "\x1b[?25l";
     bool was_unicode = false;
     for (int i = 0; i < m_screen.size(); i++){
-        int y = i / m_size[0];
-        int x = i % m_size[0];
+        int y = i / m_size[0] + 1;
+        int x = i % m_size[0] + 1; // add one to both x, and y since terminals are 1 indexed.
         if (was_unicode){
             was_unicode = false;
             continue;
         }
         if (m_screen[i] != m_lastScreen[i]){
-            m_file <<"\x1b[" << y << ";"<< x << "H" << m_genrate(m_screen[i]);
+            m_file <<"\x1b[" << y << ";"<< x  << "H" << m_genrate(m_screen[i]);
             charactersRenderd++;
         } 
         was_unicode = InputString::getWidth(m_screen[i].get_ch()) > 1;

@@ -26,6 +26,17 @@ void too_many_surfaces(Tui& tui){
         }
     }
 }
+void one_big_surface(Tui& tui){
+    auto surf = tui.append({tui.getScreenSize()[0], tui.getScreenSize()[1]}, {0, 0}, " ");
+    for (int y = 0; y < tui.getScreenSize()[1] ; y++){
+        for (int x = 0; x < tui.getScreenSize()[0]; x++){
+            int blue = x % 255;
+            int red = y % 255;
+            int index = y * surf.get_size()[0] + x;
+            surf[index].set_bg(red, 0, blue);
+        }
+    }
+}
 void good_amont_surfaces(Tui& tui){
     for (int x = 0; x <= tui.getScreenSize()[0]; x++){
         auto tmp = tui.append({1, tui.getScreenSize()[1]}, {x, 1}, " ", x);
@@ -48,7 +59,8 @@ void debug(){
     array<int, 2> offset2 {20, 22};
 
     // surfaces stress test
-    // many_surfaces_background(tui);
+    // too_many_surfaces(tui);
+    // one_big_surface(tui);
     // good_amont_surfaces(tui);
 
     auto surf = tui.append({40, 10}, offset);
@@ -68,16 +80,16 @@ void debug(){
     surf.register_keys({"q", "h", "j", "k", "l", "d", "Up", "Down", "Left", "Right"});
 
     auto surf2 = tui.append({40, 10}, offset2);
-    surf2.fill_fg(0xbf, 0xc1, 0xc8);
+    surf2.fill_fg(0xbf, 0xc1, 0xc8, 200);
     surf2.fill_bg(0x57, 0xA4, 0x90, 200);
     string test = "Unicode test.\nそれん\nソレン";
     Label lab2{surf2, test, {5, 2}};
 
-    auto debug = tui.append({tui.getScreenSize()[0], tui.getScreenSize()[1]}, {-tui.getScreenSize()[0], -tui.getScreenSize()[1]}, " ", 1000);
+    auto debug = tui.append({tui.getScreenSize()[0], tui.getScreenSize()[1]}, {-tui.getScreenSize()[0], -tui.getScreenSize()[1]}, " ");
     debug.fill_fg(0xbf, 0xc1, 0xc8);
     debug.fill_bg(0, 0, 0, 100);
     string debugStr = "";
-    Label debugLabel{debug, debugStr, {1, 1}};
+    Label debugLabel{debug, debugStr, {0, 0}};
 
     
     clear();
@@ -108,7 +120,7 @@ void debug(){
         }
         if (surf.get_event("d")){
             if (!show_debug){
-                debug.set_offset(2, 2);
+                debug.set_offset(0, 0);
                 show_debug = true;
             }else {
                 debug.set_offset(-tui.getScreenSize()[0], -tui.getScreenSize()[1]);

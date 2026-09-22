@@ -82,7 +82,7 @@ void Surface::fill_bg(int r, int g, int b, int a) {
 void Surface::fill_fg(int r, int g, int b, int a) {
   assert(m_is != nullptr);
   for (int i = 0; i != m_is->surface.size(); i++) {
-    m_is->surface[i].set_fg(r, g, b);
+    m_is->surface[i].set_fg(r, g, b, a);
   }
 }
 
