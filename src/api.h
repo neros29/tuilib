@@ -16,8 +16,8 @@ public:
 
     Surface(const Surface& surf) = delete;
     Surface& operator=(const Surface&) = delete;
-    core::Character& operator[](int x);
-    core::Character operator[](int x) const;
+    core::c_cell& operator[](int x);
+    core::c_cell operator[](int x) const;
 
     bool get_event(std::string event);
     void register_keys(std::vector<std::string> keys);

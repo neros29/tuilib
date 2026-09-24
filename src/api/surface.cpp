@@ -18,14 +18,14 @@ using namespace core;
  * @param dst The background color array [R, G, B, A] (0-255)
  * @return A new 4-element array containing the blended color.
  */
-static array<int, 4> blendColors(const std::array<int, 4>& src, const std::array<int, 4>& dst) {
+static array<u_int8_t, 4> blendColors(const std::array<u_int8_t, 4>& src, const std::array<u_int8_t, 4>& dst) {
     if (src[3] <= 0){
         return dst;
     }
     else if (dst[3] <= 0){
         return src;
     }
-    array<int, 4> result;
+    array<u_int8_t, 4> result;
 
     // Convert alpha to 0.0 - 1.0 range for math
     float alpha_src = src[3] / 255.0f;
@@ -136,7 +136,7 @@ void Surface::set_offset(int x, int y) {
 }
 
 void Surface::extend_size(string direction, int amount) {
-    Character chr;
+    c_cell chr;
     chr.set_ch(m_is->defulat_ch);
     if (direction == "Down"){
         m_is->size[1] += amount;
@@ -177,11 +177,11 @@ void Surface::extend_size(string direction, int amount) {
             smaller = 0;
         }
         m_is->size[0] += amount;
-        vector<Character> new_vec(m_is->size[0] * m_is->size[1], chr);
+        vector<c_cell> new_vec(m_is->size[0] * m_is->size[1], chr);
         for (int y = 0; y < m_is->size[1] - smaller; y++){
             for (int x = 0; x < m_is->size[0] - smaller; x++){
                 int old_idx = y * (m_is->size[0] - amount) + x;
-                Character& ch = m_is->surface[old_idx];
+                c_cell& ch = m_is->surface[old_idx];
                 if (ch != chr){
                     int new_idx = y * m_is->size[0] + x + left_padding;
                     new_vec[new_idx] = ch;
@@ -203,8 +203,8 @@ void Surface::blit(Surface &surf) {
         if (r_x < surf.m_is->size[0] && r_y < surf.m_is->size[1]) {
             if (r_x >= 0 && r_y >= 0) {
                 int index = (surf.m_is->size[0] * r_y) + r_x;
-                Character& newCharacter = surf[index];
-                Character& oldCharacter = m_is->surface[i];
+                c_cell& newCharacter = surf[index];
+                c_cell& oldCharacter = m_is->surface[i];
 
                 if (!newCharacter.is_def("ch")){
                     oldCharacter.set_ch(newCharacter.get_ch());
@@ -227,5 +227,5 @@ void Surface::blit(Surface &surf) {
     }
 }
 
-Character &Surface::operator[](int x) { return m_is->surface[x]; }
-Character Surface::operator[](int x) const { return m_is->surface[x]; }
+c_cell &Surface::operator[](int x) { return m_is->surface[x]; }
+c_cell Surface::operator[](int x) const { return m_is->surface[x]; }

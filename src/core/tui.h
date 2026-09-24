@@ -3,10 +3,12 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <stdexcept>
 #include <fstream>
 #include <array>
 #include <termios.h>
 #include <term.h>
+#include <cstdint>
 
 class InputString{
 private:
@@ -21,37 +23,88 @@ public:
 
 namespace core {
 
-    struct Character {
+    struct c_cell {
     private:
-        // Initialize to invalid color to make sure the == operator works correctly.
-        std::array<int, 4> fg {0, 0, 0, 0};
-        std::array<int, 4> bg {255, 0, 0, 0};
-        std::string ch = " ";
+        uint32_t m_fg {0};
+        uint32_t m_bg {0};
+
+        char ch[5] = " ";
+
         bool ch_def {true};
         bool fg_def {true};
         bool bg_def {true};
 
+        std::array<uint8_t, 4> m_getColor(const uint32_t color) const{
+            std::array<uint8_t, 4> arr;
+            for (int i = 0; i < arr.size(); i++){
+                arr[i] = (color >> (i*8)) & 0xff;
+            }
+            return arr;
+        }
+        void m_clear(uint32_t& color){
+            color = 0;
+        }
+        void m_setColor(uint32_t& color, std::array<uint8_t, 4> arr){
+            m_clear(color);
+            for (int i = 0; i < arr.size(); i++){
+                color |= static_cast<uint32_t>(arr[i]) << (8 * i); 
+            }
+            }
     public:
 
+        // setFg
+        void set_fg(std::array<uint8_t, 4> color){
+            m_setColor(m_fg, {color[0], color[1], color[2], color[3]});
+            fg_def = false;
+        }
+        void set_fg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255){
+            m_setColor(m_fg, {red, green, blue, alpha});
+            fg_def = false;
+        }
 
-        void set_fg(int r, int g, int b, int a = 255);
-        void set_bg(int r, int g, int b, int a = 255);
-        void set_ch(std::string chi);
+        // setBg
+        void set_bg(std::array<uint8_t, 4> color){
+            m_setColor(m_bg, {color[0], color[1], color[2], color[3]});
+            bg_def = false;
+        }
+        void set_bg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255){
+            m_setColor(m_bg, {red, green, blue, alpha});
+            bg_def = false;
+        }
+        void set_ch(std::string chi){
+            int index = 0;
+            for (int i = 0; i < 5; i++){
+                if (i < chi.size()){
+                    ch[i] = chi[i];
+                } else {
+                    ch[i] = '\0';
+                }
+            }
+            ch_def = false;
+        }
 
         bool is_def(std::string value) const;
+        //set ch
+        
+        std::string get_ch() const{
+            return std::string {ch};
+        }
+        std::array<uint8_t, 4> get_fg() const{
+            return m_getColor(m_fg);
+        }
+        std::array<uint8_t, 4> get_bg() const{
+            return m_getColor(m_bg);
+        }
 
-        std::array<int, 4> get_fg() const;
-        std::array<int, 4> get_bg() const;
-        std::string get_ch() const;
-
-        bool operator == (const Character ch) const;
-        bool operator != (const Character ch) const;
+        // operators
+        bool operator == (const c_cell ch) const;
+        bool operator != (const c_cell ch) const;
     };
 
     class c_surface {
     public:
-        std::vector<Character> surface;
-        std::vector<Character> m_old;
+        std::vector<c_cell> surface;
+        std::vector<c_cell> m_old;
 
         int z{0};
         bool m_dirty = true;
@@ -65,8 +118,8 @@ namespace core {
 
         c_surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys);
         c_surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset);
-        Character& operator[](int x);
-        Character operator[](int x) const;
+        c_cell& operator[](int x);
+        c_cell operator[](int x) const;
         bool cheakDirty();
     };
 
@@ -75,19 +128,19 @@ namespace core {
     class Screen {
     private:
         const std::deque<c_surface>& m_surfaces;
-        std::vector<Character> m_screen;
-        std::vector<Character> m_lastScreen;
+        std::vector<c_cell> m_screen;
+        std::vector<c_cell> m_lastScreen;
         const std::vector<int>& m_sortIndex;
         std::array<int, 2> m_size;
         std::ofstream m_file;
         int m_index{0};
-        std::string m_defaultCharacter {" "};
+        std::string m_defaultCh {" "};
         bool m_sizeChange {true};
         bool m_sorted {false};
 
         void m_getWinSize();
         void m_initScreen();
-        std::string m_genrate(Character& ch);
+        std::string m_genrate(c_cell& ch);
         void m_render();
 
     public:

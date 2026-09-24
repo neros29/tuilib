@@ -2,6 +2,7 @@
 #include <cassert>
 #include <iostream>
 #include <string>
+#include <sys/types.h>
 #include <vector>
 #include <sys/ioctl.h>
 #include <fstream>
@@ -19,14 +20,14 @@ using namespace core;
  * @param dst The background color array [R, G, B, A] (0-255)
  * @return A new 4-element array containing the blended color.
  */
-static array<int, 4> blendColors(const std::array<int, 4>& src, const std::array<int, 4>& dst) {
+static array<u_int8_t, 4> blendColors(const std::array<u_int8_t, 4>& src, const std::array<u_int8_t, 4>& dst) {
     if (src[3] <= 0){
         return dst;
     }
     else if (dst[3] <= 0){
         return src;
     }
-    array<int, 4> result;
+    array<u_int8_t, 4> result;
 
     // Convert alpha to 0.0 - 1.0 range for math
     float alpha_src = src[3] / 255.0f;
@@ -65,10 +66,10 @@ array<int, 2> Screen::getSize(){
 }
 
 void Screen::m_initScreen(){
-    Character character;
-    character.set_ch(m_defaultCharacter);
-    m_screen.assign(m_size[0] * m_size[1],character);
-    m_lastScreen.assign(m_size[0] * m_size[1], character);
+    c_cell cell;
+    cell.set_ch(m_defaultCh);
+    m_screen.assign(m_size[0] * m_size[1], cell);
+    m_lastScreen.assign(m_size[0] * m_size[1], cell);
 }
 
 void Screen::m_render(){
@@ -76,12 +77,12 @@ void Screen::m_render(){
     if (m_sizeChange){
         m_initScreen();
     }
-    array<int, 4> bg {0, 0, 0, 0}; // pre make these so we aren't allocating and destroying for every single cell. Probably not necessary.
-    array<int, 4> fg {0, 0, 0, 0};
+    array<u_int8_t, 4> bg {0, 0, 0, 0}; // pre make these so we aren't allocating and destroying for every single cell. Probably not necessary.
+    array<u_int8_t, 4> fg {0, 0, 0, 0};
     for (int i = 0; i < m_screen.size(); i++){
         int y = i / m_size[0];
         int x = i % m_size[0];
-        Character newCharacter;
+        c_cell newCell;
         for (int j: m_sortIndex){ // m_sortIndex is from highest z to lowest z
             const c_surface &surf = m_surfaces[j];
             int r_x = x - surf.r_cords[0];
@@ -89,34 +90,34 @@ void Screen::m_render(){
             if (r_x < surf.size[0] && r_y < surf.size[1]){
                 if (r_x >= 0 && r_y >= 0){
                     int index = surf.size[0] * r_y + r_x;
-                    const Character& currentCharacter = surf[index];
+                    const c_cell& currentCell = surf[index];
 
-                    if (!currentCharacter.is_def("ch") && newCharacter.is_def("ch") && currentCharacter.get_ch() != m_defaultCharacter){
-                        newCharacter.set_ch(currentCharacter.get_ch());
-                        fg = blendColors(newCharacter.get_fg(), currentCharacter.get_fg());
-                        newCharacter.set_fg(fg[0], fg[1], fg[2], fg[3]);
+                    if (!currentCell.is_def("ch") && newCell.is_def("ch") && currentCell.get_ch() != m_defaultCh){
+                        newCell.set_ch(currentCell.get_ch());
+                        fg = blendColors(newCell.get_fg(), currentCell.get_fg());
+                        newCell.set_fg(fg[0], fg[1], fg[2], fg[3]);
                     } 
-                    bg = blendColors(newCharacter.get_bg(), currentCharacter.get_bg());
-                    newCharacter.set_bg(bg[0], bg[1], bg[2], bg[3]);
+                    bg = blendColors(newCell.get_bg(), currentCell.get_bg());
+                    newCell.set_bg(bg[0], bg[1], bg[2], bg[3]);
 
-                    fg = blendColors(newCharacter.get_fg(), currentCharacter.get_bg());
-                    newCharacter.set_fg(fg[0], fg[1], fg[2], fg[3]);
+                    fg = blendColors(newCell.get_fg(), currentCell.get_bg());
+                    newCell.set_fg(fg[0], fg[1], fg[2], fg[3]);
 
-                    if (bg[3] >= 255 && !newCharacter.is_def("ch")){
+                    if (bg[3] >= 255 && !newCell.is_def("ch")){
                         break;
                     }
                 }
             }
         }
-        m_screen[i] = newCharacter;
+        m_screen[i] = newCell;
     }
 }
 
-string Screen::m_genrate(Character& ch){
+string Screen::m_genrate(c_cell& ch){
     static string ESC {"\x1B"};
     static string colors[256];
     if (colors[1].empty()){
-        logger::info("[Character] Creating colors cache");
+        logger::info("[Screen] Creating colors cache");
         for (int i = 0; i <= 255; i++){
             colors[i] = to_string(i);
         }
@@ -124,11 +125,11 @@ string Screen::m_genrate(Character& ch){
     string ansii;
     ansii = "\x1b[0m";
 
-    array<int, 4> fg = ch.get_fg();
+    array<u_int8_t, 4> fg = ch.get_fg();
     if (!ch.is_def("fg")){
         ansii += ESC + "[38;2;" + colors[fg[0]] + ";" + colors[fg[1]] + ";" + colors[fg[2]]  + "m";
     }
-    array<int, 4> bg = ch.get_bg();
+    array<u_int8_t, 4> bg = ch.get_bg();
     if (bg[3] > 0 && !ch.is_def("bg")){
         ansii += ESC + "[48;2;"+ colors[bg[0]] + ";" + colors[bg[1]] + ";" + colors[bg[2]] + "m";
     }
@@ -136,7 +137,7 @@ string Screen::m_genrate(Character& ch){
     if (!ch.is_def("ch") && fg[3] > 0){
         ansii += ch.get_ch();
     } else{
-        ansii += m_defaultCharacter;
+        ansii += m_defaultCh;
     }
 
     return ansii;

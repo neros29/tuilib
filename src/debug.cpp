@@ -151,7 +151,7 @@ void debug(){
     clog << "[Program] Ending" << endl;;
     clear();
     cout << "the amount of frames render was " << frameCount - tui.skipedFrames << endl;
-    cout << "the avargae update time was " << (static_cast<float>(avgFrameTime) / static_cast<float>(frameCount)) / 1000000.0f   << endl;
+    cout << "the avargae update time was " << (static_cast<float>(avgFrameTime) / static_cast<float>(frameCount)) / 1000000.0f   <<  " ms"<< endl;
     cout << "the amount of frames skipped was " << tui.skipedFrames << endl;
     cout << "the amount of charecters renderd was " << tui.charactersRendered() << endl;
  

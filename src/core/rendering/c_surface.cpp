@@ -19,14 +19,14 @@ inline void cheakVariables(const array<int, 2>& size, const string& ch){
 c_surface::c_surface(array<int, 2> size, string ch, int z, array<int, 2> offset, const vector<string>& keys):z(z), r_cords{offset[0], offset[1]}, size{size[0], size[1]}, m_validKeys(&keys){
     cheakVariables(size, ch);
     defulat_ch = ch;
-    Character chr;
+    c_cell chr;
     chr.set_ch(ch);
     surface.assign(size[0]*size[1], chr);
 }
 c_surface::c_surface(array<int, 2> size, string ch, int z, array<int, 2> offset):z(z), r_cords{offset[0], offset[1]}, size{size[0], size[1]}, m_validKeys(nullptr){
     cheakVariables(size, ch);
     defulat_ch = ch;
-    Character chr;
+    c_cell chr;
     chr.set_ch(ch);
     surface.assign(size[0]*size[1], chr);
 }
@@ -43,11 +43,11 @@ bool c_surface::cheakDirty(){
     return false;
 }
 
-Character& c_surface::operator[](int x){
+c_cell& c_surface::operator[](int x){
     // return surface.at(x); //TODO Make this back to normal [] operator for better performance
     return surface[x];
 }
-Character c_surface::operator[](int x) const{
+c_cell c_surface::operator[](int x) const{
     // return surface.at(x); //TODO Make this back to normal [] operator for better performance
     return surface[x];
 }

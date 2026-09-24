@@ -8,7 +8,7 @@ LDFLAGS  = -lutf8proc -ltinfo
 # Source files
 SOURCES = \
 	src/core/rendering/Screen.cpp \
-	src/core/rendering/InternalSurface.cpp \
+	src/core/rendering/c_surface.cpp \
 	src/core/rendering/Character.cpp \
 	src/core/input/input.cpp \
 	src/widgets/Label.cpp \
