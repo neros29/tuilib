@@ -32,10 +32,6 @@ c_surface::c_surface(array<int, 2> size, string ch, int z, array<int, 2> offset)
 }
 
 bool c_surface::cheakDirty(){
-    if (m_old != surface){
-        m_old = surface;
-        return true;
-    }
     if (m_dirty){
         m_dirty = false;
         return true;

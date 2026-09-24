@@ -1,5 +1,44 @@
 #pragma once
 #include "core/tui.h"
+#include <array>
+
+class Cell{
+    core::c_surface& surf;
+    core::c_cell& cell;
+    public:
+
+    Cell(core::c_surface& c_surface, core::c_cell& c_cell): surf(c_surface), cell(c_cell){}
+
+    void set_fg(std::array<uint8_t, 4> color){
+        cell.set_bg(color[0], color[1], color[2], color[3]);
+        surf.m_dirty = true;
+    }
+    void set_fg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255){
+        cell.set_fg(red, green, blue, alpha);
+        surf.m_dirty = true;
+    }
+    void set_bg(std::array<uint8_t, 4> color){
+        cell.set_bg(color[0], color[1], color[2], color[3]);
+        surf.m_dirty = true;
+    }
+    void set_bg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255){
+        cell.set_bg(red, green, blue, alpha);
+        surf.m_dirty = true;
+    }
+    void set_ch(std::string chi){
+        cell.set_ch(chi);
+        surf.m_dirty = true;
+    }
+    std::string get_ch() const{
+        return cell.get_ch();
+    }
+    std::array<uint8_t, 4> get_fg() const{
+        return cell.get_fg();
+    }
+    std::array<uint8_t, 4> get_bg() const{
+        return cell.get_fg();
+    }
+};
 
 class Surface{
 private:
@@ -16,8 +55,8 @@ public:
 
     Surface(const Surface& surf) = delete;
     Surface& operator=(const Surface&) = delete;
-    core::c_cell& operator[](int x);
-    core::c_cell operator[](int x) const;
+    Cell operator[](int x);
+    Cell operator[](int x) const;
 
     bool get_event(std::string event);
     void register_keys(std::vector<std::string> keys);

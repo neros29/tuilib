@@ -190,6 +190,7 @@ void Surface::extend_size(string direction, int amount) {
         }
         m_is->surface.swap(new_vec);
     }
+    m_is->m_dirty = true;
 }
 
 void Surface::blit(Surface &surf) {
@@ -203,7 +204,7 @@ void Surface::blit(Surface &surf) {
         if (r_x < surf.m_is->size[0] && r_y < surf.m_is->size[1]) {
             if (r_x >= 0 && r_y >= 0) {
                 int index = (surf.m_is->size[0] * r_y) + r_x;
-                c_cell& newCharacter = surf[index];
+                c_cell& newCharacter = surf.m_is->surface[index];
                 c_cell& oldCharacter = m_is->surface[i];
 
                 if (!newCharacter.is_def("ch")){
@@ -225,7 +226,7 @@ void Surface::blit(Surface &surf) {
             x++;
         }
     }
+    m_is->m_dirty = true;
 }
-
-c_cell &Surface::operator[](int x) { return m_is->surface[x]; }
-c_cell Surface::operator[](int x) const { return m_is->surface[x]; }
+Cell Surface::operator[](int x) {return Cell(*m_is, m_is->surface[x]); }
+Cell Surface::operator[](int x) const { return Cell(*m_is, m_is->surface[x]); }

@@ -53,20 +53,12 @@ namespace core {
     public:
 
         // setFg
-        void set_fg(std::array<uint8_t, 4> color){
-            m_setColor(m_fg, {color[0], color[1], color[2], color[3]});
-            fg_def = false;
-        }
         void set_fg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255){
             m_setColor(m_fg, {red, green, blue, alpha});
             fg_def = false;
         }
 
         // setBg
-        void set_bg(std::array<uint8_t, 4> color){
-            m_setColor(m_bg, {color[0], color[1], color[2], color[3]});
-            bg_def = false;
-        }
         void set_bg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255){
             m_setColor(m_bg, {red, green, blue, alpha});
             bg_def = false;
