@@ -1,11 +1,9 @@
 #include <array>
 #include <cassert>
-#include <iostream>
 #include <string>
 #include <sys/types.h>
 #include <vector>
 #include <sys/ioctl.h>
-#include <fstream>
 #include <deque>
 #include <cmath> // for std::round
 
@@ -48,18 +46,6 @@ static array<u_int8_t, 4> blendColors(const std::array<u_int8_t, 4>& src, const 
     return result;
 }
 
-void Screen::m_getWinSize(){
-    struct winsize ws = {(struct winsize){0,0,0,0}};
-    ioctl(0, TIOCGWINSZ, &ws);
-    if (m_size[0] != ws.ws_col + 1 || m_size[1] != ws.ws_row + 1){
-        m_size[0] = ws.ws_col + 1;
-        m_size[1] = ws.ws_row + 1;
-        m_sizeChange = true;
-    }
-    else {
-        m_sizeChange = false;
-    }
-}
 
 array<int, 2> Screen::getSize(){
     return m_size;
@@ -73,8 +59,9 @@ void Screen::m_initScreen(){
 }
 
 void Screen::m_render(){
-    m_getWinSize();
-    if (m_sizeChange){
+    array<int, 2> new_size = m_driver->d_getWinSize();
+    if (new_size != m_size){
+        m_size = new_size;
         m_initScreen();
     }
     array<u_int8_t, 4> bg {0, 0, 0, 0}; // pre make these so we aren't allocating and destroying for every single cell. Probably not necessary.
@@ -113,39 +100,10 @@ void Screen::m_render(){
     }
 }
 
-string Screen::m_genrate(c_cell& ch){
-    static string ESC {"\x1B"};
-    static string colors[256];
-    if (colors[1].empty()){
-        logger::info("[Screen] Creating colors cache");
-        for (int i = 0; i <= 255; i++){
-            colors[i] = to_string(i);
-        }
-    }
-    string ansii;
-    ansii = "\x1b[0m";
-
-    array<u_int8_t, 4> fg = ch.get_fg();
-    if (!ch.is_def("fg")){
-        ansii += ESC + "[38;2;" + colors[fg[0]] + ";" + colors[fg[1]] + ";" + colors[fg[2]]  + "m";
-    }
-    array<u_int8_t, 4> bg = ch.get_bg();
-    if (bg[3] > 0 && !ch.is_def("bg")){
-        ansii += ESC + "[48;2;"+ colors[bg[0]] + ";" + colors[bg[1]] + ";" + colors[bg[2]] + "m";
-    }
-
-    if (!ch.is_def("ch") && fg[3] > 0){
-        ansii += ch.get_ch();
-    } else{
-        ansii += m_defaultCh;
-    }
-
-    return ansii;
-}
 
 void Screen::flip(){
     m_render();
-    m_file << "\x1b[?25l";
+    m_driver->d_startFrame();
     bool was_unicode = false;
     for (int i = 0; i < m_screen.size(); i++){
         int y = i / m_size[0] + 1;
@@ -155,25 +113,22 @@ void Screen::flip(){
             continue;
         }
         if (m_screen[i] != m_lastScreen[i]){
-            m_file <<"\x1b[" << y << ";"<< x  << "H" << m_genrate(m_screen[i]);
+            m_driver->d_draw(x, y, m_screen[i]);
             charactersRenderd++;
         } 
         was_unicode = InputString::getWidth(m_screen[i].get_ch()) > 1;
     }
     m_lastScreen.swap(m_screen);
-    m_file << "\x1b[0m";
-    m_file <<"\x1b[?25h";
-    m_file << "\x1b["<< m_size[0] << ";" << m_size[1] << "H";
-    m_file.flush();
+    m_driver->d_endFrame();
 }
 
 Screen::Screen(const deque<c_surface>& surfaces, const vector<int>& sortIndex):m_surfaces(surfaces), m_sortIndex(sortIndex){
     logger::info("[Screen] Starting up");
-    m_getWinSize();
+    m_driver = new drivers::d_screen();
+    m_size = m_driver->d_getWinSize();
     m_initScreen();
-    m_file.open("/dev/stdout");
+}
+Screen::~Screen(){
+    delete m_driver;
 }
 
-Screen::~Screen(){
-    m_file.close();
-}

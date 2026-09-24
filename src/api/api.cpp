@@ -15,7 +15,7 @@ Surface Tui::append(array<int, 2> size,  array<int, 2> offset, string ch, int z)
     return Surface(m_surfaces[m_index-1]);
 }
 
-Tui::Tui():m_screen(Screen(m_surfaces, m_sortedSurfaceIndex)), m_input(Input(m_surfaces, m_sortedSurfaceIndex)), m_index(0){
+Tui::Tui():m_screen(m_surfaces, m_sortedSurfaceIndex), m_input(m_surfaces, m_sortedSurfaceIndex), m_index(0), screen_driver(){
     logger::info("[API] Starting up");
 }
 

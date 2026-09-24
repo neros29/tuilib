@@ -10,7 +10,7 @@ class Cell{
     Cell(core::c_surface& c_surface, core::c_cell& c_cell): surf(c_surface), cell(c_cell){}
 
     void set_fg(std::array<uint8_t, 4> color){
-        cell.set_bg(color[0], color[1], color[2], color[3]);
+        cell.set_fg(color[0], color[1], color[2], color[3]);
         surf.m_dirty = true;
     }
     void set_fg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255){
@@ -79,6 +79,7 @@ public:
 
 class Tui{
 private:
+    drivers::d_screen screen_driver;
     std::deque<core::c_surface> m_surfaces;
     std::vector<int> m_sortedSurfaceIndex;
 
