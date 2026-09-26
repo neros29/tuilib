@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include <deque>
 #include <string>
 #include <unordered_map>
@@ -8,7 +9,7 @@
 #include <array>
 #include <termios.h>
 #include <term.h>
-#include <cstdint>
+#include <inttypes.h>
 #include <sys/ioctl.h>
 #include <iostream>
 
@@ -25,6 +26,30 @@ public:
 namespace drivers {
     class d_screen;
 }
+enum class styles : uint32_t {
+    None =          0,
+    BOLD =          1 << 0,
+    DIM =           1 << 1,
+    ITALIC =        1 << 2,
+    UNDERLINE =     1 << 3,
+    BLINKING =      1 << 4,
+    INVERSE =       1 << 5,
+    HIDDEN =        1 << 6,
+    STRIKETHROUGH = 1 << 7,
+};
+
+inline styles operator|(styles lhs, styles rhs) {
+    return static_cast<styles>(
+        static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs)
+    );
+}
+
+// We also overload the bitwise AND operator for checking flags
+inline bool operator&(styles lhs, styles rhs) {
+    return static_cast<bool>(
+        static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs)
+    );
+}
 
 namespace core{
     struct c_cell {
@@ -34,63 +59,28 @@ namespace core{
 
         char ch[5] = " ";
 
+        styles m_styles = styles::None;
         bool ch_def {true};
         bool fg_def {true};
         bool bg_def {true};
 
-        std::array<uint8_t, 4> m_getColor(const uint32_t color) const{
-            std::array<uint8_t, 4> arr;
-            for (int i = 0; i < arr.size(); i++){
-                arr[i] = (color >> (i*8)) & 0xff;
-            }
-            return arr;
-        }
-        void m_clear(uint32_t& color){
-            color = 0;
-        }
-        void m_setColor(uint32_t& color, std::array<uint8_t, 4> arr){
-            m_clear(color);
-            for (int i = 0; i < arr.size(); i++){
-                color |= static_cast<uint32_t>(arr[i]) << (8 * i); 
-            }
-            }
     public:
 
         // setFg
-        void set_fg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255){
-            m_setColor(m_fg, {red, green, blue, alpha});
-            fg_def = false;
-        }
+        void set_fg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);
 
         // setBg
-        void set_bg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255){
-            m_setColor(m_bg, {red, green, blue, alpha});
-            bg_def = false;
-        }
-        void set_ch(std::string chi){
-            int index = 0;
-            for (int i = 0; i < 5; i++){
-                if (i < chi.size()){
-                    ch[i] = chi[i];
-                } else {
-                    ch[i] = '\0';
-                }
-            }
-            ch_def = false;
-        }
+        void set_bg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);
+        void set_ch(std::string chi);
+        void set_style(styles f);
+        styles get_style() const;
 
         bool is_def(std::string value) const;
         //set ch
         
-        std::string get_ch() const{
-            return std::string {ch};
-        }
-        std::array<uint8_t, 4> get_fg() const{
-            return m_getColor(m_fg);
-        }
-        std::array<uint8_t, 4> get_bg() const{
-            return m_getColor(m_bg);
-        }
+        std::string get_ch() const;
+        std::array<uint8_t, 4> get_fg() const;
+        std::array<uint8_t, 4> get_bg() const;
 
         // operators
         bool operator == (const c_cell ch) const;

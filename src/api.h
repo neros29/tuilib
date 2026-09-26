@@ -1,6 +1,7 @@
 #pragma once
 #include "core/tui.h"
 #include <array>
+#include <cstdint>
 
 class Cell{
     core::c_surface& surf;
@@ -29,6 +30,9 @@ class Cell{
         cell.set_ch(chi);
         surf.m_dirty = true;
     }
+    void set_style(styles style){
+        cell.set_style(style);
+    }
     std::string get_ch() const{
         return cell.get_ch();
     }
@@ -37,6 +41,9 @@ class Cell{
     }
     std::array<uint8_t, 4> get_bg() const{
         return cell.get_fg();
+    }
+    styles get_style(){
+        return cell.get_style();
     }
 };
 
@@ -63,6 +70,7 @@ public:
 
     void fill_bg(int r, int g, int b, int a = 255);
     void fill_fg(int r, int g, int b, int a = 255);
+    void fill_style(styles s);
 
     void set_z(int z);
     int get_z() const;

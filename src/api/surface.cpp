@@ -85,6 +85,12 @@ void Surface::fill_fg(int r, int g, int b, int a) {
     m_is->surface[i].set_fg(r, g, b, a);
   }
 }
+void Surface::fill_style(styles s) {
+  assert(m_is != nullptr);
+  for (int i = 0; i != m_is->surface.size(); i++) {
+    m_is->surface[i].set_style(s);
+  }
+}
 
 bool Surface::get_event(string event) {
   assert(m_is != nullptr);

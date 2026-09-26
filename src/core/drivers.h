@@ -1,5 +1,11 @@
+#pragma once
 #include "tui.h"
+#include <inttypes.h>
+#include <iostream>
+#include <string>
+
 namespace drivers {
+
     class d_screen{
         public:
         virtual ~d_screen(){};
@@ -31,21 +37,38 @@ namespace drivers {
             static std::string colors[256];
             if (colors[1].empty()){
                 for (int i = 0; i <= 255; i++){
-                    colors[i] = std::to_string(i);
+                    colors[i] = std::to_string(i) + ";";
                 }
             }
             std::string ansii;
-            ansii = "\x1b[0m";
+            ansii = "\x1b[0m\x1b[";
 
             std::array<u_int8_t, 4> fg = ch.get_fg();
             if (!ch.is_def("fg")){
-                ansii += ESC + "[38;2;" + colors[fg[0]] + ";" + colors[fg[1]] + ";" + colors[fg[2]]  + "m";
+                ansii += "38;2;";
+				ansii += colors[fg[0]];
+				ansii += colors[fg[1]];
+				ansii += colors[fg[2]];
             }
             std::array<u_int8_t, 4> bg = ch.get_bg();
             if (bg[3] > 0 && !ch.is_def("bg")){
-                ansii += ESC + "[48;2;"+ colors[bg[0]] + ";" + colors[bg[1]] + ";" + colors[bg[2]] + "m";
+                ansii += "48;2;";
+				ansii += colors[bg[0]];
+				ansii += colors[bg[1]];
+				ansii += colors[bg[2]];
             }
-
+            styles style = static_cast<styles>(ch.get_style());
+            if (style != styles::None){
+				if (style & styles::BOLD)          ansii += "1;";
+				if (style & styles::DIM)           ansii += "2;";
+				if (style & styles::ITALIC)        ansii += "3;";
+				if (style & styles::UNDERLINE)     ansii += "4;";
+				if (style & styles::BLINKING)      ansii += "5;";
+				if (style & styles::INVERSE)       ansii += "7;";
+				if (style & styles::HIDDEN)        ansii += "8;";
+				if (style & styles::STRIKETHROUGH) ansii += "9;";
+            }
+            ansii += "m";
             if (!ch.is_def("ch") && fg[3] > 0){
                 ansii += ch.get_ch();
             } else{

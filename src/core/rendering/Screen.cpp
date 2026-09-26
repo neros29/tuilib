@@ -83,6 +83,7 @@ void Screen::m_render(){
                     if (!currentCell.is_def("ch") && newCell.is_def("ch") && currentCell.get_ch() != m_defaultCh){
                         newCell.set_ch(currentCell.get_ch());
                         fg = blendColors(newCell.get_fg(), currentCell.get_fg());
+                        newCell.set_style(currentCell.get_style());
                         newCell.set_fg(fg[0], fg[1], fg[2], fg[3]);
                     } 
                     bg = blendColors(newCell.get_bg(), currentCell.get_bg());

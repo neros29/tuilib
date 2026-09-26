@@ -1,5 +1,6 @@
 #include <array>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <chrono>
@@ -7,7 +8,9 @@
 #include <unistd.h>
 #include <thread>
 #include "api.h"
+#include "core/tui.h"
 #include "widgets/Label.h"
+#include "core/drivers.h"
 
 
 using namespace std;
@@ -74,6 +77,7 @@ void debug(){
     surf.extend_size("Up", -10);
     surf.extend_size("Left", 10);
     surf.extend_size("Left", -10);
+    surf.fill_style(styles::BOLD | styles::UNDERLINE);
 
     Label lab{surf, str, {5, 2}};
     surf.fill_fg(0xbf, 0xc1, 0xc8);
