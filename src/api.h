@@ -79,7 +79,7 @@ public:
 
 class Tui{
 private:
-    drivers::d_screen screen_driver;
+    drivers::d_screen* m_screenDriver;
     std::deque<core::c_surface> m_surfaces;
     std::vector<int> m_sortedSurfaceIndex;
 
@@ -93,6 +93,7 @@ private:
 public:
     int skipedFrames = 0;
     Tui();
+    ~Tui();
     int amontOfSurfaces(){
         return m_surfaces.size();
     }

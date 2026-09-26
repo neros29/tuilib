@@ -5,6 +5,7 @@
 #include <chrono>
 #include <fstream>
 #include <unistd.h>
+#include <thread>
 #include "api.h"
 #include "widgets/Label.h"
 
@@ -98,7 +99,6 @@ void debug(){
     short color = 1;
     bool show_debug = false;
     unsigned long long avgFrameTime = 0;
-
     clog << "[Program] Entering main loop" << endl;;
     auto start = chrono::system_clock::now();
     while (true){
@@ -146,15 +146,14 @@ void debug(){
         auto total = chrono::system_clock::now();
         avgFrameTime += chrono::duration_cast<chrono::nanoseconds>(total - before).count();
         frameCount ++;
-        // this_thread::sleep_for(chrono::milliseconds(10));
+        // this_thread::sleep_for(chrono::milliseconds(3));
     }
-    clog << "[Program] Ending" << endl;;
+    clog << "[Program] Ending" << endl;
     clear();
     cout << "the amount of frames render was " << frameCount - tui.skipedFrames << endl;
     cout << "the avargae update time was " << (static_cast<float>(avgFrameTime) / static_cast<float>(frameCount)) / 1000000.0f   <<  " ms"<< endl;
     cout << "the amount of frames skipped was " << tui.skipedFrames << endl;
     cout << "the amount of charecters renderd was " << tui.charactersRendered() << endl;
- 
 }
 
 int main(int argc, char* argv[]){

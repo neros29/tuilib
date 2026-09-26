@@ -1,6 +1,7 @@
 #include "../api.h"
 #include <algorithm>
 #include "../core/utils/logging.h"
+#include "../core/drivers.h"
 
 using namespace std;
 using namespace core;
@@ -15,8 +16,12 @@ Surface Tui::append(array<int, 2> size,  array<int, 2> offset, string ch, int z)
     return Surface(m_surfaces[m_index-1]);
 }
 
-Tui::Tui():m_screen(m_surfaces, m_sortedSurfaceIndex), m_input(m_surfaces, m_sortedSurfaceIndex), m_index(0), screen_driver(){
+Tui::Tui():m_screen(m_surfaces, m_sortedSurfaceIndex, m_screenDriver), m_input(m_surfaces, m_sortedSurfaceIndex), m_index(0), m_screenDriver(new drivers::d_defualt_screen){
     logger::info("[API] Starting up");
+}
+Tui::~Tui(){
+    delete m_screenDriver;
+    logger::debug("[Tui] destructer run.");
 }
 
 void Tui::m_sortSurfaces(){

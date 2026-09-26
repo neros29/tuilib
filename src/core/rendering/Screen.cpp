@@ -9,6 +9,7 @@
 
 #include "../tui.h"
 #include "../utils/logging.h"
+#include "../drivers.h"
 
 using namespace std;
 using namespace core;
@@ -122,13 +123,9 @@ void Screen::flip(){
     m_driver->d_endFrame();
 }
 
-Screen::Screen(const deque<c_surface>& surfaces, const vector<int>& sortIndex):m_surfaces(surfaces), m_sortIndex(sortIndex){
+Screen::Screen(const deque<c_surface>& surfaces, const vector<int>& sortIndex, drivers::d_screen* driver):m_surfaces(surfaces), m_sortIndex(sortIndex), m_driver(driver){
     logger::info("[Screen] Starting up");
-    m_driver = new drivers::d_screen();
     m_size = m_driver->d_getWinSize();
     m_initScreen();
-}
-Screen::~Screen(){
-    delete m_driver;
 }
 
