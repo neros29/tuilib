@@ -1,22 +1,19 @@
 #include "../api.h"
-#include <algorithm>
 #include "../core/utils/logging.h"
 #include "../core/drivers.h"
 
 using namespace std;
 using namespace core;
-Surface Tui::append(array<int, 2> size,  array<int, 2> offset, string ch, int z){
+Surface Tui::addSurface(array<int, 2> size,  array<int, 2> offset, string ch, int z){
+    
     if (z == -1){
         z = m_index;
     }
-    m_surfaces.emplace_back(size, ch, z, offset, m_input.keys);
-    m_sortedSurfaceIndex.emplace_back(m_index);
+    c_surface* surf = m_surfaces.add(size, ch, z, offset, m_input.keys);
     m_index ++;
-    m_isSurfaceSorted = false;
-    return Surface(m_surfaces[m_index-1]);
+    return Surface(surf);
 }
-
-Tui::Tui():m_screen(m_surfaces, m_sortedSurfaceIndex, m_screenDriver), m_input(m_surfaces, m_sortedSurfaceIndex), m_index(0), m_screenDriver(new drivers::d_defualt_screen){
+Tui::Tui():m_screen(m_screenDriver), m_input(), m_screenDriver(new drivers::d_defualt_screen){
     logger::info("[API] Starting up");
 }
 Tui::~Tui(){
@@ -24,18 +21,10 @@ Tui::~Tui(){
     logger::debug("[Tui] destructer run.");
 }
 
-void Tui::m_sortSurfaces(){
-    sort(m_sortedSurfaceIndex.begin(), m_sortedSurfaceIndex.end(), 
-        [this](const int& a, const int& b){
-            return m_surfaces[a].z > m_surfaces[b].z;
-        }
-    );
-    m_isSurfaceSorted = true;
-}
 
 void Tui::update(){
-    bool isDirty = m_input.update();
-    m_sortSurfaces();
+    bool isDirty = m_input.update(m_surfaces);
+    m_surfaces.sort();
     // isDirty = true;
     for (c_surface& surf: m_surfaces){
         if (surf.cheakDirty()){
@@ -43,7 +32,7 @@ void Tui::update(){
         }
     }
     if (isDirty){
-        m_screen.flip();
+        m_screen.flip(m_surfaces);
     }
     else{
         skipedFrames += 1;

@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
@@ -5,7 +6,6 @@
 #include <array>
 #include <string>
 
-#include "core/tui.h"
 #include "api.h"
 #include "widgets/Label.h"
 #include "core/utils/logging.h"
@@ -46,11 +46,26 @@ PYBIND11_MODULE(tui, m) {
     // -----------------
     // Character
     // -----------------
-    py::class_<core::Character>(m, "Character", py::dynamic_attr())
-        .def(py::init<>())
-        .def("set_bg", &core::Character::set_bg, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
-        .def("set_fg", &core::Character::set_fg, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
-        .def("set_ch", &core::Character::set_ch, py::arg("ch"));
+    py::class_<Cell>(m, "Cell", py::dynamic_attr())
+        .def(
+            py::init([](core::c_surface& surf, core::c_cell& cell){
+                return Cell(surf, cell); 
+            }), 
+            py::arg("surf"),
+            py::arg("cell")
+        )
+        .def("set_bg", [](Cell& self, uint8_t r, uint8_t g, uint8_t b, uint8_t a){
+                return self.set_bg(r, g, b, a);
+                }, 
+                py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
+        .def("set_fg", [](Cell& self, uint8_t r, uint8_t g, uint8_t b, uint8_t a){
+                return self.set_fg(r, g, b, a);
+                }, 
+                py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
+        .def("set_style", [](Cell& self, uint32_t style){
+                return self.set_style(static_cast<styles>(style));
+                }, py::arg("style"))
+        .def("set_ch", &Cell::set_ch, py::arg("ch"));
         // raw fields (handy from Python)
 
     // -----------------
@@ -71,6 +86,9 @@ PYBIND11_MODULE(tui, m) {
         )
         .def("fill_bg", &Surface::fill_bg, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
         .def("fill_fg", &Surface::fill_fg, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
+        .def("fill_style", [](Surface& self, uint32_t style){
+                return self.fill_style(static_cast<styles>(style));
+                }, py::arg("style"))
         .def("set_z", &Surface::set_z, py::arg("z"))
         .def("get_z", &Surface::get_z)
         .def("set_offset", &Surface::set_offset, py::arg("x"), py::arg("y"))
@@ -82,9 +100,9 @@ PYBIND11_MODULE(tui, m) {
         .def("get_event", &Surface::get_event, py::arg("event"))
         .def(
             "__getitem__",
-            [](Surface& self, int idx) -> core::Character& { return self[idx]; },
-            py::arg("idx"),
-            py::return_value_policy::reference_internal
+            [](Surface& self, int idx) -> Cell { return self[idx]; },
+            py::arg("idx")
+            // py::return_value_policy::reference_internal
         );
 
     // -----------------
@@ -100,13 +118,13 @@ PYBIND11_MODULE(tui, m) {
                std::string ch,
                int z) -> Surface {
                 // Screen::append signature: (size, offset, ch, z)
-                return self.append(size, offset, ch, z);
+                return self.addSurface(size, offset, ch, z);
             },
             py::arg("size"),
             py::arg("offset"),
             py::arg("ch") = " ",
-            py::arg("z") = -1,
-            py::return_value_policy::reference_internal
+            py::arg("z") = -1
+            // py::return_value_policy::reference_internal
         )
         .def("getScreenSize", &Tui::getScreenSize)
         .def("update", &Tui::update);

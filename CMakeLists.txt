@@ -1,21 +1,31 @@
 cmake_minimum_required(VERSION 3.15...3.28)
 project(tui_project LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Use modern Python lookup in pybind11
-set(PYBIND11_FINDPYTHON NEW)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# 1. Define a variable for the target Python version.
+# This can be passed via command line: cmake -DTUI_PYTHON_VERSION=3.10 ..
+set(TUI_PYTHON_VERSION "3" CACHE STRING "Target Python version (e.g. 3.10 or 3.12)")
 
-# Find pybind11 (installed via pacman/apt/pip/etc)
+message(STATUS "Targeting Python version: ${TUI_PYTHON_VERSION}")
+
+# 2. Find the specific Python version first.
+# This tells CMake which Python interpreter and headers we want to use.
+find_package(Python3 ${TUI_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development)
+
+# 3. Force pybind11 to use the Python we just found.
+# We tell pybind11 where the Python include directories and libraries are.
+set(pybind11_PYTHON_VERSION ${TUI_PYTHON_VERSION})
 find_package(pybind11 CONFIG REQUIRED)
 
 # Core engine sources
 set(TUI_CORE_SOURCES
     src/core/rendering/Screen.cpp
-    src/core/rendering/InternalSurface.cpp
-    src/core/rendering/Character.cpp
+    src/core/rendering/c_surface.cpp
+    src/core/rendering/c_cell.cpp
+    src/core/impl/c_surfaces.cpp
     src/core/input/input.cpp
     src/widgets/Label.cpp
     src/core/utils/InputString.cpp

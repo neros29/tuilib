@@ -92,18 +92,12 @@ bool c_cell::operator ==(const c_cell chi) const{
     if (*chi.ch != *ch){
         return false;
     }
+    if (chi.m_styles != m_styles){
+        return false;
+    }
     return true;
 }
 
 bool c_cell::operator !=(const c_cell chi) const{
-    if (chi.m_bg != m_bg){
-        return true;
-    }
-    if (chi.m_fg != m_fg){
-        return true;
-    }
-    if (*chi.ch != *ch){
-        return true;
-    }
-    return false;
+    return  !c_cell::operator==(chi);
 }

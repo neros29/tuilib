@@ -27,7 +27,7 @@ static string getData(){
 }
 
 // Input memeber functinos
-Input::Input(deque<c_surface>& surfaces, const vector<int>& sortIndex):m_surfaces(surfaces), m_sortIndex(sortIndex){
+Input::Input(){
     logger::info("[Input] Starting up");
     m_setRawMode();
     m_initDb();
@@ -101,7 +101,7 @@ inline void Input::m_initDb(){
     }
 }
 
-bool Input::update(){
+bool Input::update(c_surfaces& surfs){
     string human;
     m_buffer = getData();
     if (m_buffer.empty()){
@@ -117,8 +117,7 @@ bool Input::update(){
     } else {
         human = m_buffer; 
     }
-    for (int i : m_sortIndex){
-        c_surface& surf = m_surfaces[i];
+    for (c_surface& surf : surfs){
         auto it = find(surf.keys.begin(), surf.keys.end(), human);
         if (it != surf.keys.end()){
             surf.events[human] = true;

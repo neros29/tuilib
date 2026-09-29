@@ -16,7 +16,7 @@ inline void cheakVariables(const array<int, 2>& size, const string& ch){
         throw invalid_argument{"Defutlt Character must not be empty"};
     }
 }
-c_surface::c_surface(array<int, 2> size, string ch, int z, array<int, 2> offset, const vector<string>& keys):z(z), r_cords{offset[0], offset[1]}, size{size[0], size[1]}, m_validKeys(&keys){
+c_surface::c_surface(array<int, 2> size, string ch, int z, array<int, 2> offset, const vector<string>& keys, int id):z(z), r_cords{offset[0], offset[1]}, size{size[0], size[1]}, m_validKeys(&keys), id(id){
     cheakVariables(size, ch);
     defulat_ch = ch;
     c_cell chr;
@@ -47,4 +47,19 @@ c_cell c_surface::operator[](int x) const{
     // return surface.at(x); //TODO Make this back to normal [] operator for better performance
     return surface[x];
 }
-
+bool c_surface::operator==(const c_surface& surf) const{
+    bool result = true;
+    if (z != surf.z){
+        result = false;
+    }
+    if (surface != surf.surface){
+        result = false;
+    }
+    if (r_cords != surf.r_cords){
+        result = false;
+    }
+    if (size != surf.size){
+        result = false;
+    }
+    return result;
+}

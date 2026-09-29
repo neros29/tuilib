@@ -4,14 +4,11 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <stdexcept>
-#include <fstream>
 #include <array>
 #include <termios.h>
 #include <term.h>
 #include <inttypes.h>
 #include <sys/ioctl.h>
-#include <iostream>
 
 class InputString{
 private:
@@ -86,12 +83,11 @@ namespace core{
         bool operator == (const c_cell ch) const;
         bool operator != (const c_cell ch) const;
     };
-
     class c_surface {
     public:
+        int id;
         std::vector<c_cell> surface;
         std::vector<c_cell> m_old;
-
         int z{0};
         bool m_dirty = true;
         std::array<int, 2> size;
@@ -102,21 +98,51 @@ namespace core{
         std::unordered_map<std::string, bool> events;
         std::vector<std::string> keys;
 
-        c_surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys);
+        c_surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys, int id);
         c_surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset);
         c_cell& operator[](int x);
         c_cell operator[](int x) const;
+        bool operator==(const c_surface& surf) const;
         bool cheakDirty();
     };
 
+    class c_surfaces {
+    private:
+        std::deque<core::c_surface> m_surfaces;
+        std::vector<c_surface*> m_sortedSurfaces;
+        int m_nextId {0};
+    public:
+         class SurfaceIterator {
+            public:
+                using iterator_category = std::forward_iterator_tag;
+                using value_type = c_surface&;
+                using difference_type = std::ptrdiff_t;
+                using pointer = c_surface**;
+                using reference = c_surface&;
+
+                SurfaceIterator(std::vector<c_surface*>::iterator it) : m_it(it) {}
+
+                reference operator*() const { return *(*m_it); }
+                c_surface* operator->() const { return *m_it; }
+
+                SurfaceIterator& operator++() { ++m_it; return *this; }
+                SurfaceIterator operator++(int) { SurfaceIterator tmp = *this; ++(*this); return tmp; }
+                bool operator==(const SurfaceIterator& other) const { return m_it == other.m_it; }
+                bool operator!=(const SurfaceIterator& other) const { return m_it != other.m_it; }
+
+            private:
+                std::vector<c_surface*>::iterator m_it;
+            };
+        c_surface* add(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys);
+        void sort();
+        size_t size();
+        SurfaceIterator begin();
+        SurfaceIterator end();
+    };
 
     class Screen {
     private:
         drivers::d_screen* m_driver;
-
-        const std::deque<c_surface>& m_surfaces;
-        const std::vector<int>& m_sortIndex;
-
         std::vector<c_cell> m_screen;
         std::vector<c_cell> m_lastScreen;
 
@@ -124,22 +150,18 @@ namespace core{
         std::string m_defaultCh {" "};
 
         void m_initScreen();
-        void m_render();
+        void m_render(c_surfaces& surfs);
 
     public:
         int charactersRenderd;
-        Screen(const std::deque<c_surface>& surfaces, const std::vector<int>& sortIndex, drivers::d_screen* driver);
+        Screen(drivers::d_screen* driver);
         std::array<int, 2> getSize();
-        void flip();
+        void flip(c_surfaces& surfs);
     };
 
     // Input
     class Input{
     private:
-        // Surface data passed from api 
-        std::deque<c_surface>& m_surfaces; 
-        const std::vector<int>& m_sortIndex;
-
         // input stuff
         struct termios m_old;
         std::vector<std::array<std::string, 2>> m_namePair;
@@ -158,11 +180,10 @@ namespace core{
     public:
         std::vector<std::string> keys;
         // Constructers
-        Input(std::deque<c_surface>& surfaces, const std::vector<int>& sortIndex);
+        Input();
         ~Input();
 
         // member public functions
-        bool update();
+        bool update(c_surfaces& surfs);
     };
-
 }

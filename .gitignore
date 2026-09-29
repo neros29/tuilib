@@ -8,3 +8,4 @@ Docs/
 logs/
 perf*
 BUGS.md
+test/

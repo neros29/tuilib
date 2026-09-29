@@ -2,6 +2,7 @@
 #include "tui.h"
 #include <inttypes.h>
 #include <iostream>
+#include <fstream>
 #include <string>
 
 namespace drivers {
@@ -90,10 +91,10 @@ namespace drivers {
             m_file << "\x1b[?25l";
         }
         void d_endFrame() override {
-            m_file << "\x1b[?25l";
+            // m_file << "\x1b[?25l";
             m_file << "\x1b[0m";
             m_file <<"\x1b[?25h";
-            m_file << "\x1b["<< m_size[0] << ";" << m_size[1] << "H";
+            m_file << "\x1b[" << m_size[1] + 1 << ";" << m_size[0] + 1 << "H";
             m_file.flush();
         }
         std::array<int, 2> d_getWinSize() override {

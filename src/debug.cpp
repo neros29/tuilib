@@ -1,37 +1,35 @@
 #include <array>
 #include <iostream>
-#include <memory>
 #include <sstream>
 #include <string>
 #include <chrono>
 #include <fstream>
 #include <unistd.h>
-#include <thread>
 #include "api.h"
 #include "core/tui.h"
 #include "widgets/Label.h"
-#include "core/drivers.h"
+#include "core/utils/logging.h"
 
 
 using namespace std;
 
-void clear(){
+static void clear(){
     char code[] {"\x1b[2J\x1b[H"};
     write(1, &code, sizeof(code));
 }
 
-void too_many_surfaces(Tui& tui){
+static void too_many_surfaces(Tui& tui){
     for (int y = 0; y <= tui.getScreenSize()[1] ; y++){
         for (int x = 0; x <= tui.getScreenSize()[0]; x++){
-            auto tmp = tui.append({1, 1}, {x, y}, " ", x * y);
+            auto tmp = tui.addSurface({1, 1}, {x, y}, " ", x * y);
             int blue = x % 255;
             int red = y % 255;
             tmp.fill_bg(red, 0, blue);
         }
     }
 }
-void one_big_surface(Tui& tui){
-    auto surf = tui.append({tui.getScreenSize()[0], tui.getScreenSize()[1]}, {0, 0}, " ");
+static void one_big_surface(Tui& tui){
+    auto surf = tui.addSurface({tui.getScreenSize()[0], tui.getScreenSize()[1]}, {0, 0}, " ");
     for (int y = 0; y < tui.getScreenSize()[1] ; y++){
         for (int x = 0; x < tui.getScreenSize()[0]; x++){
             int blue = x % 255;
@@ -41,22 +39,34 @@ void one_big_surface(Tui& tui){
         }
     }
 }
-void good_amont_surfaces(Tui& tui){
+static void good_amont_surfaces(Tui& tui){
     for (int x = 0; x <= tui.getScreenSize()[0]; x++){
-        auto tmp = tui.append({1, tui.getScreenSize()[1]}, {x, 1}, " ", x);
+        auto tmp = tui.addSurface({1, tui.getScreenSize()[1]}, {x, 1}, " ", x);
         int blue = x % 255;
         tmp.fill_bg(0, 0, blue);
     }
 
 }
-void debug(){
+static void log(int level, const std::string& msg) {
+    std::string level_str;
     ofstream log("logs/debug.log", ios::app);
-    clog.rdbuf(log.rdbuf());
-    clog << "\n=====================================================\n" << endl;;
-    clog << "[Program] Starting" << endl;;
+    switch (level) {
+        case LogLevel::INFO:     level_str = "INFO";     break;
+        case LogLevel::WARNING:  level_str = "WARNING";  break;
+        case LogLevel::ERROR:    level_str = "ERROR";    break;
+        case LogLevel::CRITICAL: level_str = "CRITICAL"; break;
+        case LogLevel::DEBUG:    level_str = "DEBUG";    break;
+        default:                 level_str = "UNKNOWN";  break;
+    }
+    log << "[" << level_str << "] " << msg << endl;
+}
+void debug(){
+    Logger::set_callback(log);
+    logger::debug("\n=====================================================\n");
+    logger::debug("[Program] Starting");
 
     Tui tui; // initialize tui
-    clog << "[Program] Size of screen is " << tui.getScreenSize()[0] << ", " << tui.getScreenSize()[1] << endl;
+    logger::debug("[Program] Size of screen is " + to_string(tui.getScreenSize()[0]) + ", " + to_string(tui.getScreenSize()[1]));
 
     // defined offsets
     array<int, 2> offset {20, 12};
@@ -67,7 +77,7 @@ void debug(){
     // one_big_surface(tui);
     // good_amont_surfaces(tui);
 
-    auto surf = tui.append({40, 10}, offset);
+    auto surf = tui.addSurface({40, 10}, offset);
     string str = "Terrminal User Interface\nbuilt by Soren Mile";
     surf.extend_size("Down", 5);
     surf.extend_size("Down", -5);
@@ -84,13 +94,13 @@ void debug(){
     surf.fill_bg(0x10,0x50, 0x10);
     surf.register_keys({"q", "h", "j", "k", "l", "d", "Up", "Down", "Left", "Right"});
 
-    auto surf2 = tui.append({40, 10}, offset2);
+    auto surf2 = tui.addSurface({40, 10}, offset2);
     surf2.fill_fg(0xbf, 0xc1, 0xc8, 200);
     surf2.fill_bg(0x57, 0xA4, 0x90, 200);
     string test = "Unicode test.\nそれん\nソレン";
     Label lab2{surf2, test, {5, 2}};
 
-    auto debug = tui.append({tui.getScreenSize()[0], tui.getScreenSize()[1]}, {-tui.getScreenSize()[0], -tui.getScreenSize()[1]}, " ");
+    auto debug = tui.addSurface({tui.getScreenSize()[0], tui.getScreenSize()[1]}, {-tui.getScreenSize()[0], -tui.getScreenSize()[1]}, " ");
     debug.fill_fg(0xbf, 0xc1, 0xc8);
     debug.fill_bg(0, 0, 0, 100);
     string debugStr = "";
@@ -103,7 +113,7 @@ void debug(){
     short color = 1;
     bool show_debug = false;
     unsigned long long avgFrameTime = 0;
-    clog << "[Program] Entering main loop" << endl;;
+    logger::debug("[Program] Entering main loop");
     auto start = chrono::system_clock::now();
     while (true){
         int diff = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now() - start).count();
@@ -144,7 +154,6 @@ void debug(){
             offset[0] += 1;
         }
         surf.set_offset(offset[0], offset[1]);
-        
         auto before = chrono::system_clock::now();
         tui.update();
         auto total = chrono::system_clock::now();
@@ -152,7 +161,7 @@ void debug(){
         frameCount ++;
         // this_thread::sleep_for(chrono::milliseconds(3));
     }
-    clog << "[Program] Ending" << endl;
+    logger::debug("[Program] Ending");
     clear();
     cout << "the amount of frames render was " << frameCount - tui.skipedFrames << endl;
     cout << "the avargae update time was " << (static_cast<float>(avgFrameTime) / static_cast<float>(frameCount)) / 1000000.0f   <<  " ms"<< endl;

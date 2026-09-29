@@ -4,7 +4,6 @@
 #include <sys/types.h>
 #include <vector>
 #include <sys/ioctl.h>
-#include <deque>
 #include <cmath> // for std::round
 
 #include "../tui.h"
@@ -59,7 +58,7 @@ void Screen::m_initScreen(){
     m_lastScreen.assign(m_size[0] * m_size[1], cell);
 }
 
-void Screen::m_render(){
+void Screen::m_render(c_surfaces& surfs){
     array<int, 2> new_size = m_driver->d_getWinSize();
     if (new_size != m_size){
         m_size = new_size;
@@ -71,8 +70,7 @@ void Screen::m_render(){
         int y = i / m_size[0];
         int x = i % m_size[0];
         c_cell newCell;
-        for (int j: m_sortIndex){ // m_sortIndex is from highest z to lowest z
-            const c_surface &surf = m_surfaces[j];
+        for (const c_surface& surf: surfs){ // m_sortIndex is from highest z to lowest z
             int r_x = x - surf.r_cords[0];
             int r_y = y - surf.r_cords[1];
             if (r_x < surf.size[0] && r_y < surf.size[1]){
@@ -92,7 +90,7 @@ void Screen::m_render(){
                     fg = blendColors(newCell.get_fg(), currentCell.get_bg());
                     newCell.set_fg(fg[0], fg[1], fg[2], fg[3]);
 
-                    if (bg[3] >= 255 && !newCell.is_def("ch")){
+                    if (bg[3] >= 255){
                         break;
                     }
                 }
@@ -103,8 +101,8 @@ void Screen::m_render(){
 }
 
 
-void Screen::flip(){
-    m_render();
+void Screen::flip(c_surfaces& surfs){
+    m_render(surfs);
     m_driver->d_startFrame();
     bool was_unicode = false;
     for (int i = 0; i < m_screen.size(); i++){
@@ -124,7 +122,7 @@ void Screen::flip(){
     m_driver->d_endFrame();
 }
 
-Screen::Screen(const deque<c_surface>& surfaces, const vector<int>& sortIndex, drivers::d_screen* driver):m_surfaces(surfaces), m_sortIndex(sortIndex), m_driver(driver){
+Screen::Screen(drivers::d_screen* driver): m_driver(driver){
     logger::info("[Screen] Starting up");
     m_size = m_driver->d_getWinSize();
     m_initScreen();

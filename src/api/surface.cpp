@@ -45,100 +45,100 @@ static array<u_int8_t, 4> blendColors(const std::array<u_int8_t, 4>& src, const 
 
     return result;
 }
-Surface::Surface(c_surface &is) : m_is(&is) {}
+Surface::Surface(c_surface* is) : m_is(is), id(m_is->id) {}
 Surface::Surface(array<int, 2> size, string ch, int z, array<int, 2> offset)
     : m_is(new c_surface(size, ch, z, offset)) {
-  m_del = true;
-}
+        m_del = true;
+    }
 Surface::Surface() : m_is(nullptr) {}
 Surface::Surface(Surface &&surf) {
-  m_is = surf.m_is;
-  m_del = surf.m_del;
-  surf.m_is = nullptr;
+    m_is = surf.m_is;
+    m_del = surf.m_del;
+    surf.m_is = nullptr;
 }
 Surface::~Surface() {
-  if (m_del) {
-    assert(m_is != nullptr);
-    delete m_is;
-  }
+    if (m_del) {
+        assert(m_is != nullptr);
+        delete m_is;
+    }
 }
 Surface &Surface::operator=(Surface &&surf) {
-  if (this != &surf) {
-    delete m_is;         // free old resource
-    m_is = surf.m_is;    // steal pointer
-    m_del = surf.m_del;  // take ownership flag
-    surf.m_is = nullptr; // leave moved-from in safe state
-    surf.m_del = false;
-  }
-  return *this;
+    if (this != &surf) {
+        delete m_is;         // free old resource
+        m_is = surf.m_is;    // steal pointer
+        m_del = surf.m_del;  // take ownership flag
+        surf.m_is = nullptr; // leave moved-from in safe state
+        surf.m_del = false;
+    }
+    return *this;
 }
 
 void Surface::fill_bg(int r, int g, int b, int a) {
-  assert(m_is != nullptr);
-  for (int i = 0; i != m_is->surface.size(); i++) {
-    m_is->surface[i].set_bg(r, g, b, a);
-  }
+    assert(m_is != nullptr);
+    for (int i = 0; i != m_is->surface.size(); i++) {
+        m_is->surface[i].set_bg(r, g, b, a);
+    }
 }
 void Surface::fill_fg(int r, int g, int b, int a) {
-  assert(m_is != nullptr);
-  for (int i = 0; i != m_is->surface.size(); i++) {
-    m_is->surface[i].set_fg(r, g, b, a);
-  }
+    assert(m_is != nullptr);
+    for (int i = 0; i != m_is->surface.size(); i++) {
+        m_is->surface[i].set_fg(r, g, b, a);
+    }
 }
 void Surface::fill_style(styles s) {
-  assert(m_is != nullptr);
-  for (int i = 0; i != m_is->surface.size(); i++) {
-    m_is->surface[i].set_style(s);
-  }
+    assert(m_is != nullptr);
+    for (int i = 0; i != m_is->surface.size(); i++) {
+        m_is->surface[i].set_style(s);
+    }
 }
 
 bool Surface::get_event(string event) {
-  assert(m_is != nullptr);
-  if (bool isEvent = m_is->events[event]) {
-    m_is->events[event] = false;
-    return isEvent;
-  }
-  return false;
+    assert(m_is != nullptr);
+    if (bool isEvent = m_is->events[event]) {
+        m_is->events[event] = false;
+        return isEvent;
+    }
+    return false;
 }
 void Surface::register_keys(vector<string> i_keys) {
-  assert(m_is != nullptr);
-  for (string key : i_keys) {
-    if (find(m_is->m_validKeys->begin(), m_is->m_validKeys->end(), key) ==
-            m_is->m_validKeys->end() &&
-        key.size() > 1) {
-      throw invalid_argument{"The key " + key +
-                             " dose not exist in input's data base"};
+    assert(m_is != nullptr);
+    for (string key : i_keys) {
+        if (find(m_is->m_validKeys->begin(), m_is->m_validKeys->end(), key) ==
+                m_is->m_validKeys->end() &&
+                key.size() > 1) {
+            throw invalid_argument{"The key " + key +
+                " dose not exist in input's data base"};
+        }
+        m_is->keys.push_back(key);
     }
-    m_is->keys.push_back(key);
-  }
 }
 
 void Surface::set_z(int zi) {
-  assert(m_is != nullptr);
-  if (zi != m_is->z) {
-    m_is->m_dirty = true;
-    m_is->z = zi;
-  }
+    assert(m_is != nullptr);
+    if (zi != m_is->z) {
+        m_is->m_dirty = true;
+        m_is->z = zi;
+    }
 }
 int Surface::get_z() const {
-  assert(m_is != nullptr);
-  return m_is->z;
+    assert(m_is != nullptr);
+    return m_is->z;
 }
 
 array<int, 2> Surface::get_size() const {
-  assert(m_is != nullptr);
-  return m_is->size;
+    assert(m_is != nullptr);
+    return m_is->size;
 }
 array<int, 2> Surface::get_offset() const {
-  assert(m_is != nullptr);
-  return m_is->r_cords;
+    assert(m_is != nullptr);
+    return m_is->r_cords;
 }
 void Surface::set_offset(int x, int y) {
-  if (x != m_is->r_cords[0] || y != m_is->r_cords[1]) {
-    m_is->m_dirty = true;
-    m_is->r_cords[0] = x;
-    m_is->r_cords[1] = y;
-  }
+    if (x != m_is->r_cords[0] || y != m_is->r_cords[1]) {
+        m_is->m_dirty = true;
+        m_is->r_cords[0] = x;
+        m_is->r_cords[1] = y;
+    }
 }
 
 void Surface::extend_size(string direction, int amount) {
