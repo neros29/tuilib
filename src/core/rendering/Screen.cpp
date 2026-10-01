@@ -69,7 +69,8 @@ void Screen::m_render(c_surfaces& surfs){
     for (int i = 0; i < m_screen.size(); i++){
         int y = i / m_size[0];
         int x = i % m_size[0];
-        c_cell newCell;
+        c_cell& newCell = m_screen[i];
+        newCell.clear();
         for (const c_surface& surf: surfs){ // m_sortIndex is from highest z to lowest z
             int r_x = x - surf.r_cords[0];
             int r_y = y - surf.r_cords[1];
@@ -96,7 +97,6 @@ void Screen::m_render(c_surfaces& surfs){
                 }
             }
         }
-        m_screen[i] = newCell;
     }
 }
 

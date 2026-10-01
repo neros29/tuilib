@@ -16,7 +16,7 @@ SOURCES = \
 	src/core/utils/InputString.cpp \
 	src/api/api.cpp \
 	src/api/surface.cpp\
-	src/debug.cpp
+	src/test.cpp
 
 # Object / dependency files
 OBJECTS = $(SOURCES:.cpp=.o)

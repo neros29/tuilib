@@ -2,6 +2,8 @@
 #include "core/tui.h"
 #include <array>
 #include <cstdint>
+#include <chrono>
+#include <thread>
 
 class Cell{
     core::c_surface& m_surf;
@@ -108,6 +110,22 @@ public:
     int skipedFrames = 0;
     Tui();
     ~Tui();
+    class Clock {
+    private:
+        using clock = std::chrono::high_resolution_clock;
+        using duration = std::chrono::duration<double>;
+
+        clock::time_point last_frame_time;
+        double smoothed_fps = 0.0;
+        double alpha; 
+        duration target_delta;
+        bool first_frame = true;
+
+    public:
+        Clock(double target_fps, double smoothing_alpha);
+        void tick();
+        double get_fps() const;
+    };
     int amontOfSurfaces(){
         return m_surfaces.size();
     }
@@ -118,6 +136,4 @@ public:
     void update();
     std::array<int, 2> getScreenSize();
     int charactersRendered();
-
 };
-

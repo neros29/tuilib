@@ -46,3 +46,26 @@ array<int, 2> Tui::getScreenSize(){
 int Tui::charactersRendered(){
     return m_screen.charactersRenderd;
 }
+void Tui::Clock::tick() {
+        auto now = clock::now();
+        duration delta = now - last_frame_time;
+        if (delta < target_delta) {
+            std::this_thread::sleep_for(target_delta - delta);
+        } 
+        now = clock::now();
+        delta = now - last_frame_time;
+        double current_fps = 1.0 / delta.count();
+
+        last_frame_time = now;
+        if (first_frame) {
+            smoothed_fps = current_fps;
+            first_frame = false;
+        } else {
+            // The EWMA Magic
+            smoothed_fps = (alpha * current_fps) + ((1.0 - alpha) * smoothed_fps);
+        }
+}
+double Tui::Clock::get_fps() const {
+    return smoothed_fps;
+}
+Tui::Clock::Clock(double target_fps, double smoothing_alpha) : last_frame_time(clock::now()), target_delta(1 / target_fps), alpha(smoothing_alpha){}

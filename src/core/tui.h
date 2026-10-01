@@ -50,7 +50,6 @@ inline bool operator&(styles lhs, styles rhs) {
 
 namespace core{
     struct c_cell {
-    private:
         uint32_t m_fg {0};
         uint32_t m_bg {0};
 
@@ -78,6 +77,7 @@ namespace core{
         std::string get_ch() const;
         std::array<uint8_t, 4> get_fg() const;
         std::array<uint8_t, 4> get_bg() const;
+        void clear();
 
         // operators
         bool operator == (const c_cell ch) const;

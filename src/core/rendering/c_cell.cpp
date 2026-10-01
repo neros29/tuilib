@@ -101,3 +101,20 @@ bool c_cell::operator ==(const c_cell chi) const{
 bool c_cell::operator !=(const c_cell chi) const{
     return  !c_cell::operator==(chi);
 }
+void c_cell::clear(){
+    m_fg = 0;
+    m_bg = 0;
+
+    ch[0] = ' ';
+    ch[1] = '\0';
+    ch[2] = '\0';
+    ch[3] = '\0';
+    ch[4] = '\0';
+
+    styles m_styles = styles::None;
+
+    ch_def = true;
+    fg_def = true;
+    bg_def = true;
+}
+
