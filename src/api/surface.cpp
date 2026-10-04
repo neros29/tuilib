@@ -85,7 +85,7 @@ void Surface::fill_fg(int r, int g, int b, int a) {
         m_is->surface[i].set_fg(r, g, b, a);
     }
 }
-void Surface::fill_style(styles s) {
+void Surface::fill_style(uint32_t s) {
     assert(m_is != nullptr);
     for (int i = 0; i != m_is->surface.size(); i++) {
         m_is->surface[i].set_style(s);
@@ -215,12 +215,13 @@ void Surface::blit(Surface &surf) {
 
                 if (!newCharacter.is_def("ch")){
                     oldCharacter.set_ch(newCharacter.get_ch());
+                    oldCharacter.or_style(newCharacter.get_style());
                     if (!newCharacter.is_def("fg")){
                         auto fg = newCharacter.get_fg();
                         oldCharacter.set_fg(fg[0], fg[1], fg[2], fg[3]);
                     }
                 } 
-
+                oldCharacter.or_flags(newCharacter.get_flags());
                 auto bg = blendColors(oldCharacter.get_bg(), newCharacter.get_bg());
                 oldCharacter.set_bg(bg[0], bg[1], bg[2], bg[3]);
             }
@@ -235,4 +236,4 @@ void Surface::blit(Surface &surf) {
     m_is->m_dirty = true;
 }
 Cell Surface::operator[](int x) {return Cell(*m_is, m_is->surface[x]); }
-Cell Surface::operator[](int x) const { return Cell(*m_is, m_is->surface[x]); }
+const Cell Surface::operator[](int x) const { return Cell(*m_is, m_is->surface[x]); }

@@ -42,8 +42,14 @@ class Cell{
         m_cell.set_ch(chi);
         m_surf.m_dirty = true;
     }
-    void set_style(styles style){
+    void set_style(uint16_t style){
         m_cell.set_style(style);
+    }
+    void or_style(uint16_t style){
+        m_cell.or_style(style);
+    }
+    void or_flags(uint16_t style){
+        m_cell.or_flags(style);
     }
     std::string get_ch() const{
         return m_cell.get_ch();
@@ -54,7 +60,7 @@ class Cell{
     std::array<uint8_t, 4> get_bg() const{
         return m_cell.get_fg();
     }
-    styles get_style(){
+    uint16_t get_style() const{
         return m_cell.get_style();
     }
 };
@@ -75,14 +81,14 @@ public:
     Surface(const Surface& surf) = delete;
     Surface& operator=(const Surface&) = delete;
     Cell operator[](int x);
-    Cell operator[](int x) const;
+    const Cell operator[](int x) const;
 
     bool get_event(std::string event);
     void register_keys(std::vector<std::string> keys);
 
     void fill_bg(int r, int g, int b, int a = 255);
     void fill_fg(int r, int g, int b, int a = 255);
-    void fill_style(styles s);
+    void fill_style(uint32_t s);
 
     void set_z(int z);
     int get_z() const;

@@ -3,6 +3,7 @@
 #include <deque>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 #include <array>
 #include <termios.h>
@@ -23,53 +24,74 @@ public:
 namespace drivers {
     class d_screen;
 }
-enum class styles : uint32_t {
-    None =          0,
-    BOLD =          1 << 0,
-    DIM =           1 << 1,
-    ITALIC =        1 << 2,
-    UNDERLINE =     1 << 3,
-    BLINKING =      1 << 4,
-    INVERSE =       1 << 5,
-    HIDDEN =        1 << 6,
-    STRIKETHROUGH = 1 << 7,
+namespace styles{
+    constexpr uint16_t NONE =          0;
+    constexpr uint16_t BOLD =          1 << 0;
+    constexpr uint16_t DIM =           1 << 1;
+    constexpr uint16_t ITALIC =        1 << 2;
+    constexpr uint16_t UNDERLINE =     1 << 3;
+    constexpr uint16_t BLINKING =      1 << 4;
+    constexpr uint16_t INVERSE =       1 << 5;
+    constexpr uint16_t HIDDEN =        1 << 6;
+    constexpr uint16_t STRIKETHROUGH = 1 << 7;
 };
-
-inline styles operator|(styles lhs, styles rhs) {
-    return static_cast<styles>(
+enum class modifers : uint8_t{
+    none =      0,
+	shift =     0b1,
+	alt =       0b10,
+	ctrl =      0b100,
+	super =     0b1000,
+	hyper =     0b10000,
+	meta =      0b100000,
+	caps_lock = 0b1000000,
+	num_lock =  0b10000000,
+};
+inline modifers operator|(modifers lhs, modifers rhs) {
+    return static_cast<modifers>(
         static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs)
     );
 }
 
 // We also overload the bitwise AND operator for checking flags
-inline bool operator&(styles lhs, styles rhs) {
+inline bool operator&(modifers lhs, modifers rhs) {
     return static_cast<bool>(
         static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs)
     );
 }
 
 namespace core{
+    namespace flags {
+        constexpr uint16_t PLACEHOLDER = 1 << 0;
+
+        constexpr uint32_t STYLE_MASK = 0x0000FFFF; // Bits 0-15 are 1, others are 0
+        constexpr uint32_t SYSTEM_MASK = 0xFFFF0000; // Bits 16-31 are 1, others are 0
+        // The Shifts: used to move values into their designated slots
+        constexpr int STYLE_SHIFT = 0;
+        constexpr int SYSTEM_SHIFT = 16;
+    }
+    struct Event{
+        modifers modifer;
+        char ch;
+    };
     struct c_cell {
         uint32_t m_fg {0};
         uint32_t m_bg {0};
-
-        char ch[5] = " ";
-
-        styles m_styles = styles::None;
-        bool ch_def {true};
-        bool fg_def {true};
-        bool bg_def {true};
-
+        std::variant<std::monostate, std::array<char, 8>, std::string*> m_ch;
+        uint32_t m_flags = styles::NONE;
     public:
-
         // setFg
         void set_fg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);
 
         // setBg
         void set_bg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);
         void set_ch(std::string chi);
-        void set_style(styles f);
-        styles get_style() const;
+        void set_style(uint16_t flag);
+        void or_style(uint16_t flag);
+        uint16_t get_style() const;
+
+        void set_flags(uint16_t flag);
+        void or_flags(uint16_t flag);
+        uint16_t get_flags() const;
 
         bool is_def(std::string value) const;
         //set ch
@@ -80,8 +102,8 @@ namespace core{
         void clear();
 
         // operators
-        bool operator == (const c_cell ch) const;
-        bool operator != (const c_cell ch) const;
+        bool operator == (const c_cell& ch) const;
+        bool operator != (const c_cell& ch) const;
     };
     class c_surface {
     public:
@@ -101,7 +123,7 @@ namespace core{
         c_surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys, int id);
         c_surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset);
         c_cell& operator[](int x);
-        c_cell operator[](int x) const;
+        const c_cell& operator[](int x) const;
         bool operator==(const c_surface& surf) const;
         bool cheakDirty();
     };

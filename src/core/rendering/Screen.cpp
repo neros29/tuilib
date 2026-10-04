@@ -71,13 +71,13 @@ void Screen::m_render(c_surfaces& surfs){
         int x = i % m_size[0];
         c_cell& newCell = m_screen[i];
         newCell.clear();
-        for (const c_surface& surf: surfs){ // m_sortIndex is from highest z to lowest z
+        for (c_surface& surf: surfs){ // m_sortIndex is from highest z to lowest z
             int r_x = x - surf.r_cords[0];
             int r_y = y - surf.r_cords[1];
             if (r_x < surf.size[0] && r_y < surf.size[1]){
                 if (r_x >= 0 && r_y >= 0){
                     int index = surf.size[0] * r_y + r_x;
-                    const c_cell& currentCell = surf[index];
+                    const c_cell currentCell = surf[index];
 
                     if (!currentCell.is_def("ch") && newCell.is_def("ch") && currentCell.get_ch() != m_defaultCh){
                         newCell.set_ch(currentCell.get_ch());
@@ -85,6 +85,7 @@ void Screen::m_render(c_surfaces& surfs){
                         newCell.set_style(currentCell.get_style());
                         newCell.set_fg(fg[0], fg[1], fg[2], fg[3]);
                     } 
+                    newCell.or_flags(currentCell.get_flags());
                     bg = blendColors(newCell.get_bg(), currentCell.get_bg());
                     newCell.set_bg(bg[0], bg[1], bg[2], bg[3]);
 
@@ -104,24 +105,20 @@ void Screen::m_render(c_surfaces& surfs){
 void Screen::flip(c_surfaces& surfs){
     m_render(surfs);
     m_driver->d_startFrame();
-    bool was_unicode = false;
     for (int i = 0; i < m_screen.size(); i++){
         int y = i / m_size[0] + 1;
         int x = i % m_size[0] + 1; // add one to both x, and y since terminals are 1 indexed.
-        if (was_unicode){
-            was_unicode = false;
+        if (m_screen[i].get_flags() & core::flags::PLACEHOLDER){ // Don't render anything if it's a place holder cell.
             continue;
         }
         if (m_screen[i] != m_lastScreen[i]){
             m_driver->d_draw(x, y, m_screen[i]);
             charactersRenderd++;
         } 
-        was_unicode = InputString::getWidth(m_screen[i].get_ch()) > 1;
     }
     m_lastScreen.swap(m_screen);
     m_driver->d_endFrame();
 }
-
 Screen::Screen(drivers::d_screen* driver): m_driver(driver){
     logger::info("[Screen] Starting up");
     m_size = m_driver->d_getWinSize();

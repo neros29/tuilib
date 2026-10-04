@@ -1,6 +1,7 @@
 #include "../tui.h"
+#include <string>
 #include <utf8proc.h>
-#include <iostream>
+#include "../utils/logging.h"
 
 using namespace std;
 
@@ -53,7 +54,6 @@ int InputString::getWidth(string s){
     if (static_cast<size_t>(consumed) != s.size()) {
         return 1;
     }
-
     int w = utf8proc_charwidth(cp);             // 0/1/2 (and sometimes -1)
     if (w < 0) return 1;                        // non-printable -> treat as 1
     return w;

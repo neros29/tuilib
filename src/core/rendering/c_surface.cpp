@@ -43,7 +43,7 @@ c_cell& c_surface::operator[](int x){
     // return surface.at(x); //TODO Make this back to normal [] operator for better performance
     return surface[x];
 }
-c_cell c_surface::operator[](int x) const{
+const c_cell& c_surface::operator[](int x) const{
     // return surface.at(x); //TODO Make this back to normal [] operator for better performance
     return surface[x];
 }

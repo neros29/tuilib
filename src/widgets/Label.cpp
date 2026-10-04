@@ -1,4 +1,5 @@
 #include "../api.h"
+#include "../core/utils/logging.h"
 #include "Label.h"
 
 using namespace std;
@@ -7,33 +8,33 @@ using namespace std;
 Label::Label(Surface& i_root, const string& i_text, array<int, 2> i_offset):root(i_root), offset(i_offset), str(i_text) {
     updateSurface();
 }
-
 void Label::updateSurface(){
     if (str != oldStr){
         m_parseString(str);
         m_getSize();
-        // TODO Do i need a better z handling here
-        surf = Surface(size, " ", 0, offset);
-        string ch = "";
-        for (int y = 0; y <= text.size()-1; y++){
-            InputString istr(text[y]);
+        for (int y = 0; y < text.size(); y ++){
+            InputString line(text[y]);
             int x = 0;
-            int index = 0;
-            while (index < istr.size()){
-                ch = istr[index];
-                index++;
-                int width = istr.getWidth(ch);
-                surf[y * size[0] + x].set_ch(ch);
+            string buff;
+            for (int i = 0; i < line.size(); i ++){
+                string code_point = line[i];
+                buff += code_point;
+                if (i + 1 < line.size() && InputString::getWidth(line[i + 1]) < 1){
+                    continue;
+                }
+                int total_width = InputString::getWidth(buff);
+                root[(y + offset[1]) * root.get_size()[0] + x + offset[0]].set_ch(buff);
+                buff.clear();
                 x++;
-                for (int i = 2; i <= width; i++){
-                    if (index <= istr.size()){
-                        surf[y * size[0] + x].set_ch(" ");
+                if (total_width > 1){
+                    for (int j = 0; j < total_width - 1; j++){
+                        root[(y + offset[1]) * root.get_size()[0] + x + offset[0]].or_flags(core::flags::PLACEHOLDER);
                         x++;
                     }
                 }
-            } 
+
+            }
         }
-        root.blit(surf);
         oldStr = str;
     }
 }

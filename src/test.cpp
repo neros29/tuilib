@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include "core/tui.h"
 #include "core/utils/logging.h"
 #include <chrono>
 #include "api.h"
@@ -146,7 +147,7 @@ Frames Skipped: {FRAMES_SKIPPED:5}
     unordered_map<string, string> values;
 
     Surface surf1;
-    string surf1_text = "Unicode test.\nそれん\nソレン";
+    string surf1_text = "Unicode test.\nそれん\nソレン\nSøren";
     Label lab1;
 
     array<int, 2> surf2_offset = {20, 12};
@@ -197,6 +198,8 @@ public:
 
         surf2.fill_fg(0xbf, 0xc1, 0xc8);
         surf2.fill_bg(0x10,0x50, 0x10);
+        surf2.fill_style(styles::UNDERLINE | styles::BOLD);
+        logger::info("[Main] starting up.");
     }
     void run(){
         double alpha = 0.05;

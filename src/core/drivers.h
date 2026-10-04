@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 namespace drivers {
     class d_screen{
         public:
@@ -27,7 +28,6 @@ namespace drivers {
             return {5, 5};
         }
     };
-
     class d_defualt_screen : public drivers::d_screen{
         std::ofstream m_file;
         std::array<int, 2> m_size;
@@ -70,8 +70,8 @@ namespace drivers {
 				m_buffer.append(colors[bg[1]]);
                 m_buffer.append(colors[bg[2]]);
             }
-            styles style = static_cast<styles>(ch.get_style());
-            if (style != styles::None){
+            uint16_t style = ch.get_style();
+            if (style != styles::NONE){
 				if (style & styles::BOLD)          m_buffer.append("1;");
 				if (style & styles::DIM)           m_buffer.append("2;");
 				if (style & styles::ITALIC)        m_buffer.append("3;");
@@ -96,6 +96,9 @@ namespace drivers {
             m_file.close();
         };
         void d_draw(int x, int y, const core::c_cell& cell) override {
+            if (cell.get_flags() & core::flags::PLACEHOLDER){
+                return;
+            }
             m_buffer.clear();
             if (cell_style_equal(cell, m_last_cell)){
                 m_file <<"\x1b[" << y << ";"<< x  << "H" << cell.get_ch();

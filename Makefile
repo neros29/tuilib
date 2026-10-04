@@ -2,6 +2,8 @@
 CXX = g++
 
 # Flags
+# CXXFLAGS = -fsanitize=address -std=c++20 -MMD -MP -O0 -g
+# LDFLAGS  = -lutf8proc -ltinfo -fsanitize=address 
 CXXFLAGS = -std=c++20 -MMD -MP -O3 -g
 LDFLAGS  = -lutf8proc -ltinfo
 
