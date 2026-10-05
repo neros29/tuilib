@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "utils/logging.h"
 #include <vector>
 namespace drivers {
     class d_screen{

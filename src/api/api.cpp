@@ -18,7 +18,6 @@ Tui::Tui():m_screen(m_screenDriver), m_input(), m_screenDriver(new drivers::d_de
 }
 Tui::~Tui(){
     delete m_screenDriver;
-    logger::debug("[Tui] destructer run.");
 }
 
 

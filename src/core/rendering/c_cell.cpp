@@ -83,7 +83,7 @@ uint16_t c_cell::get_style() const{
     return static_cast<uint16_t>((m_flags & flags::STYLE_MASK) >> flags::STYLE_SHIFT);
 }
 void c_cell::set_flags(uint16_t flags){
-    m_flags = (m_flags & ~flags::STYLE_MASK) | (static_cast<uint32_t>(flags) << flags::STYLE_SHIFT);
+    m_flags = (m_flags & ~flags::SYSTEM_MASK) | (static_cast<uint32_t>(flags) << flags::SYSTEM_SHIFT);
 };
 void c_cell::or_flags(uint16_t flags){
     m_flags = m_flags | (static_cast<uint32_t>(flags) << flags::SYSTEM_SHIFT);

@@ -101,7 +101,7 @@ inline void Input::m_initNamePair(){
 void Input::m_setRawMode() {
     tcgetattr(STDIN_FILENO, &m_old);
     termios t = m_old;
-    t.c_lflag &= ~(ICANON | ECHO);
+    t.c_lflag &= ~(ICANON | ECHO | ISIG);
     t.c_cc[VMIN] = 1;
     t.c_cc[VTIME] = 0;
     tcsetattr(STDIN_FILENO, TCSANOW, &t);

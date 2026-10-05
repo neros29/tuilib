@@ -29,7 +29,7 @@ public:
         if (length == -1){
             length = text.size();
         }
-        for (int i; i <= length; i ++){
+        for (int i = 0; i <= length; i ++){
             if (i < text.size()){
                 surf[i + start].set_ch(string{text[i]});
             } else {
@@ -192,6 +192,7 @@ public:
         surf2(tui.addSurface({40, 10}, surf2_offset, " ", 80)),
         lab2(surf2, surf2_text, {5, 2})
     {
+        cout << "\x1b[?1049h" << endl;
         event.register_keys({"q", "h", "j", "k", "l", "d", "Up", "Down", "Left", "Right"});
         surf1.fill_fg(0xbf, 0xc1, 0xc8, 200);
         surf1.fill_bg(0x57, 0xA4, 0x90, 200);
@@ -200,6 +201,9 @@ public:
         surf2.fill_bg(0x10,0x50, 0x10);
         surf2.fill_style(styles::UNDERLINE | styles::BOLD);
         logger::info("[Main] starting up.");
+    }
+    ~Main(){
+        cout << "\x1b[?1049l" << endl;
     }
     void run(){
         double alpha = 0.05;
@@ -252,11 +256,11 @@ static void clear(){
 int main(){
     Logger::set_callback(log);
     logger::info("================================= PROGRAM STARTING =================================");
-    clear();
+    // clear();
     {
         Main main;
         main.run();
     }
     logger::info("Program Ending");
-    clear();
+    // clear();
 }
