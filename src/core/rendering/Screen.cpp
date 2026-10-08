@@ -1,10 +1,11 @@
 #include <array>
 #include <cassert>
+#include <cstdint>
 #include <string>
 #include <sys/types.h>
 #include <vector>
 #include <sys/ioctl.h>
-#include <cmath> // for std::round
+#include <math.h>
 
 #include "../tui.h"
 #include "../utils/logging.h"
@@ -12,37 +13,21 @@
 
 using namespace std;
 using namespace core;
-/**
- * Blends two RGBA color arrays.
- * @param src The foreground color array [R, G, B, A] (0-255)
- * @param dst The background color array [R, G, B, A] (0-255)
- * @return A new 4-element array containing the blended color.
- */
+
 static array<u_int8_t, 4> blendColors(const std::array<u_int8_t, 4>& src, const std::array<u_int8_t, 4>& dst) {
-    if (src[3] <= 0){
-        return dst;
+    if (src[3] == 0) return dst;
+    if (src[3] == 255) return src;
+
+    array<uint8_t, 4> result;
+    //integer promotion
+    uint32_t inv_alpha_src = 256 - src[3];
+    uint32_t alpha_src = src[3];
+    // Integer lerp.
+    for (int i = 0; i < 3; i ++){
+        result[i] = static_cast<uint8_t>((src[i] * alpha_src + dst[i] * inv_alpha_src) >> 8);
     }
-    else if (dst[3] <= 0){
-        return src;
-    }
-    array<u_int8_t, 4> result;
-
-    // Convert alpha to 0.0 - 1.0 range for math
-    float alpha_src = src[3] / 255.0f;
-    float alpha_dst = dst[3] / 255.0f;
-    float inv_alpha_src = 1.0f - alpha_src;
-
-    // 1. Blend RGB channels
-    // Formula: C_out = (C_src * alpha_src) + (C_dst * (1 - alpha_src))
-    result[0] = static_cast<int>(round(src[0] * alpha_src + dst[0] * inv_alpha_src));
-    result[1] = static_cast<int>(round(src[1] * alpha_src + dst[1] * inv_alpha_src));
-    result[2] = static_cast<int>(round(src[2] * alpha_src + dst[2] * inv_alpha_src));
-
-    // 2. Accumulate the Alpha channel
-    // Formula: A_out = A_src + A_dst * (1 - A_src)
-    float alpha_out = alpha_src + (alpha_dst * inv_alpha_src);
-    result[3] = static_cast<int>(round(alpha_out * 255.0f));
-
+    // accumulate alpha
+    result[3] = static_cast<uint8_t>(((alpha_src << 8) + (dst[3] * inv_alpha_src)) >> 8);
     return result;
 }
 
