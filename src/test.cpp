@@ -162,16 +162,16 @@ Frames Skipped: {FRAMES_SKIPPED:5}
         if (event.get_event("d")){
             debug_is_shown = debug_surf.ToggleShown();
         }
-        if (event.get_event("k")| event.get_event("Up")){
+        if (event.get_event("k") || event.get_event("Up")){
             surf2_offset[1] -= 1;
         }
-        if (event.get_event("j") | event.get_event("Down")){
+        if (event.get_event("j") || event.get_event("Down")){
             surf2_offset[1] += 1;
         }
-        if (event.get_event("h") | event.get_event("Left")){
+        if (event.get_event("h") || event.get_event("Left")){
             surf2_offset[0] -= 1;
         }
-        if (event.get_event("l") | event.get_event("Right")){
+        if (event.get_event("l") || event.get_event("Right")){
             surf2_offset[0] += 1;
         }
         surf2.set_offset(surf2_offset[0], surf2_offset[1]);
