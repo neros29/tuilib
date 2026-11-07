@@ -1,9 +1,12 @@
 #pragma once
 #include "core/tui.h"
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <chrono>
 #include <thread>
+#include <concepts>
+#include <type_traits>
 
 class Cell{
     core::c_surface& m_surf;
@@ -72,7 +75,7 @@ private:
 public:
     int id;
     Surface(core::c_surface* is);
-    Surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset);
+    Surface(std::array<size_t, 2> size, std::string ch, int z, std::array<int, 2> offset);
     ~Surface();
     Surface();
     Surface(Surface&& surf);
@@ -98,7 +101,7 @@ public:
     
     void extend_size(std::string direction, int amount);
 
-    std::array<int, 2> get_size() const; 
+    std::array<size_t, 2> get_size() const; 
     void blit(Surface& surf);
 };
 
@@ -138,8 +141,8 @@ public:
     int amontOfCharacters(){
         return m_screen.getSize()[0] * m_screen.getSize()[1];
     }
-    Surface addSurface(std::array<int, 2> size, std::array<int, 2> offset, std::string ch = " ", int z = -1);
-    void update();
-    std::array<int, 2> getScreenSize();
+    Surface addSurface(std::array<size_t, 2> size, std::array<int, 2> offset, std::string ch = " ", int z = -1);
+    void update(int waitinput_ms = -1);
+    std::array<size_t, 2> getScreenSize();
     int charactersRendered();
 };

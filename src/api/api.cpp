@@ -1,10 +1,11 @@
 #include "../api.h"
 #include "../core/utils/logging.h"
 #include "../core/drivers.h"
+#include <cstddef>
 
 using namespace std;
 using namespace core;
-Surface Tui::addSurface(array<int, 2> size,  array<int, 2> offset, string ch, int z){
+Surface Tui::addSurface(array<size_t, 2> size,  array<int, 2> offset, string ch, int z){
     
     if (z == -1){
         z = m_index;
@@ -21,8 +22,8 @@ Tui::~Tui(){
 }
 
 
-void Tui::update(){
-    bool isDirty = m_input.update(m_surfaces);
+void Tui::update(int waitinput_ms){
+    static bool isDirty;
     m_surfaces.sort();
     // isDirty = true;
     for (c_surface& surf: m_surfaces){
@@ -36,9 +37,10 @@ void Tui::update(){
     else{
         skipedFrames += 1;
     }
+    isDirty = m_input.update(m_surfaces, waitinput_ms);
 }
 
-array<int, 2> Tui::getScreenSize(){
+array<size_t, 2> Tui::getScreenSize(){
     return m_screen.getSize();
 }
 
@@ -49,7 +51,7 @@ void Tui::Clock::tick() {
         auto now = clock::now();
         duration delta = now - last_frame_time;
         if (delta < target_delta) {
-            std::this_thread::sleep_for(target_delta - delta);
+            std::this_thread::sleep_for(target_delta - delta * 1000);
         } 
         now = clock::now();
         delta = now - last_frame_time;

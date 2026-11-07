@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <cstdint>
 #include <deque>
 #include <string>
@@ -13,9 +14,9 @@
 
 class InputString{
 private:
-    int get_byte_len(unsigned char firstbyte);
     std::vector<std::string> str;
 public:
+    static int get_byte_len(unsigned char firstbyte);
     size_t size();
     static int getWidth(std::string ch); 
     InputString(std::string s);
@@ -58,6 +59,14 @@ inline bool operator&(modifers lhs, modifers rhs) {
         static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs)
     );
 }
+enum class Key : uint32_t{
+    NONE,
+    ESCAPE,
+    TAB,
+    INSERT,
+    LEFT,
+    UP,
+};
 
 namespace core{
     namespace flags {
@@ -70,8 +79,10 @@ namespace core{
         constexpr int SYSTEM_SHIFT = 16;
     }
     struct Event{
+        enum class Kind { Key, Text } kind;
         modifers modifer;
-        char ch;
+        std::string text;
+        Key key;
     };
     struct c_cell {
         uint32_t m_fg {0};
@@ -112,7 +123,7 @@ namespace core{
         std::vector<c_cell> m_old;
         int z{0};
         bool m_dirty = true;
-        std::array<int, 2> size;
+        std::array<size_t, 2> size;
         std::array<int, 2> r_cords;
         std::string defulat_ch = {" "};
 
@@ -120,10 +131,10 @@ namespace core{
         std::unordered_map<std::string, bool> events;
         std::vector<std::string> keys;
 
-        c_surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys, int id);
-        c_surface(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset);
-        c_cell& operator[](int x);
-        const c_cell& operator[](int x) const;
+        c_surface(std::array<size_t, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys, int id);
+        c_surface(std::array<size_t, 2> size, std::string ch, int z, std::array<int, 2> offset);
+        c_cell& operator[](size_t x);
+        const c_cell& operator[](size_t x) const;
         bool operator==(const c_surface& surf) const;
         bool cheakDirty();
     };
@@ -155,7 +166,7 @@ namespace core{
             private:
                 std::vector<c_surface*>::iterator m_it;
             };
-        c_surface* add(std::array<int, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys);
+        c_surface* add(std::array<size_t, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys);
         void sort();
         size_t size();
         SurfaceIterator begin();
@@ -168,7 +179,7 @@ namespace core{
         std::vector<c_cell> m_screen;
         std::vector<c_cell> m_lastScreen;
 
-        std::array<int, 2> m_size;
+        std::array<size_t, 2> m_size;
         std::string m_defaultCh {" "};
 
         void m_initScreen();
@@ -177,7 +188,7 @@ namespace core{
     public:
         int charactersRenderd;
         Screen(drivers::d_screen* driver);
-        std::array<int, 2> getSize();
+        std::array<size_t, 2> getSize();
         void flip(c_surfaces& surfs);
     };
 
@@ -191,12 +202,14 @@ namespace core{
 
         // input buffer
         std::string m_buffer;
+        std::string m_buff {""};
 
         // member private functions
         inline void m_initNamePair();
         void m_setRawMode();
         void m_restoreMode();
         void m_initDb();
+        std::vector<Event> m_parseData(int timeout_ms);
         void m_add(std::string capname, std::string human);
         std::string m_getCap(const char* name);
     public:
@@ -206,6 +219,6 @@ namespace core{
         ~Input();
 
         // member public functions
-        bool update(c_surfaces& surfs);
+        bool update(c_surfaces& surfs, int timeout_ms = -1);
     };
 }

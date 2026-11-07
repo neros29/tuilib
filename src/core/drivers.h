@@ -1,5 +1,6 @@
 #pragma once
 #include "tui.h"
+#include <cstddef>
 #include <inttypes.h>
 #include <iostream>
 #include <fstream>
@@ -13,7 +14,7 @@ namespace drivers {
         virtual void d_draw(int x, int y, const core::c_cell& cell) = 0;
         virtual void d_startFrame() = 0;
         virtual void d_endFrame() = 0;
-        virtual std::array<int, 2> d_getWinSize() = 0;
+        virtual std::array<size_t, 2> d_getWinSize() = 0;
     };
     class d_test_screen : public drivers::d_screen{
         void d_draw(int x, int y, const core::c_cell& cell) override {
@@ -25,13 +26,13 @@ namespace drivers {
         void d_endFrame() override {
             std::cout << "end frame." << std::endl;
         }
-        std::array<int, 2> d_getWinSize() override {
+        std::array<size_t, 2> d_getWinSize() override {
             return {5, 5};
         }
     };
     class d_defualt_screen : public drivers::d_screen{
         std::ofstream m_file;
-        std::array<int, 2> m_size;
+        std::array<size_t, 2> m_size;
         core::c_cell m_last_cell;
         std::string m_buffer;
 
@@ -119,7 +120,7 @@ namespace drivers {
             m_file << "\x1b[" << m_size[1] + 1 << ";" << m_size[0] + 1 << "H";
             m_file.flush();
         }
-        std::array<int, 2> d_getWinSize() override {
+        std::array<size_t, 2> d_getWinSize() override {
             struct winsize ws = {(struct winsize){0,0,0,0}};
             ioctl(0, TIOCGWINSZ, &ws);
             if (m_size[0] != ws.ws_col + 1 || m_size[1] != ws.ws_row + 1){

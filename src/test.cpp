@@ -180,7 +180,7 @@ Frames Skipped: {FRAMES_SKIPPED:5}
         if (debug_is_shown){
             debug_surf.draw(values);
         }
-        tui.update();
+        tui.update(16);
     }
 public:
     Main(): 

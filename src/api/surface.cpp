@@ -46,7 +46,7 @@ static array<u_int8_t, 4> blendColors(const std::array<u_int8_t, 4>& src, const 
     return result;
 }
 Surface::Surface(c_surface* is) : m_is(is), id(m_is->id) {}
-Surface::Surface(array<int, 2> size, string ch, int z, array<int, 2> offset)
+Surface::Surface(array<size_t, 2> size, string ch, int z, array<int, 2> offset)
     : m_is(new c_surface(size, ch, z, offset)) {
         m_del = true;
     }
@@ -75,19 +75,19 @@ Surface &Surface::operator=(Surface &&surf) {
 
 void Surface::fill_bg(int r, int g, int b, int a) {
     assert(m_is != nullptr);
-    for (int i = 0; i != m_is->surface.size(); i++) {
+    for (size_t i = 0; i != m_is->surface.size(); i++) {
         m_is->surface[i].set_bg(r, g, b, a);
     }
 }
 void Surface::fill_fg(int r, int g, int b, int a) {
     assert(m_is != nullptr);
-    for (int i = 0; i != m_is->surface.size(); i++) {
+    for (size_t i = 0; i != m_is->surface.size(); i++) {
         m_is->surface[i].set_fg(r, g, b, a);
     }
 }
 void Surface::fill_style(uint32_t s) {
     assert(m_is != nullptr);
-    for (int i = 0; i != m_is->surface.size(); i++) {
+    for (size_t i = 0; i != m_is->surface.size(); i++) {
         m_is->surface[i].set_style(s);
     }
 }
@@ -125,7 +125,7 @@ int Surface::get_z() const {
     return m_is->z;
 }
 
-array<int, 2> Surface::get_size() const {
+array<size_t, 2> Surface::get_size() const {
     assert(m_is != nullptr);
     return m_is->size;
 }
@@ -201,15 +201,14 @@ void Surface::extend_size(string direction, int amount) {
 
 void Surface::blit(Surface &surf) {
     assert(m_is->surface.size() == m_is->size[0] * m_is->size[1]);
-    int x = 0;
-    int y = 0;
-    for (int i = 0; i != m_is->surface.size(); i++) {
-        bool def{true};
+    size_t x = 0;
+    size_t y = 0;
+    for (size_t i = 0; i != m_is->surface.size(); i++) {
         int r_x = x - surf.m_is->r_cords[0];
         int r_y = y - surf.m_is->r_cords[1];
         if (r_x < surf.m_is->size[0] && r_y < surf.m_is->size[1]) {
             if (r_x >= 0 && r_y >= 0) {
-                int index = (surf.m_is->size[0] * r_y) + r_x;
+                size_t index = (surf.m_is->size[0] * r_y) + r_x;
                 c_cell& newCharacter = surf.m_is->surface[index];
                 c_cell& oldCharacter = m_is->surface[i];
 

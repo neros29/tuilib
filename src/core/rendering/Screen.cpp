@@ -32,7 +32,7 @@ static array<u_int8_t, 4> blendColors(const std::array<u_int8_t, 4>& src, const 
 }
 
 
-array<int, 2> Screen::getSize(){
+array<size_t, 2> Screen::getSize(){
     return m_size;
 }
 
@@ -44,7 +44,7 @@ void Screen::m_initScreen(){
 }
 
 void Screen::m_render(c_surfaces& surfs){
-    array<int, 2> new_size = m_driver->d_getWinSize();
+    array<size_t, 2> new_size = m_driver->d_getWinSize();
     if (new_size != m_size){
         m_size = new_size;
         m_initScreen();
