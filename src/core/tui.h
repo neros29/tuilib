@@ -87,8 +87,9 @@ enum class Key : uint32_t{
     F11,
     F12,
 };
+enum class Kind { Key, Text };
 struct Event{
-    enum class Kind { Key, Text } kind;
+    Kind kind;
     modifers modifer;
     std::string text;
     Key key;

@@ -63,7 +63,7 @@ PYBIND11_MODULE(tui, m) {
                 }, 
                 py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
         .def("set_style", [](Cell& self, uint32_t style){
-                return self.set_style(static_cast<styles>(style));
+                return self.set_style(static_cast<uint16_t>(style));
                 }, py::arg("style"))
         .def("set_ch", &Cell::set_ch, py::arg("ch"));
         // raw fields (handy from Python)
@@ -77,7 +77,7 @@ PYBIND11_MODULE(tui, m) {
                         std::string ch,
                         int z,
                         std::array<int, 2> offset) {
-                return Surface(size, std::move(ch), z, offset);
+                return Surface({static_cast<size_t>(size[0]), static_cast<size_t>(size[1])}, std::move(ch), z, offset);
             }),
             py::arg("size"),
             py::arg("ch") = " ",
@@ -87,7 +87,7 @@ PYBIND11_MODULE(tui, m) {
         .def("fill_bg", &Surface::fill_bg, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
         .def("fill_fg", &Surface::fill_fg, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
         .def("fill_style", [](Surface& self, uint32_t style){
-                return self.fill_style(static_cast<styles>(style));
+                return self.fill_style(static_cast<uint16_t>(style));
                 }, py::arg("style"))
         .def("set_z", &Surface::set_z, py::arg("z"))
         .def("get_z", &Surface::get_z)
@@ -96,8 +96,9 @@ PYBIND11_MODULE(tui, m) {
         .def("offset", &Surface::get_offset)
         .def("size", &Surface::get_size)
         .def("blit", &Surface::blit, py::arg("surf"))
-        .def("register_keys", &Surface::register_keys, py::arg("keys"))
-        .def("get_event", &Surface::get_event, py::arg("event"))
+        // .def("register_keys", &Surface::register_keys, py::arg("keys"))
+        // .def("get_event", &Surface::get_event, py::arg("event"))
+        .def("register_func", &Surface::register_func, py::arg("func"))
         .def(
             "__getitem__",
             [](Surface& self, int idx) -> Cell { return self[idx]; },
@@ -118,7 +119,7 @@ PYBIND11_MODULE(tui, m) {
                std::string ch,
                int z) -> Surface {
                 // Screen::append signature: (size, offset, ch, z)
-                return self.addSurface(size, offset, ch, z);
+                return self.addSurface({static_cast<size_t>(size[0]), static_cast<size_t>(size[1])}, offset, ch, z);
             },
             py::arg("size"),
             py::arg("offset"),
@@ -127,8 +128,15 @@ PYBIND11_MODULE(tui, m) {
             // py::return_value_policy::reference_internal
         )
         .def("getScreenSize", &Tui::getScreenSize)
-        .def("update", &Tui::update);
-
+        .def("update", &Tui::update, py::arg("timeout_ms"));
+    // -----------------
+    // Event
+    // -----------------
+    py::class_<Event>(m, "Event")
+        .def_property_readonly("kind", [](Event& self){return static_cast<int>(self.kind);})
+    	.def_property_readonly("text", [](Event& self){return self.text;})
+    	.def_property_readonly("key", [](Event& self){return static_cast<int>(self.key);})
+    	.def_property_readonly("modifer", [](Event& self){return static_cast<int>(self.modifer);});
     // -----------------
     // Label (safe wrapper)
     // -----------------

@@ -1,5 +1,6 @@
 #include <array>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <term.h>
 #include <unistd.h>
@@ -169,7 +170,13 @@ Frames Skipped: {FRAMES_SKIPPED:5}
             {Key::Right,  {2, 0}},
         };
         bool results = false;
-        if (e.kind == Event::Kind::Text){
+        if (e.kind == Kind::Text){
+            if (e.text == "c"){
+                if (e.modifer & modifers::ctrl){
+                    running = false;
+                    results = true;
+                }
+            }
             if (e.text == "q"){
                 running = false;
                 results = true;
@@ -185,7 +192,7 @@ Frames Skipped: {FRAMES_SKIPPED:5}
                 results = true;
             }
         }
-        if (e.kind == Event::Kind::Key){
+        if (e.kind == Kind::Key){
             auto itr = key_dirs.find(e.key);
             if (itr != key_dirs.end()){
                 surf2_offset[0] += key_dirs[e.key][0];
@@ -206,7 +213,7 @@ public:
     Main(): 
         tui(),
         event(tui.addSurface({0, 0}, {0, 0}, " ", 1000)),
-        debug_surf(tui.addSurface(tui.getScreenSize(), {-tui.getScreenSize()[0], -tui.getScreenSize()[1]}, " ", 100), debug_format_str),
+        debug_surf(tui.addSurface(tui.getScreenSize(), {static_cast<int>(-tui.getScreenSize()[0]), static_cast<int>(-tui.getScreenSize()[1])}, " ", 100), debug_format_str),
         surf1(tui.addSurface({40, 10}, {20, 22}, " ", 70)),
         lab1(surf1, surf1_text, {5, 2}), 
         surf2(tui.addSurface({40, 10}, surf2_offset, " ", 80)),
@@ -269,10 +276,10 @@ static void log(int level, const std::string& msg) {
     log.close();
 }
 
-static void clear(){
-    char code[] {"\x1b[2J\x1b[H"};
-    write(1, &code, sizeof(code));
-}
+// static void clear(){
+//     char code[] {"\x1b[2J\x1b[H"};
+//     write(1, &code, sizeof(code));
+// }
 
 int main(){
     Logger::set_callback(log);

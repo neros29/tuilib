@@ -22,15 +22,16 @@ find_package(pybind11 CONFIG REQUIRED)
 
 # Core engine sources
 set(TUI_CORE_SOURCES
-    src/core/rendering/Screen.cpp
-    src/core/rendering/c_surface.cpp
-    src/core/rendering/c_cell.cpp
-    src/core/impl/c_surfaces.cpp
-    src/core/input/input.cpp
-    src/widgets/Label.cpp
-    src/core/utils/InputString.cpp
-    src/api/api.cpp
-    src/api/surface.cpp
+	src/core/rendering/Screen.cpp
+	src/core/rendering/c_surface.cpp
+	src/core/rendering/c_cell.cpp
+	src/core/impl/c_surfaces.cpp
+	src/core/utils/InputString.cpp
+	src/core/c_eventBus.cpp
+	src/drivers/d_default_input.cpp
+	src/api/api.cpp
+	src/api/surface.cpp
+	src/widgets/Label.cpp
 )
 
 # Header location
@@ -52,7 +53,7 @@ target_compile_definitions(tui PRIVATE VERSION_INFO="0.0.1")
 # Native C++ test executable
 # -------------------------
 add_executable(test
-    src/debug.cpp
+    src/test.cpp
     ${TUI_CORE_SOURCES}
 )
 

@@ -73,7 +73,7 @@ void d_default_input::m_add(std::string key, Key value){
         logger::info("Key: " + to_string((uint32_t)value) + " Dose not exist in terminfo.");
         return;
     }
-    logger::debug("Added key: " + to_string((uint32_t)value) + " Search term: " + key);
+    logger::debug("Added key: " + to_string((uint32_t)value));
     m_keydb[key] = value;
 }
 void d_default_input::m_fillDb(){
@@ -112,6 +112,44 @@ void d_default_input::m_fillDb(){
     m_add(m_getCap("kf11"),  Key::F11);
     m_add(m_getCap("kf12"),  Key::F12);
 }
+void d_default_input::m_addCtrl(char k, char v){
+    logger::debug("[d_default_input][fillCtrldb] Added Ctrl + " + string() + v + " key with Byte: " + to_string(k));
+    m_asciiCtrldb[k] = v;
+}
+void d_default_input::m_fillCtrldb(){
+    // genraly speaking last character wins. I am still leaving every character even ones that match keys, just for completeness.
+    m_addCtrl(0, '@');  
+    m_addCtrl(0, ' ');
+    m_addCtrl(0, '2');
+
+    std::string alphabet = "abcdefghijklmnopqrstuvwxyz";
+    for (int i = 1; i <= 26; i ++){ // add the alphabet since it's a simple order
+        m_addCtrl(i, alphabet[i - 1]);
+    }
+    m_addCtrl(27, '[');  
+    m_addCtrl(27, '3');  
+
+    m_addCtrl(28, '\\');
+
+    m_addCtrl(29, ']');  
+    m_addCtrl(29, '5');  
+
+    m_addCtrl(30, '~');
+    m_addCtrl(30, '^');  
+    m_addCtrl(30, '6');  
+
+    m_addCtrl(31, '_');
+    m_addCtrl(31, '/');
+    m_addCtrl(31, '7');
+
+    m_addCtrl(48, '0');  
+    m_addCtrl(49, '1');
+    m_addCtrl(57, '9');  
+
+    // 127
+    m_addCtrl(127, '?');
+    m_addCtrl(127, '8');  
+}
 // ===========================================
 vector<Event> d_default_input::d_getEvents(int timeout_ms){
     vector<Event> results {};
@@ -144,7 +182,7 @@ vector<Event> d_default_input::d_getEvents(int timeout_ms){
                 in_esc = true;
                 event_buff += ch;
             } else{
-                results.push_back(Event{Event::Kind::Text, modifers::alt, string() + ch});
+                results.push_back(Event{Kind::Text, modifers::alt, string() + ch});
                 event_buff.clear();
             } 
             was_esc = false;
@@ -184,10 +222,10 @@ vector<Event> d_default_input::d_getEvents(int timeout_ms){
             }
             auto it = m_keydb.find(event_buff);
             if (it != m_keydb.end()){
-                logger::debug("Key: modifer: "  + to_string((uint8_t)modifer) + " key: " + to_string((uint32_t)it->second));
-                results.push_back(Event{Event::Kind::Key, modifer, "", it->second});
+                logger::debug("[d_default_input][getEvents] Key: modifer: "  + to_string((uint8_t)modifer) + " key: " + to_string((uint32_t)it->second));
+                results.push_back(Event{Kind::Key, modifer, "", it->second});
             } else {
-                logger::debug("Key: '" + event_buff + "' was not found.");
+                logger::debug("[d_default_input][getEvents] Key: '" + event_buff + "' was not found.");
             }
             event_buff.clear();
             in_esc = false;
@@ -203,8 +241,11 @@ vector<Event> d_default_input::d_getEvents(int timeout_ms){
         } 
         else if (!event_buff.empty()){
             event_buff += ch;
-            results.push_back(Event{Event::Kind::Text, modifer, event_buff});
+            results.push_back(Event{Kind::Text, modifer, event_buff});
             event_buff.clear();
+        } else if (auto it = m_asciiCtrldb.find(ch); it != m_asciiCtrldb.end()){
+            logger::debug("Ctrl key hit: " + string() + it->second);
+            results.push_back(Event{Kind::Text, modifer | modifers::ctrl, string() + it->second});
         }
         else {
             std::string lower{ch};
@@ -212,7 +253,7 @@ vector<Event> d_default_input::d_getEvents(int timeout_ms){
                 modifer = modifers::shift;
                 lower = ch + ('a' - 'A');
             }
-            results.push_back(Event{Event::Kind::Text, modifer, lower});
+            results.push_back(Event{Kind::Text, modifer, lower});
         }
     }
     m_buff.clear();
@@ -222,6 +263,7 @@ vector<Event> d_default_input::d_getEvents(int timeout_ms){
 d_default_input::d_default_input(){
     m_setRawMode();
     m_fillDb();
+    m_fillCtrldb();
 }
 d_default_input::~d_default_input(){
     m_restoreMode();

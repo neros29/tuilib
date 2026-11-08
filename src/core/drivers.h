@@ -32,6 +32,9 @@ namespace drivers {
         struct termios m_old;
         std::string m_buff;
         std::unordered_map<std::string, Key> m_keydb;
+        std::unordered_map<char, char> m_asciiCtrldb;
+        void m_addCtrl(char k, char v);
+        void m_fillCtrldb();
         void m_fillDb();
         void m_add(std::string key, Key value);
         void m_setRawMode();
