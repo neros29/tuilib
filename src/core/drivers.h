@@ -1,20 +1,46 @@
 #pragma once
 #include "tui.h"
+#include <array>
 #include <cstddef>
+#include <cstdint>
 #include <inttypes.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include "utils/logging.h"
+#include <unordered_map>
 #include <vector>
+#include <termios.h>
+
 namespace drivers {
     class d_screen{
-        public:
+    public:
         virtual ~d_screen(){};
         virtual void d_draw(int x, int y, const core::c_cell& cell) = 0;
         virtual void d_startFrame() = 0;
         virtual void d_endFrame() = 0;
         virtual std::array<size_t, 2> d_getWinSize() = 0;
+    };
+    class d_input{
+    public:
+        virtual ~d_input(){};
+        virtual std::vector<Event> d_getEvents(int timeout_ms) = 0;
+        // virtual int d_getCharacterWidth(uint32_t ch) = 0;
+    };
+    class d_default_input: public drivers::d_input{
+    private:
+        struct termios m_old;
+        std::string m_buff;
+        std::unordered_map<std::string, Key> m_keydb;
+        void m_fillDb();
+        void m_add(std::string key, Key value);
+        void m_setRawMode();
+        void m_restoreMode();
+    public:
+        ~d_default_input() override;
+        d_default_input();
+        std::vector<Event> d_getEvents(int timeout_ms) override;
+        // int d_getCharacterWidth(uint32_t ch) override;
     };
     class d_test_screen : public drivers::d_screen{
         void d_draw(int x, int y, const core::c_cell& cell) override {
@@ -123,9 +149,9 @@ namespace drivers {
         std::array<size_t, 2> d_getWinSize() override {
             struct winsize ws = {(struct winsize){0,0,0,0}};
             ioctl(0, TIOCGWINSZ, &ws);
-            if (m_size[0] != ws.ws_col + 1 || m_size[1] != ws.ws_row + 1){
-                m_size[0] = ws.ws_col + 1;
-                m_size[1] = ws.ws_row + 1;
+            if (m_size[0] != ws.ws_col || m_size[1] != ws.ws_row){
+                m_size[0] = ws.ws_col;
+                m_size[1] = ws.ws_row;
                 return m_size;
             }
             else {

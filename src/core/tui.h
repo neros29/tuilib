@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -24,6 +25,7 @@ public:
 };
 namespace drivers {
     class d_screen;
+    class d_input;
 }
 namespace styles{
     constexpr uint16_t NONE =          0;
@@ -61,13 +63,36 @@ inline bool operator&(modifers lhs, modifers rhs) {
 }
 enum class Key : uint32_t{
     NONE,
-    ESCAPE,
-    TAB,
-    INSERT,
-    LEFT,
-    UP,
+    Up,
+    Down,
+    Left,
+    Right,
+    Home,
+    End,
+    Delete,
+    Insert,
+    PageUp,
+    PageDown,
+    Backspace,
+    F1,
+    F2,
+    F3,
+    F4,
+    F5,
+    F6,
+    F7,
+    F8,
+    F9,
+    F10,
+    F11,
+    F12,
 };
-
+struct Event{
+    enum class Kind { Key, Text } kind;
+    modifers modifer;
+    std::string text;
+    Key key;
+};
 namespace core{
     namespace flags {
         constexpr uint16_t PLACEHOLDER = 1 << 0;
@@ -78,12 +103,6 @@ namespace core{
         constexpr int STYLE_SHIFT = 0;
         constexpr int SYSTEM_SHIFT = 16;
     }
-    struct Event{
-        enum class Kind { Key, Text } kind;
-        modifers modifer;
-        std::string text;
-        Key key;
-    };
     struct c_cell {
         uint32_t m_fg {0};
         uint32_t m_bg {0};
@@ -121,17 +140,17 @@ namespace core{
         int id;
         std::vector<c_cell> surface;
         std::vector<c_cell> m_old;
+        std::function<bool(Event)> inputFunc {nullptr};
         int z{0};
         bool m_dirty = true;
         std::array<size_t, 2> size;
         std::array<int, 2> r_cords;
         std::string defulat_ch = {" "};
 
-        const std::vector<std::string>* m_validKeys;
         std::unordered_map<std::string, bool> events;
         std::vector<std::string> keys;
 
-        c_surface(std::array<size_t, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys, int id);
+        c_surface(std::array<size_t, 2> size, std::string ch, int z, std::array<int, 2> offset, int id);
         c_surface(std::array<size_t, 2> size, std::string ch, int z, std::array<int, 2> offset);
         c_cell& operator[](size_t x);
         const c_cell& operator[](size_t x) const;
@@ -166,7 +185,7 @@ namespace core{
             private:
                 std::vector<c_surface*>::iterator m_it;
             };
-        c_surface* add(std::array<size_t, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys);
+        c_surface* add(std::array<size_t, 2> size, std::string ch, int z, std::array<int, 2> offset);
         void sort();
         size_t size();
         SurfaceIterator begin();
@@ -196,29 +215,23 @@ namespace core{
     class Input{
     private:
         // input stuff
-        struct termios m_old;
-        std::vector<std::array<std::string, 2>> m_namePair;
-        std::unordered_map<std::string, std::string> m_termDb;
+        drivers::d_input* m_driver;
 
-        // input buffer
-        std::string m_buffer;
-        std::string m_buff {""};
-
-        // member private functions
-        inline void m_initNamePair();
-        void m_setRawMode();
-        void m_restoreMode();
-        void m_initDb();
-        std::vector<Event> m_parseData(int timeout_ms);
-        void m_add(std::string capname, std::string human);
-        std::string m_getCap(const char* name);
     public:
-        std::vector<std::string> keys;
         // Constructers
-        Input();
+        Input(drivers::d_input* driver);
         ~Input();
 
         // member public functions
         bool update(c_surfaces& surfs, int timeout_ms = -1);
+    };
+    class c_eventBus{
+    private:
+        drivers::d_input* m_inputDriver;
+        c_surfaces& m_surfs;
+    public:
+        c_eventBus(drivers::d_input* driver, c_surfaces& surfs);
+        ~c_eventBus();
+        void tick(int timeout_ms);
     };
 }

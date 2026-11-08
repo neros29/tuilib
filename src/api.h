@@ -7,6 +7,7 @@
 #include <thread>
 #include <concepts>
 #include <type_traits>
+#include <functional>
 
 class Cell{
     core::c_surface& m_surf;
@@ -86,8 +87,7 @@ public:
     Cell operator[](int x);
     const Cell operator[](int x) const;
 
-    bool get_event(std::string event);
-    void register_keys(std::vector<std::string> keys);
+    void register_func(std::function<bool(Event)>);
 
     void fill_bg(int r, int g, int b, int a = 255);
     void fill_fg(int r, int g, int b, int a = 255);
@@ -108,13 +108,14 @@ public:
 class Tui{
 private:
     drivers::d_screen* m_screenDriver;
+    drivers::d_input* m_inputDriver;
     core::c_surfaces m_surfaces;
     bool m_isSurfaceSorted;
     void m_sortSurfaces();
 
     int m_index = 0;
     core::Screen m_screen;
-    core::Input m_input;
+    core::c_eventBus m_evetBus;
 public:
     int skipedFrames = 0;
     Tui();

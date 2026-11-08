@@ -64,13 +64,14 @@ void Screen::m_render(c_surfaces& surfs){
                     int index = surf.size[0] * r_y + r_x;
                     const c_cell currentCell = surf[index];
 
-                    if (!currentCell.is_def("ch") && newCell.is_def("ch") && currentCell.get_ch() != m_defaultCh){
+                    if (newCell.is_def("ch") && (!currentCell.is_def("ch")  && currentCell.get_ch() != m_defaultCh)){
                         newCell.set_ch(currentCell.get_ch());
-                        fg = blendColors(newCell.get_fg(), currentCell.get_fg());
                         newCell.set_style(currentCell.get_style());
+                        newCell.set_flags(currentCell.get_flags());
+
+                        fg = blendColors(newCell.get_fg(), currentCell.get_fg());
                         newCell.set_fg(fg[0], fg[1], fg[2], fg[3]);
                     } 
-                    newCell.or_flags(currentCell.get_flags());
                     bg = blendColors(newCell.get_bg(), currentCell.get_bg());
                     newCell.set_bg(bg[0], bg[1], bg[2], bg[3]);
 
@@ -90,13 +91,24 @@ void Screen::m_render(c_surfaces& surfs){
 void Screen::flip(c_surfaces& surfs){
     m_render(surfs);
     m_driver->d_startFrame();
+    c_cell empty_cell;
+    empty_cell.set_ch(" ");
     for (int i = 0; i < m_screen.size(); i++){
         int y = i / m_size[0] + 1;
         int x = i % m_size[0] + 1; // add one to both x, and y since terminals are 1 indexed.
-        if (m_screen[i].get_flags() & core::flags::PLACEHOLDER){ // Don't render anything if it's a place holder cell.
-            continue;
-        }
         if (m_screen[i] != m_lastScreen[i]){
+            if (m_screen[i].get_flags() & core::flags::PLACEHOLDER){ // Don't render anything if it's a place holder cell. Please find a better way to do this very soon.
+                int last = i - 1; 
+                int ly = last / m_size[0] + 1;
+                int lx = last % m_size[0] + 1; 
+                std::array<uint8_t, 4> bg = m_screen[i].get_bg();
+                std::array<uint8_t, 4> fg = m_screen[i].get_fg();
+                empty_cell.set_bg(bg[0], bg[1], bg[2]);
+                empty_cell.set_fg(fg[0], fg[1], fg[2]);
+                m_driver->d_draw(x, y, empty_cell); // clear PLACEHOLDER cell. This is stupid.
+                m_driver->d_draw(lx, ly, m_screen[last]); // make sure to draw the previous cell to make sure and remove any old characters blocking the unicode in the place holder cell. This is stupid but haven't thought of a better answer.
+                continue;
+            }
             m_driver->d_draw(x, y, m_screen[i]);
             charactersRenderd++;
         } 

@@ -16,6 +16,8 @@ SOURCES = \
 	src/core/input/input.cpp \
 	src/widgets/Label.cpp \
 	src/core/utils/InputString.cpp \
+	src/core/c_eventBus.cpp\
+	src/drivers/d_default_input.cpp \
 	src/api/api.cpp \
 	src/api/surface.cpp\
 	src/test.cpp

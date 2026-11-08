@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
+#include <functional>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -92,25 +93,8 @@ void Surface::fill_style(uint32_t s) {
     }
 }
 
-bool Surface::get_event(string event) {
-    assert(m_is != nullptr);
-    if (bool isEvent = m_is->events[event]) {
-        m_is->events[event] = false;
-        return isEvent;
-    }
-    return false;
-}
-void Surface::register_keys(vector<string> i_keys) {
-    assert(m_is != nullptr);
-    for (string key : i_keys) {
-        if (find(m_is->m_validKeys->begin(), m_is->m_validKeys->end(), key) ==
-                m_is->m_validKeys->end() &&
-                key.size() > 1) {
-            throw invalid_argument{"The key " + key +
-                " dose not exist in input's data base"};
-        }
-        m_is->keys.push_back(key);
-    }
+void Surface::register_func(function<bool(Event)> func) {
+    m_is->inputFunc = func;
 }
 
 void Surface::set_z(int zi) {

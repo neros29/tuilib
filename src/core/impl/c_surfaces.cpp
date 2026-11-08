@@ -5,8 +5,8 @@
 
 using namespace core;
 
-c_surface* c_surfaces::add(std::array<size_t, 2> size, std::string ch, int z, std::array<int, 2> offset, const std::vector<std::string>& keys){
-    m_surfaces.emplace_back(size, ch, z, offset, keys, m_nextId);
+c_surface* c_surfaces::add(std::array<size_t, 2> size, std::string ch, int z, std::array<int, 2> offset){
+    m_surfaces.emplace_back(size, ch, z, offset, m_nextId);
     m_nextId ++;
     c_surface* new_surf = &m_surfaces[m_surfaces.size()-1];
     m_sortedSurfaces.push_back(new_surf);

@@ -28,6 +28,7 @@ void Label::updateSurface(){
                 x++;
                 if (total_width > 1){
                     for (int j = 0; j < total_width - 1; j++){
+                        root[(y + offset[1]) * root.get_size()[0] + x + offset[0]].set_ch("X");
                         root[(y + offset[1]) * root.get_size()[0] + x + offset[0]].or_flags(core::flags::PLACEHOLDER);
                         x++;
                     }

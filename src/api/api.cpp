@@ -10,15 +10,16 @@ Surface Tui::addSurface(array<size_t, 2> size,  array<int, 2> offset, string ch,
     if (z == -1){
         z = m_index;
     }
-    c_surface* surf = m_surfaces.add(size, ch, z, offset, m_input.keys);
+    c_surface* surf = m_surfaces.add(size, ch, z, offset);
     m_index ++;
     return Surface(surf);
 }
-Tui::Tui():m_screen(m_screenDriver), m_input(), m_screenDriver(new drivers::d_defualt_screen){
+Tui::Tui():m_screen(m_screenDriver), m_evetBus(m_inputDriver, m_surfaces), m_screenDriver(new drivers::d_defualt_screen), m_inputDriver(new drivers::d_default_input){
     logger::info("[API] Starting up");
 }
 Tui::~Tui(){
     delete m_screenDriver;
+    delete m_inputDriver;
 }
 
 
@@ -37,7 +38,7 @@ void Tui::update(int waitinput_ms){
     else{
         skipedFrames += 1;
     }
-    isDirty = m_input.update(m_surfaces, waitinput_ms);
+    m_evetBus.tick(waitinput_ms);
 }
 
 array<size_t, 2> Tui::getScreenSize(){

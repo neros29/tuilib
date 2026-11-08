@@ -1,3 +1,4 @@
+#include <array>
 #include <fstream>
 #include <string>
 #include <term.h>
@@ -21,7 +22,6 @@ public:
     Debug(Surface s, string t): surf(std::move(s)), str(t){
         surf.fill_bg(0, 0, 0, 100);
         surf.fill_fg(0xbf, 0xc1, 0xc8);
-        surf.register_keys({"d"});
         init_text();
     }
 
@@ -155,26 +155,46 @@ Frames Skipped: {FRAMES_SKIPPED:5}
     string surf2_text = "Terrminal User Interface\nbuilt by Soren Mile";
     Label lab2;
 
-    void events(){
-        if (event.get_event("q")){
-            running = false;
+    bool events(Event e){
+        unordered_map<std::string, array<int, 2>> text_dirs {
+            {"k", {0, -1}},
+            {"j",  {0, 1}},
+            {"h", {-2, 0}},
+            {"l",  {2, 0}},
+        };
+        unordered_map<Key, array<int, 2>> key_dirs {
+            {Key::Up, {0, -1}},
+            {Key::Down,  {0, 1}},
+            {Key::Left, {-2, 0}},
+            {Key::Right,  {2, 0}},
+        };
+        bool results = false;
+        if (e.kind == Event::Kind::Text){
+            if (e.text == "q"){
+                running = false;
+                results = true;
+            }
+            if (e.text == "d"){
+                debug_is_shown = debug_surf.ToggleShown();
+                results = true;
+            }
+            auto itr = text_dirs.find(e.text);
+            if (itr != text_dirs.end()){
+                surf2_offset[0] += text_dirs[e.text][0];
+                surf2_offset[1] += text_dirs[e.text][1];
+                results = true;
+            }
         }
-        if (event.get_event("d")){
-            debug_is_shown = debug_surf.ToggleShown();
-        }
-        if (event.get_event("k") || event.get_event("Up")){
-            surf2_offset[1] -= 1;
-        }
-        if (event.get_event("j") || event.get_event("Down")){
-            surf2_offset[1] += 1;
-        }
-        if (event.get_event("h") || event.get_event("Left")){
-            surf2_offset[0] -= 1;
-        }
-        if (event.get_event("l") || event.get_event("Right")){
-            surf2_offset[0] += 1;
+        if (e.kind == Event::Kind::Key){
+            auto itr = key_dirs.find(e.key);
+            if (itr != key_dirs.end()){
+                surf2_offset[0] += key_dirs[e.key][0];
+                surf2_offset[1] += key_dirs[e.key][1];
+                results = true;
+            }
         }
         surf2.set_offset(surf2_offset[0], surf2_offset[1]);
+        return results;
     }
     void draw(){
         if (debug_is_shown){
@@ -187,18 +207,20 @@ public:
         tui(),
         event(tui.addSurface({0, 0}, {0, 0}, " ", 1000)),
         debug_surf(tui.addSurface(tui.getScreenSize(), {-tui.getScreenSize()[0], -tui.getScreenSize()[1]}, " ", 100), debug_format_str),
-        surf1(tui.addSurface({40, 10}, {20, 22}, " ", 90)),
+        surf1(tui.addSurface({40, 10}, {20, 22}, " ", 70)),
         lab1(surf1, surf1_text, {5, 2}), 
         surf2(tui.addSurface({40, 10}, surf2_offset, " ", 80)),
         lab2(surf2, surf2_text, {5, 2})
     {
         cout << "\x1b[?1049h" << endl;
-        event.register_keys({"q", "h", "j", "k", "l", "d", "Up", "Down", "Left", "Right"});
+        event.register_func([this](Event e){
+                return events(e);
+                });
         surf1.fill_fg(0xbf, 0xc1, 0xc8, 200);
         surf1.fill_bg(0x57, 0xA4, 0x90, 200);
 
         surf2.fill_fg(0xbf, 0xc1, 0xc8);
-        surf2.fill_bg(0x10,0x50, 0x10);
+        surf2.fill_bg(0x10,0x50, 0x10, 200);
         surf2.fill_style(styles::UNDERLINE | styles::BOLD);
         logger::info("[Main] starting up.");
     }
@@ -226,7 +248,6 @@ public:
                 values["FRAMES_SKIPPED"] = to_string(tui.skipedFrames);
             }
             draw();
-            events(); 
             frame_count += 1;
             clock.tick();
         }

@@ -16,14 +16,14 @@ inline void cheakVariables(const array<size_t, 2>& size, const string& ch){
         throw invalid_argument{"Defutlt Character must not be empty"};
     }
 }
-c_surface::c_surface(array<size_t, 2> size, string ch, int z, array<int, 2> offset, const vector<string>& keys, int id):z(z), r_cords{offset[0], offset[1]}, size{size[0], size[1]}, m_validKeys(&keys), id(id){
+c_surface::c_surface(array<size_t, 2> size, string ch, int z, array<int, 2> offset, int id):z(z), r_cords{offset[0], offset[1]}, size{size[0], size[1]}, id(id){
     cheakVariables(size, ch);
     defulat_ch = ch;
     c_cell chr;
     chr.set_ch(ch);
     surface.assign(size[0]*size[1], chr);
 }
-c_surface::c_surface(array<size_t, 2> size, string ch, int z, array<int, 2> offset):z(z), r_cords{offset[0], offset[1]}, size{size[0], size[1]}, m_validKeys(nullptr){
+c_surface::c_surface(array<size_t, 2> size, string ch, int z, array<int, 2> offset):z(z), r_cords{offset[0], offset[1]}, size{size[0], size[1]}{
     cheakVariables(size, ch);
     defulat_ch = ch;
     c_cell chr;
