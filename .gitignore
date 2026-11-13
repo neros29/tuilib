@@ -7,5 +7,4 @@ Docs/
 **/*.d
 logs/
 perf*
-BUGS.md
-test/
+*__pycache__*
