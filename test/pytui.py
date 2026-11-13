@@ -3,7 +3,7 @@ from logging import getLogger
 import sys
 import atexit
 from typing import Callable, Optional
-sys.path.append("../build/")
+sys.path.append("build/")
 from enum import Enum, auto
 
 import tui
@@ -17,7 +17,7 @@ levels = {
     50: "CRITICAL",
 }
 def log(level, msg):
-    with open("logs", "a") as f:
+    with open("logs/test-log", "a") as f:
         f.write(f"[{levels[level]}]{msg}\n")
 
 tui.set_logger(log)
