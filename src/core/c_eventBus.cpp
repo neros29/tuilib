@@ -11,11 +11,11 @@ c_eventBus::~c_eventBus(){}
 
 void c_eventBus::tick(int timeout_ms){
     std::vector<Event> events = m_inputDriver->d_getEvents(timeout_ms);
-    for (c_surface& surf : m_surfs){
-        if (surf.inputFunc == nullptr){
-            continue;
-        }
-        for (Event e : events){
+    for (Event e: events){
+        for (c_surface& surf : m_surfs){
+            if (surf.inputFunc == nullptr){
+                continue;
+            }
             if (surf.inputFunc(e)){
                 break;
             }

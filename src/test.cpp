@@ -148,7 +148,7 @@ Frames Skipped: {FRAMES_SKIPPED:5}
     unordered_map<string, string> values;
 
     Surface surf1;
-    string surf1_text = "Unicode test.\nそれん\nソレン\nSøren";
+    string surf1_text = "Unicode tést.\nそれん\nソレン\nSøren";
     Label lab1;
 
     array<int, 2> surf2_offset = {20, 12};

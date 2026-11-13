@@ -1,13 +1,235 @@
 #include "../core/drivers.h"
+#include <cstddef>
+#include <cstdint>
+#include <fstream>
+#include <ostream>
 #include <poll.h>
 #include <string>
 #include <unistd.h>
 #include <termios.h>
+#include <unordered_map>
+#include <utf8proc.h>
+#include <vector>
 
 using namespace drivers;
 using namespace std;
 using namespace core;
 
+std::unordered_map<char, Key> ctrl_map {};
+std::unordered_map<char, Key> ss3_last_byte_map {
+    {'A', Key::Up},
+    {'B', Key::Down},
+    {'C', Key::Left},
+    {'D', Key::Right},
+};
+std::unordered_map<char, Key> csi_last_byte_map {
+    {'A', Key::Up},
+    {'B', Key::Down},
+    {'C', Key::Left},
+    {'D', Key::Right},
+};
+
+static void dump_debug(string& m_buff, State& state, Data& data, size_t index, string msg, string func){
+    fstream file("logs/debug-dump", ios::app);
+    file << "=============" << msg  << "=============" << endl;
+    file << "BUFF: '" << m_buff << "'" << endl;
+    file << "DATA: 'EVENT: Kind = " << to_string(static_cast<uint8_t>(data.event.kind));
+    file << " modifers = " << to_string(static_cast<uint8_t>(data.event.modifer));
+    file << " text = '" << data.event.text << "'";
+    file << " Key = " << to_string(static_cast<uint8_t>(data.event.key));
+    file << endl;
+    file << "INDEX: " << index << endl;
+    file << "STATE:  " << to_string(static_cast<uint8_t>(state)) << endl;
+    file.flush();
+    file.close();
+}
+static size_t ground(string& m_buff, State& state, Data& data, size_t index){
+    for (size_t i = index; i < m_buff.size(); i++){
+        char& ch = m_buff[i];
+        if (ch >= '\x20' && ch <= '\x7e'){ // Check if character is in printable ASCII
+            if (data.has_data()){
+                data.push(); // Push since multiple ASCII in a row are separate events.
+            } 
+            data.event.kind = Kind::Text;
+            data.event.text = string(1, ch);
+            continue;
+        } 
+        else if (ch == '\x1b'){ // Check if character is the escape character.
+            if (data.has_data()){
+                data.push(); // Push since this is the start of a new sequence.
+            }
+            state = State::Esc;
+            return i;
+        } 
+        else if (ctrl_map.find(ch) != ctrl_map.end()){ // check if character is the control map
+            if (data.has_data()){
+                data.push(); // Push since a ctrl character is always independent.
+            }
+            data.clear();
+            continue;
+        }
+        else if (ch >= '\xC2' && ch <= '\xF4'){ // Check if character is a Unicode first byte.
+            state = State::Utf8;
+            return i;
+        }
+        else { //Unknown data move on.
+            if (data.has_data()){
+                data.push(); // since this byte was unknown there is no chance later bytes can affect this event.
+            }
+            continue;
+        }
+    }
+    return m_buff.size();
+}
+static size_t esc(string& m_buff, State& state, Data& data, size_t index){ // implement lone escape key detection.
+    index += 1;
+    char& ch = m_buff[index];
+    switch (ch){
+        case '[':
+            state = State::Csi;
+            break;
+        case 'O':
+            state = State::Ss3;
+            break;
+        case ']':
+           state = State::String;
+            break;
+        case 'P':
+           state = State::String;
+            break;
+        case '_':
+           state = State::String;
+            break;
+        case '^':
+           state = State::String;
+            break;
+        case 'X':
+           state = State::String; 
+            break;
+        default:
+           data.event.kind = Kind::Key;
+           data.event.key = Key::PlaceHolder;
+           data.event.modifer = modifers::alt | data.event.modifer;
+           state = State::Ground;
+    }
+    return index;
+}
+static size_t ss3(string& m_buff, State& state, Data& data, size_t index){ 
+    index += 1;
+    char& ch = m_buff[index];
+    if (ss3_last_byte_map.find(ch) != ss3_last_byte_map.end()){
+       data.event.kind = Kind::Key;
+       data.event.key = ss3_last_byte_map[ch];
+       data.event.modifer = modifers::none;
+    } 
+    else {
+        logger::warn("SS3 End Byte " + string(1, ch) + " Is not in table.");
+    }
+    state = State::Ground;
+    return index + 1;
+}
+static size_t csi(string& m_buff, State& state, Data& data, size_t index){ 
+    int start = -1;
+    int number = -1;
+    state = State::Ground;
+    for (size_t i = index + 1; i < m_buff.size(); i++){
+        char& ch = m_buff[i];
+        if (0x30 <= ch && ch <= 0x39){ // is digit
+            if (start == -1){
+                start = i;
+            }
+        }
+        if (ch == ';'){
+            if (start == -1){
+                number = 0;
+            }
+            else {
+                number = stoi(m_buff.substr(start, i - start));
+                start = -1;
+            }
+        }
+        if (0x40 <= ch && ch <= 0x7E){
+            if (csi_last_byte_map.find(ch) != csi_last_byte_map.end()){
+                if (start != -1){
+                    data.event.modifer = static_cast<modifers>(stoi(m_buff.substr(start, i - start)) - 1);
+                }
+                data.event.kind = Kind::Key;
+                data.event.key = csi_last_byte_map[ch];
+            }
+            return i + 1;
+        }
+    }
+    return m_buff.size();
+}
+static size_t utf8(string& m_buff, State& state, Data& data, size_t index){ // TODO make this function work better. Specifically zwj, as well as end of string cases.
+    char first_byte = m_buff[index];
+    int codepoint_len = InputString::get_byte_len(first_byte);
+    if (codepoint_len > 4){
+        dump_debug(m_buff, state, data, index, "Too long Unicode code point found.", "utf8");
+        logger::warn("Too long Unicode code point found.");
+        return index;
+    }
+    char codepoint[5] {first_byte, '\0', '\0', '\0', '\0'};
+    for (size_t i = index  + 1; i <= m_buff.size(); i++){
+        if (i - (index + 1) >= codepoint_len - 1){
+            utf8proc_int32_t cp;
+            int consumed = utf8proc_iterate(reinterpret_cast<utf8proc_uint8_t*>(codepoint), 4, &cp);
+            if (consumed < 0){ // invalid UTF-8
+                dump_debug(m_buff, state, data, i, "Invalid utf8 bytes.", "utf8");
+                logger::warn("Invalid utf8 bytes.");
+                return i;
+            } 
+            int catagory = utf8proc_category(cp);
+            if (catagory == UTF8PROC_CATEGORY_MC || catagory == UTF8PROC_CATEGORY_ME || catagory == UTF8PROC_CATEGORY_MN){
+                data.event.text += string(codepoint);
+            } 
+            else if (cp == 0x200D){
+                data.event.text += string(codepoint);
+            } 
+            else {
+                if (data.has_data()){
+                    data.push();
+                }
+                data.event.kind = Kind::Text;
+                data.event.text += string(codepoint);
+            }
+            state = State::Ground;
+            return i;
+        }
+        if (i - index < 5){
+            codepoint[i - index] = m_buff[i];
+        } else {
+            logger::warn("Something went wrong");
+        }
+    }
+    logger::warn("Something went wrong");
+    return m_buff.size();
+}
+static void parseInput(string& buffer, State& s, Data& d){
+    int idx = 0;
+    while (idx < buffer.size()){
+        switch (s){
+            case State::Ground:
+                idx = ground(buffer, s, d, idx);
+                break;
+            case State::Utf8:
+                idx = utf8(buffer, s, d, idx);
+                break;
+            case State::Esc:
+                idx = esc(buffer, s, d, idx);
+                break;
+            case State::Ss3:
+                idx = ss3(buffer, s, d, idx);
+                break;
+            case State::Csi:
+                idx = csi(buffer, s, d, idx);
+                break;
+            default:
+                logger::error("No function defined for state: " + to_string(static_cast<uint8_t>(s)));
+        }
+    }
+    d.push();
+}
 static int checkstdin(int timeout_ms){
     struct pollfd stdin_fd = {0, POLLIN, 0};
     int code = poll(&stdin_fd, 1, timeout_ms);
@@ -44,6 +266,7 @@ static string m_getCap(const char* name){
         if (s == (char*)-1 || s == nullptr) return {};
         return std::string(s);
 }
+
 void d_default_input::m_setRawMode() {
     tcgetattr(STDIN_FILENO, &m_old);
     termios t = m_old;
@@ -74,7 +297,8 @@ void d_default_input::m_add(std::string key, Key value){
         return;
     }
     logger::debug("Added key: " + to_string((uint32_t)value));
-    m_keydb[key] = value;
+    csi_last_byte_map[key[key.size() - 1]] = value;
+    ss3_last_byte_map[key[key.size() - 1]] = value;
 }
 void d_default_input::m_fillDb(){
     m_add(m_getCap("kcuu1"), Key::Up);
@@ -114,7 +338,7 @@ void d_default_input::m_fillDb(){
 }
 void d_default_input::m_addCtrl(char k, char v){
     logger::debug("[d_default_input][fillCtrldb] Added Ctrl + " + string() + v + " key with Byte: " + to_string(k));
-    m_asciiCtrldb[k] = v;
+    ctrl_map[k] = Key::PlaceHolder;
 }
 void d_default_input::m_fillCtrldb(){
     // genraly speaking last character wins. I am still leaving every character even ones that match keys, just for completeness.
@@ -152,115 +376,17 @@ void d_default_input::m_fillCtrldb(){
 }
 // ===========================================
 vector<Event> d_default_input::d_getEvents(int timeout_ms){
-    vector<Event> results {};
+    m_events.clear();
     if (!checkstdin(timeout_ms)){
-        return results;
+        return m_events;
     }
     m_buff += getData();
-
-    char esc = '\x1b';
-    char ss3 = '\x4f';
-    char csi = '\x5b';
-    bool was_esc {false};
-    bool in_esc {false};
-    bool was_mod {false};
-    static int wait {0};
-    std::string possable_ends = {"ABCDEFHPQRS~"};
-    std::string event_buff;
-    modifers modifer = modifers::none;
-    for (char& ch : m_buff){
-        if (wait > 0){
-            event_buff += ch;
-            wait --;
-            continue;
-        }
-        if (was_esc){
-            if (ch == ss3){
-                in_esc = true;
-                event_buff += ch;
-            } else if (ch == csi){
-                in_esc = true;
-                event_buff += ch;
-            } else{
-                results.push_back(Event{Kind::Text, modifers::alt, string() + ch});
-                event_buff.clear();
-            } 
-            was_esc = false;
-            continue;
-        }
-        else if (in_esc){
-            if (ch == ';'){
-                if (event_buff[event_buff.size() - 1] == '1'){
-                    event_buff.pop_back();
-                }
-                was_mod = true;
-                continue;
-            }
-            if (was_mod){
-                modifer = static_cast<modifers>(stoi(string() + ch) - 1);
-                was_mod = false;
-                continue;
-            }
-            size_t i = possable_ends.find(ch);
-            event_buff += ch;
-            if (i >= possable_ends.size()){
-                continue;
-            }
-            else if (possable_ends[i] == '~'){
-                if (event_buff[1] != csi){
-                    continue;
-                }
-            }
-            else if (possable_ends[i] == 'R'){
-                if (event_buff[1] != ss3){
-                    continue;
-                }
-            } else if (i < possable_ends.size()){
-                if (event_buff[1] != ss3 && event_buff[1] != csi){
-                    continue;
-                }
-            }
-            auto it = m_keydb.find(event_buff);
-            if (it != m_keydb.end()){
-                logger::debug("[d_default_input][getEvents] Key: modifer: "  + to_string((uint8_t)modifer) + " key: " + to_string((uint32_t)it->second));
-                results.push_back(Event{Kind::Key, modifer, "", it->second});
-            } else {
-                logger::debug("[d_default_input][getEvents] Key: '" + event_buff + "' was not found.");
-            }
-            event_buff.clear();
-            in_esc = false;
-            modifer = modifers::none;
-        }
-        else if (ch == esc){
-            was_esc = true;
-            event_buff += ch;
-        } 
-        else if (InputString::get_byte_len(static_cast<unsigned char>(ch)) > 1){
-            event_buff += ch;
-            wait = InputString::get_byte_len(static_cast<unsigned char>(ch)) - 2;
-        } 
-        else if (!event_buff.empty()){
-            event_buff += ch;
-            results.push_back(Event{Kind::Text, modifer, event_buff});
-            event_buff.clear();
-        } else if (auto it = m_asciiCtrldb.find(ch); it != m_asciiCtrldb.end()){
-            logger::debug("Ctrl key hit: " + string() + it->second);
-            results.push_back(Event{Kind::Text, modifer | modifers::ctrl, string() + it->second});
-        }
-        else {
-            std::string lower{ch};
-            if ('A' <= ch && ch <= 'Z'){
-                modifer = modifers::shift;
-                lower = ch + ('a' - 'A');
-            }
-            results.push_back(Event{Kind::Text, modifer, lower});
-        }
-    }
+    parseInput(m_buff, m_state, m_data);
+    m_state = State::Ground;
     m_buff.clear();
-    m_buff += event_buff;
-    return results;
+    return m_events;
 }
-d_default_input::d_default_input(){
+d_default_input::d_default_input(): m_data(m_events){
     m_setRawMode();
     m_fillDb();
     m_fillCtrldb();

@@ -86,8 +86,9 @@ enum class Key : uint32_t{
     F10,
     F11,
     F12,
+    PlaceHolder,
 };
-enum class Kind { Key, Text };
+enum class Kind: uint8_t { Key, Text };
 struct Event{
     Kind kind;
     modifers modifer;

@@ -20,7 +20,15 @@ SOURCES = \
 	src/api/api.cpp \
 	src/api/surface.cpp\
 	src/test.cpp
-
+# Temp source
+# SOURCES = \
+# 	src/core/rendering/Screen.cpp \
+# 	src/core/impl/c_surfaces.cpp \
+# 	src/core/rendering/c_surface.cpp \
+# 	src/core/rendering/c_cell.cpp \
+# 	src/core/utils/InputString.cpp \
+# 	src/core/c_eventBus.cpp\
+# 	test.cpp
 # Object / dependency files
 OBJECTS = $(SOURCES:.cpp=.o)
 DEPS    = $(OBJECTS:.o=.d)

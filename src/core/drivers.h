@@ -13,6 +13,31 @@
 #include <termios.h>
 
 namespace drivers {
+    enum State : uint8_t{
+        Ground = 0,
+        Utf8 = 1,
+        Esc = 2,
+        Csi = 3,
+        Ss3 = 4,
+        String = 5,
+        Paste = 6,
+    };
+
+    struct Data{
+        Event event{Kind::Text, modifers::none, "", Key::NONE};
+        std::vector<Event>& events;
+        Data(std::vector<Event>& i_events): events(i_events){}
+        void clear(){
+            event = Event{Kind::Text, modifers::none, "", Key::NONE};
+        }
+        bool has_data(){
+            return (event.kind == Kind::Text && event.text.size() > 0) || (event.kind == Kind::Key && event.key != Key::NONE);
+        }
+        void push(){
+            events.push_back(event);
+            clear();
+        }
+    };
     class d_screen{
     public:
         virtual ~d_screen(){};
@@ -33,6 +58,9 @@ namespace drivers {
         std::string m_buff;
         std::unordered_map<std::string, Key> m_keydb;
         std::unordered_map<char, char> m_asciiCtrldb;
+        std::vector<Event> m_events {};
+        Data m_data;
+        State m_state;
         void m_addCtrl(char k, char v);
         void m_fillCtrldb();
         void m_fillDb();

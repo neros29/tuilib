@@ -56,12 +56,12 @@ class Key(int):
     F4 = 15
     F5 = 16
     F6 = 17
-    F7 = 19
-    F8 = 20
-    F9 = 21
-    F10 = 22
-    F11 = 23
-    F12 = 24
+    F7 = 18
+    F8 = 19
+    F9 = 20
+    F10 = 21
+    F11 = 22
+    F12 = 23
 
 class modifers(int):
     none =      0
