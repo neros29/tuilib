@@ -17,7 +17,7 @@ class Main:
         self.lab = pytui.Label(self.surf, "hello world", [0, 0])
         self.index = 0
         self.running = True
-        self.wait = 0.005
+        self.wait = 0.05
         self.new = True
 
     @pytui.register_func_wrapper
@@ -35,7 +35,7 @@ class Main:
 
     def send_event(self, events: list[str]):
         for i in events:
-            cmd = ['kitten', '@', 'send-text', '--match-tab', 'index:1', i]
+            cmd = ['kitten', '@', 'send-text', '--match-tab', f'id:{os.getenv("KITTY_WINDOW_ID")}', i]
             subprocess.run(cmd); 
         sent = ', '.join([repr(e) for e in events])
         pytui.log(10, f"Sent [{sent}]")
