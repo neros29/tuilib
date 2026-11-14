@@ -1,6 +1,5 @@
 #include <array>
 #include <fstream>
-#include <memory>
 #include <string>
 #include <term.h>
 #include <unistd.h>
@@ -148,7 +147,7 @@ Frames Skipped: {FRAMES_SKIPPED:5}
     unordered_map<string, string> values;
 
     Surface surf1;
-    string surf1_text = "Unicode tést.\nそれん\nソレン\nSøren";
+    string surf1_text = "Unicode test.\nそれん\nソレン\nSøren";
     Label lab1;
 
     array<int, 2> surf2_offset = {20, 12};
@@ -164,10 +163,10 @@ Frames Skipped: {FRAMES_SKIPPED:5}
             {"l",  {2, 0}},
         };
         unordered_map<Key, array<int, 2>> key_dirs {
-            {Key::Up, {0, -1}},
-            {Key::Down,  {0, 1}},
-            {Key::Left, {-2, 0}},
-            {Key::Right,  {2, 0}},
+            {Key::UP, {0, -1}},
+            {Key::DOWN,  {0, 1}},
+            {Key::LEFT, {-2, 0}},
+            {Key::RIGHT,  {2, 0}},
         };
         bool results = false;
         if (e.kind == Kind::Text){

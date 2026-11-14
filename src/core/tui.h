@@ -62,32 +62,21 @@ inline bool operator&(modifers lhs, modifers rhs) {
     );
 }
 enum class Key : uint32_t{
-    NONE,
-    Up,
-    Down,
-    Left,
-    Right,
-    Home,
-    End,
-    Delete,
-    Insert,
-    PageUp,
-    PageDown,
-    Backspace,
-    F1,
-    F2,
-    F3,
-    F4,
-    F5,
-    F6,
-    F7,
-    F8,
-    F9,
-    F10,
-    F11,
-    F12,
-    PlaceHolder,
+#define U_KEY(name, id, text) name = id,
+#include "../../templates/key.def"
+#undef U_KEY
 };
+namespace std {
+    inline std::string to_string(Key a){
+        switch (a){
+#define U_KEY(name, id, text)\
+            case static_cast<Key>(id): return text;
+#include "../../templates/key.def"
+#undef U_KEY
+        }
+        return "NONE";
+    }
+}
 enum class Kind: uint8_t { Key, Text };
 struct Event{
     Kind kind;

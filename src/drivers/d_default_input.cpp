@@ -16,18 +16,9 @@ using namespace std;
 using namespace core;
 
 std::unordered_map<char, Key> ctrl_map {};
-std::unordered_map<char, Key> ss3_last_byte_map {
-    {'A', Key::Up},
-    {'B', Key::Down},
-    {'C', Key::Left},
-    {'D', Key::Right},
-};
-std::unordered_map<char, Key> csi_last_byte_map {
-    {'A', Key::Up},
-    {'B', Key::Down},
-    {'C', Key::Left},
-    {'D', Key::Right},
-};
+std::unordered_map<char, Key> ss3_last_byte_map {};
+std::unordered_map<char, Key> csi_last_byte_map {};
+std::unordered_map<int, Key> csi_parm_map {};
 
 static void dump_debug(string& m_buff, State& state, Data& data, size_t index, string msg, string func){
     fstream file("logs/debug-dump", ios::app);
@@ -65,7 +56,9 @@ static size_t ground(string& m_buff, State& state, Data& data, size_t index){
             if (data.has_data()){
                 data.push(); // Push since a ctrl character is always independent.
             }
-            data.clear();
+            data.event.key = ctrl_map[ch];
+            data.event.modifer = data.event.modifer | modifers::ctrl;
+            data.event.kind = Kind::Key;
             continue;
         }
         else if (ch >= '\xC2' && ch <= '\xF4'){ // Check if character is a Unicode first byte.
@@ -83,7 +76,12 @@ static size_t ground(string& m_buff, State& state, Data& data, size_t index){
 }
 static size_t esc(string& m_buff, State& state, Data& data, size_t index){ // implement lone escape key detection.
     index += 1;
+    if (index >= m_buff.size()){
+        data.exit = true;
+        return index - 1;
+    }
     char& ch = m_buff[index];
+    logger::debug("ch: " + string(ch, 1));
     switch (ch){
         case '[':
             state = State::Csi;
@@ -92,25 +90,26 @@ static size_t esc(string& m_buff, State& state, Data& data, size_t index){ // im
             state = State::Ss3;
             break;
         case ']':
-           state = State::String;
+            state = State::String;
             break;
         case 'P':
-           state = State::String;
+            state = State::String;
             break;
         case '_':
-           state = State::String;
+            state = State::String;
             break;
         case '^':
-           state = State::String;
+            state = State::String;
             break;
         case 'X':
-           state = State::String; 
+            state = State::String; 
             break;
         default:
-           data.event.kind = Kind::Key;
-           data.event.key = Key::PlaceHolder;
-           data.event.modifer = modifers::alt | data.event.modifer;
-           state = State::Ground;
+            data.event.kind = Kind::Key;
+            data.event.key = static_cast<Key>(ch);
+            data.event.modifer = modifers::alt | data.event.modifer;
+            state = State::Ground;
+            return index + 1;
     }
     return index;
 }
@@ -131,7 +130,6 @@ static size_t ss3(string& m_buff, State& state, Data& data, size_t index){
 static size_t csi(string& m_buff, State& state, Data& data, size_t index){ 
     int start = -1;
     int number = -1;
-    state = State::Ground;
     for (size_t i = index + 1; i < m_buff.size(); i++){
         char& ch = m_buff[i];
         if (0x30 <= ch && ch <= 0x39){ // is digit
@@ -139,7 +137,7 @@ static size_t csi(string& m_buff, State& state, Data& data, size_t index){
                 start = i;
             }
         }
-        if (ch == ';'){
+        else if (ch == ';'){
             if (start == -1){
                 number = 0;
             }
@@ -148,18 +146,27 @@ static size_t csi(string& m_buff, State& state, Data& data, size_t index){
                 start = -1;
             }
         }
-        if (0x40 <= ch && ch <= 0x7E){
+        else if (0x40 <= ch && ch <= 0x7E){
+            if (start != -1 && number != -1){
+                data.event.modifer = static_cast<modifers>(stoi(m_buff.substr(start, i - start)) - 1);
+            }
+            else if (start != -1 && number == -1){
+                number = stoi(m_buff.substr(start, i - start));
+            }
             if (csi_last_byte_map.find(ch) != csi_last_byte_map.end()){
-                if (start != -1){
-                    data.event.modifer = static_cast<modifers>(stoi(m_buff.substr(start, i - start)) - 1);
-                }
                 data.event.kind = Kind::Key;
                 data.event.key = csi_last_byte_map[ch];
+            } 
+            else if (csi_parm_map.find(number) != csi_parm_map.end()){
+                data.event.kind = Kind::Key;
+                data.event.key = csi_parm_map[number];
             }
+            state = State::Ground;
             return i + 1;
         }
     }
-    return m_buff.size();
+    data.exit = true;
+    return index;
 }
 static size_t utf8(string& m_buff, State& state, Data& data, size_t index){ // TODO make this function work better. Specifically zwj, as well as end of string cases.
     char first_byte = m_buff[index];
@@ -203,11 +210,15 @@ static size_t utf8(string& m_buff, State& state, Data& data, size_t index){ // T
         }
     }
     logger::warn("Something went wrong");
-    return m_buff.size();
+    return index;
 }
-static void parseInput(string& buffer, State& s, Data& d){
+static size_t parseInput(string& buffer, State& s, Data& d){
     int idx = 0;
     while (idx < buffer.size()){
+        if (d.exit){
+            d.exit = false;
+            break;
+        }
         switch (s){
             case State::Ground:
                 idx = ground(buffer, s, d, idx);
@@ -228,7 +239,10 @@ static void parseInput(string& buffer, State& s, Data& d){
                 logger::error("No function defined for state: " + to_string(static_cast<uint8_t>(s)));
         }
     }
-    d.push();
+    if (d.has_data()){
+        d.push();
+    }
+    return idx;
 }
 static int checkstdin(int timeout_ms){
     struct pollfd stdin_fd = {0, POLLIN, 0};
@@ -291,88 +305,57 @@ void d_default_input::m_restoreMode() {
     std::string rmkx = m_getCap("rmkx");
     if (!rmkx.empty()) putp(const_cast<char*>(rmkx.c_str()));
 }
-void d_default_input::m_add(std::string key, Key value){
-    if (key.empty()){
-        logger::info("Key: " + to_string((uint32_t)value) + " Dose not exist in terminfo.");
-        return;
-    }
-    logger::debug("Added key: " + to_string((uint32_t)value));
-    csi_last_byte_map[key[key.size() - 1]] = value;
-    ss3_last_byte_map[key[key.size() - 1]] = value;
-}
 void d_default_input::m_fillDb(){
-    m_add(m_getCap("kcuu1"), Key::Up);
-    m_add(m_getCap("kcud1"), Key::Down);
-    m_add(m_getCap("kcub1"), Key::Left);
-    m_add(m_getCap("kcuf1"), Key::Right);
-    // arrow with modifiers
-    m_add(m_getCap("cuu1"), Key::Up);
-    m_add(m_getCap("cud1"), Key::Down);
-    m_add(m_getCap("cub1"), Key::Left);
-    m_add(m_getCap("cuf1"), Key::Right);
-
-    m_add(m_getCap("khome"), Key::Home);
-    // with modifiers
-    m_add(m_getCap("home"), Key::Home);
-
-    m_add(m_getCap("kend"),  Key::End);
-
-    m_add(m_getCap("kdch1"), Key::Delete);
-    m_add(m_getCap("kich1"), Key::Insert);
-    m_add(m_getCap("kpp"),   Key::PageUp);
-    m_add(m_getCap("knp"),   Key::PageDown);
-    m_add(m_getCap("kbs"),   Key::Backspace);
-    // f keys.
-    m_add(m_getCap("kf1"),   Key::F1);
-    m_add(m_getCap("kf2"),   Key::F2);
-    m_add(m_getCap("kf3"),   Key::F3);
-    m_add(m_getCap("kf4"),   Key::F4);
-    m_add(m_getCap("kf5"),   Key::F5);
-    m_add(m_getCap("kf6"),   Key::F6);
-    m_add(m_getCap("kf7"),   Key::F7);
-    m_add(m_getCap("kf8"),   Key::F8);
-    m_add(m_getCap("kf9"),   Key::F9);
-    m_add(m_getCap("kf10"),  Key::F10);
-    m_add(m_getCap("kf11"),  Key::F11);
-    m_add(m_getCap("kf12"),  Key::F12);
+#define KEY(name, id, type, param, last_byte)\
+    if (type == "CSI"){\
+        if (last_byte == '~'){\
+            csi_parm_map[param] = Key::name;\
+        } else {\
+            csi_last_byte_map[last_byte] = Key::name;\
+        }\
+    } else if (type == "SS3"){\
+        ss3_last_byte_map[last_byte] = Key::name;\
+    } 
+#include "../../templates/data.def"
+#undef KEY
 }
-void d_default_input::m_addCtrl(char k, char v){
-    logger::debug("[d_default_input][fillCtrldb] Added Ctrl + " + string() + v + " key with Byte: " + to_string(k));
-    ctrl_map[k] = Key::PlaceHolder;
+void m_addCtrl(char k, Key v){
+    logger::debug("[d_default_input][fillCtrldb] Added Ctrl + " + to_string(v) + " key with Byte: " + to_string(k));
+    ctrl_map[k] = v;
 }
 void d_default_input::m_fillCtrldb(){
     // genraly speaking last character wins. I am still leaving every character even ones that match keys, just for completeness.
-    m_addCtrl(0, '@');  
-    m_addCtrl(0, ' ');
-    m_addCtrl(0, '2');
+    // m_addCtrl(0, '@');  
+    // m_addCtrl(0, ' ');
+    // m_addCtrl(0, '2');
 
     std::string alphabet = "abcdefghijklmnopqrstuvwxyz";
     for (int i = 1; i <= 26; i ++){ // add the alphabet since it's a simple order
-        m_addCtrl(i, alphabet[i - 1]);
+        m_addCtrl(i, static_cast<Key>(alphabet[i - 1]));
     }
-    m_addCtrl(27, '[');  
-    m_addCtrl(27, '3');  
-
-    m_addCtrl(28, '\\');
-
-    m_addCtrl(29, ']');  
-    m_addCtrl(29, '5');  
-
-    m_addCtrl(30, '~');
-    m_addCtrl(30, '^');  
-    m_addCtrl(30, '6');  
-
-    m_addCtrl(31, '_');
-    m_addCtrl(31, '/');
-    m_addCtrl(31, '7');
-
-    m_addCtrl(48, '0');  
-    m_addCtrl(49, '1');
-    m_addCtrl(57, '9');  
-
+    // m_addCtrl(27, '[');  
+    // m_addCtrl(27, '3');  
+    //
+    // m_addCtrl(28, '\\');
+    //
+    // m_addCtrl(29, ']');  
+    // m_addCtrl(29, '5');  
+    //
+    // m_addCtrl(30, '~');
+    // m_addCtrl(30, '^');  
+    // m_addCtrl(30, '6');  
+    //
+    // m_addCtrl(31, '_');
+    // m_addCtrl(31, '/');
+    // m_addCtrl(31, '7');
+    //
+    // m_addCtrl(48, '0');  
+    // m_addCtrl(49, '1');
+    // m_addCtrl(57, '9');  
+    //
     // 127
-    m_addCtrl(127, '?');
-    m_addCtrl(127, '8');  
+    // m_addCtrl(127, '?');
+    // m_addCtrl(127, Key::DELETE);  
 }
 // ===========================================
 vector<Event> d_default_input::d_getEvents(int timeout_ms){
@@ -381,9 +364,8 @@ vector<Event> d_default_input::d_getEvents(int timeout_ms){
         return m_events;
     }
     m_buff += getData();
-    parseInput(m_buff, m_state, m_data);
-    m_state = State::Ground;
-    m_buff.clear();
+    size_t idx = parseInput(m_buff, m_state, m_data);
+    m_buff.erase(m_buff.begin(), m_buff.begin() + idx);
     return m_events;
 }
 d_default_input::d_default_input(): m_data(m_events){

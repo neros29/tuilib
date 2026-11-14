@@ -24,6 +24,7 @@ namespace drivers {
     };
 
     struct Data{
+        bool exit {false};
         Event event{Kind::Text, modifers::none, "", Key::NONE};
         std::vector<Event>& events;
         Data(std::vector<Event>& i_events): events(i_events){}
@@ -61,10 +62,8 @@ namespace drivers {
         std::vector<Event> m_events {};
         Data m_data;
         State m_state;
-        void m_addCtrl(char k, char v);
         void m_fillCtrldb();
         void m_fillDb();
-        void m_add(std::string key, Key value);
         void m_setRawMode();
         void m_restoreMode();
     public:
@@ -149,7 +148,7 @@ namespace drivers {
         }
     public:
         d_defualt_screen(){
-            m_file.open("/dev/stdout");
+            m_file.open("/dev/tty");
         };
         ~d_defualt_screen() override {
             m_file.close();

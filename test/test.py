@@ -17,7 +17,7 @@ class Main:
         self.lab = pytui.Label(self.surf, "hello world", [0, 0])
         self.index = 0
         self.running = True
-        self.wait = 0.05
+        self.wait = 0.5
         self.new = True
 
     @pytui.register_func_wrapper
@@ -50,13 +50,19 @@ class Main:
     def run(self):
         self.lab.update()
         start = time.perf_counter()
+        events = []
         while self.running:
+            if events:
+                self.send_event([events.pop()])
+
             if self.new:
                 # pytui.log(10, f"Got all text in {time.perf_counter() - start} seconds")
                 pytui.log(10, f"{'=' * 20} Starting Test {self.index} {'=' * 20}")
-                self.send_event(self.test_events[self.index][0])
+                events = self.test_events[self.index][0].copy()
+                events.reverse()
                 start = time.perf_counter()
                 self.new = False
+                self.tui.update(0);
 
             if time.perf_counter() > start + self.wait:
                 pytui.log(10, "Input timed out.")
@@ -85,47 +91,47 @@ events.append((['👍'], [make_event({"type": "text", "text": "👍"})]))
 # events.append((['\xff'], []))
 # events.append((['\r'], [make_event({"type": "key", "key": pytui.Key.Enter})]))
 # events.append((['\t'], [make_event({"type": "key", "key": pytui.Key.Tab})]))
-
-events.append((['\x08'], [make_event({"type": "key", "key": pytui.Key.Backspace})]))
-events.append((['\x7f'], [make_event({"type": "key", "key": pytui.Key.Backspace})]))
+#
+# events.append((['\x08'], [make_event({"type": "key", "key": pytui.Key.BACKSPACE})]))
+# events.append((['\x7f'], [make_event({"type": "key", "key": pytui.Key.BACKSPACE})]))
 
 # events.append((['\x00'], [make_event({"type": "key", "key": pytui.Key.Space, "modifier": pytui.modifers.ctrl})]))
-# events.append((['\x01'], [make_event({"type": "key", "key": pytui.Key.A, "modifier": pytui.modifers.ctrl})]))
+events.append((['\x01'], [make_event({"type": "key", "key": pytui.Key.K_A, "modifier": pytui.modifers.ctrl})]))
 
 events.append((['0', '1', '9'], [make_event({"type": "text", "text": "0"}), make_event({"type": "text", "text": "1"}),  make_event({"text": "9", "type": "text"})]))
 
 # events.append((['\x1b'], [make_event({"type": "key", "key": pytui.Key.Escape})]))
-# events.append((['\x1b', 'a'], [make_event({"type": "key", "key": pytui.Key.a, "modifier": pytui.modifers.alt})]))
-# events.append((['\x1bx'], [make_event({"type": "key", "key": pytui.Key.x, "modifier": pytui.modifers.alt})]))
-events.append((['\x1b\x7f'], [make_event({"type": "key", "key": pytui.Key.Backspace, "modifier": pytui.modifers.alt})]))
+events.append((['\x1b', 'a'], [make_event({"type": "key", "key": pytui.Key.K_A, "modifier": pytui.modifers.alt})]))
+events.append((['\x1bx'], [make_event({"type": "key", "key": pytui.Key.K_X, "modifier": pytui.modifers.alt})]))
+# events.append((['\x1b\x7f'], [make_event({"type": "key", "key": pytui.Key.BACKSPACE, "modifier": pytui.modifers.alt})]))
 # events.append((['\x1b\r'], [make_event({"type": "key", "key": pytui.Key.Enter, "modifier": pytui.modifers.alt})]))
-events.append((['\x1bOA'], [make_event({"type": "key", "key": pytui.Key.Up})]))
-events.append((['\x1b[A'], [make_event({"type": "key", "key": pytui.Key.Up})]))
-events.append((['\x1bOB'], [make_event({"type": "key", "key": pytui.Key.Down})]))
-events.append((['\x1b[B'], [make_event({"type": "key", "key": pytui.Key.Down})]))
-events.append((['\x1bOC'], [make_event({"type": "key", "key": pytui.Key.Right})]))
-events.append((['\x1b[C'], [make_event({"type": "key", "key": pytui.Key.Right})]))
-events.append((['\x1bOD'], [make_event({"type": "key", "key": pytui.Key.Left})]))
-events.append((['\x1b[D'], [make_event({"type": "key", "key": pytui.Key.Left})]))
+events.append((['\x1bOA'], [make_event({"type": "key", "key": pytui.Key.UP})]))
+events.append((['\x1b[A'], [make_event({"type": "key", "key": pytui.Key.UP})]))
+events.append((['\x1bOB'], [make_event({"type": "key", "key": pytui.Key.DOWN})]))
+events.append((['\x1b[B'], [make_event({"type": "key", "key": pytui.Key.DOWN})]))
+events.append((['\x1bOC'], [make_event({"type": "key", "key": pytui.Key.RIGHT})]))
+events.append((['\x1b[C'], [make_event({"type": "key", "key": pytui.Key.RIGHT})]))
+events.append((['\x1bOD'], [make_event({"type": "key", "key": pytui.Key.LEFT})]))
+events.append((['\x1b[D'], [make_event({"type": "key", "key": pytui.Key.LEFT})]))
 
-events.append((['\x1b[A\x1b[A'], [make_event({"type": "key", "key": pytui.Key.Up}), make_event({"type": "key", "key": pytui.Key.Up})]))
-events.append((['\x1b[', 'A'], [make_event({"type": "key", "key": pytui.Key.Up})]))
-events.append((['\x1b', '[', 'A'], [make_event({"type": "key", "key": pytui.Key.Up})]))
+events.append((['\x1b[A\x1b[A'], [make_event({"type": "key", "key": pytui.Key.UP}), make_event({"type": "key", "key": pytui.Key.UP})]))
+events.append((['\x1b[', 'A'], [make_event({"type": "key", "key": pytui.Key.UP})]))
+events.append((['\x1b', '[', 'A'], [make_event({"type": "key", "key": pytui.Key.UP})]))
 
-events.append((['\x1b[7~'], [make_event({"type": "key", "key": pytui.Key.Home})]))
-events.append((['\x1b[1~'], [make_event({"type": "key", "key": pytui.Key.Home})]))
-events.append((['\x1bOH'], [make_event({"type": "key", "key": pytui.Key.Home})]))
-events.append((['\x1b[H'], [make_event({"type": "key", "key": pytui.Key.Home})]))
+events.append((['\x1b[7~'], [make_event({"type": "key", "key": pytui.Key.HOME})]))
+events.append((['\x1b[1~'], [make_event({"type": "key", "key": pytui.Key.HOME})]))
+events.append((['\x1bOH'], [make_event({"type": "key", "key": pytui.Key.HOME})]))
+events.append((['\x1b[H'], [make_event({"type": "key", "key": pytui.Key.HOME})]))
 
-events.append((['\x1b[8~'], [make_event({"type": "key", "key": pytui.Key.End})]))
-events.append((['\x1b[4~'], [make_event({"type": "key", "key": pytui.Key.End})]))
-events.append((['\x1bOF'], [make_event({"type": "key", "key": pytui.Key.End})]))
-events.append((['\x1b[F'], [make_event({"type": "key", "key": pytui.Key.End})]))
+events.append((['\x1b[8~'], [make_event({"type": "key", "key": pytui.Key.END})]))
+events.append((['\x1b[4~'], [make_event({"type": "key", "key": pytui.Key.END})]))
+events.append((['\x1bOF'], [make_event({"type": "key", "key": pytui.Key.END})]))
+events.append((['\x1b[F'], [make_event({"type": "key", "key": pytui.Key.END})]))
 
-events.append((['\x1b[6~'], [make_event({"type": "key", "key": pytui.Key.PageDown})]))
-events.append((['\x1b[5~'], [make_event({"type": "key", "key": pytui.Key.PageUp})]))
-events.append((['\x1b[3~'], [make_event({"type": "key", "key": pytui.Key.Delete})]))
-events.append((['\x1b[2~'], [make_event({"type": "key", "key": pytui.Key.Insert})]))
+events.append((['\x1b[6~'], [make_event({"type": "key", "key": pytui.Key.PAGEDOWN})]))
+events.append((['\x1b[5~'], [make_event({"type": "key", "key": pytui.Key.PAGEUP})]))
+events.append((['\x1b[3~'], [make_event({"type": "key", "key": pytui.Key.DELETE})]))
+events.append((['\x1b[2~'], [make_event({"type": "key", "key": pytui.Key.INSERT})]))
 
 events.append((['\x1b[24~'], [make_event({"type": "key", "key": pytui.Key.F12})]))
 events.append((['\x1b[23~'], [make_event({"type": "key", "key": pytui.Key.F11})]))
@@ -140,13 +146,12 @@ events.append((['\x1bOR'], [make_event({"type": "key", "key": pytui.Key.F3})]))
 events.append((['\x1bOQ'], [make_event({"type": "key", "key": pytui.Key.F2})]))
 events.append((['\x1bOP'], [make_event({"type": "key", "key": pytui.Key.F1})]))
 
-events.append((['\x1b[1;5C'],[make_event({"type": "key", "key": pytui.Key.Right, "modifier": pytui.modifers.ctrl})]))
-events.append((['\x1b[1;2A'],[make_event({"type": "key", "key": pytui.Key.Up, "modifier": pytui.modifers.shift})]))
-events.append((['\x1b[1;3D'],[make_event({"type": "key", "key": pytui.Key.Left, "modifier": pytui.modifers.alt})]))
-events.append((['\x1b[1;10A'],[make_event({"type": "key", "key": pytui.Key.Up, "modifier": (pytui.modifers.shift | pytui.modifers.super)})]))
-events.append((['\x1b[3;5~'],[make_event({"type": "key", "key": pytui.Key.Delete, "modifier": pytui.modifers.ctrl})]))
+events.append((['\x1b[1;5C'],[make_event({"type": "key", "key": pytui.Key.RIGHT, "modifier": pytui.modifers.ctrl})]))
+events.append((['\x1b[1;2A'],[make_event({"type": "key", "key": pytui.Key.UP, "modifier": pytui.modifers.shift})]))
+events.append((['\x1b[1;3D'],[make_event({"type": "key", "key": pytui.Key.LEFT, "modifier": pytui.modifers.alt})]))
+events.append((['\x1b[1;10A'],[make_event({"type": "key", "key": pytui.Key.UP, "modifier": (pytui.modifers.shift | pytui.modifers.super)})]))
+events.append((['\x1b[3;5~'],[make_event({"type": "key", "key": pytui.Key.DELETE, "modifier": pytui.modifers.ctrl})]))
 events.append((['\x1b[15;2~'],[make_event({"type": "key", "key": pytui.Key.F5, "modifier": pytui.modifers.shift})]))
-events.append((['\x1b[1;5P'],[make_event({"type": "key", "key": pytui.Key.F1, "modifier": pytui.modifers.ctrl})]))
 # events.append((['\x1b[Z'], [make_event({"type": "key", "key": pytui.Key.Tab, "modifier": pytui.modifers.shift})]))
 
 # events.append((['\x1b[Z', 'xyz'], [make_event({"type": "key", "key": pytui.Key.Tab, "modifier": pytui.modifers.shift}), make_event({"type": "text", "text": "x"}), make_event({"type": "text", "text": "y"}), make_event({"type": "text", "text": "z"})]))

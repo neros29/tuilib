@@ -12,6 +12,7 @@ c_eventBus::~c_eventBus(){}
 void c_eventBus::tick(int timeout_ms){
     std::vector<Event> events = m_inputDriver->d_getEvents(timeout_ms);
     for (Event e: events){
+        logger::debug("Emitting Key " + to_string(e.key));
         for (c_surface& surf : m_surfs){
             if (surf.inputFunc == nullptr){
                 continue;
