@@ -15,10 +15,19 @@ using namespace drivers;
 using namespace std;
 using namespace core;
 
+
 std::unordered_map<char, Key> ctrl_map {};
 std::unordered_map<char, Key> ss3_last_byte_map {};
-std::unordered_map<char, Key> csi_last_byte_map {};
-std::unordered_map<int, Key> csi_parm_map {};
+
+long long make_key(int i, char c) {
+    return (static_cast<long long>(i) << 8) | static_cast<unsigned char>(c);
+}
+namespace std{
+    std::string to_string(Event e){
+        return "Kind: " + to_string(static_cast<uint8_t>(e.kind)) +" Key: " + to_string(e.key) + " Text: " + e.text + " mods: " + to_string(static_cast<uint8_t>(e.modifer));
+    }
+}
+std::unordered_map<long long, Key> csi_map {};
 
 static void dump_debug(string& m_buff, State& state, Data& data, size_t index, string msg, string func){
     fstream file("logs/debug-dump", ios::app);
@@ -81,7 +90,6 @@ static size_t esc(string& m_buff, State& state, Data& data, size_t index){ // im
         return index - 1;
     }
     char& ch = m_buff[index];
-    logger::debug("ch: " + string(ch, 1));
     switch (ch){
         case '[':
             state = State::Csi;
@@ -115,6 +123,10 @@ static size_t esc(string& m_buff, State& state, Data& data, size_t index){ // im
 }
 static size_t ss3(string& m_buff, State& state, Data& data, size_t index){ 
     index += 1;
+    if (index >= m_buff.size()){
+        data.exit = true;
+        return index - 1;
+    }
     char& ch = m_buff[index];
     if (ss3_last_byte_map.find(ch) != ss3_last_byte_map.end()){
        data.event.kind = Kind::Key;
@@ -128,39 +140,41 @@ static size_t ss3(string& m_buff, State& state, Data& data, size_t index){
     return index + 1;
 }
 static size_t csi(string& m_buff, State& state, Data& data, size_t index){ 
-    int start = -1;
-    int number = -1;
+    int digit_start = -1;
+    int param = -1;
     for (size_t i = index + 1; i < m_buff.size(); i++){
         char& ch = m_buff[i];
         if (0x30 <= ch && ch <= 0x39){ // is digit
-            if (start == -1){
-                start = i;
+            if (digit_start == -1){
+                digit_start = i;
             }
         }
         else if (ch == ';'){
-            if (start == -1){
-                number = 0;
+            if (digit_start == -1){
+                param = 0; // set number to 0 when there is no digit before the ; eg \x1b[;1A
             }
             else {
-                number = stoi(m_buff.substr(start, i - start));
-                start = -1;
+                param = stoi(m_buff.substr(digit_start, i - digit_start));
+                digit_start = -1;
             }
         }
         else if (0x40 <= ch && ch <= 0x7E){
-            if (start != -1 && number != -1){
-                data.event.modifer = static_cast<modifers>(stoi(m_buff.substr(start, i - start)) - 1);
+            if (param == -1){ // If the first parameter dose not exist then this is the first parameter.
+                if (digit_start != -1){
+                    param = stoi(m_buff.substr(digit_start, i - digit_start));
+                    digit_start = -1;
+                } else {
+                    param = 1;
+                }
             }
-            else if (start != -1 && number == -1){
-                number = stoi(m_buff.substr(start, i - start));
-            }
-            if (csi_last_byte_map.find(ch) != csi_last_byte_map.end()){
+            long long key = make_key(param, ch);
+            if (csi_map.find(key) != csi_map.end()){
                 data.event.kind = Kind::Key;
-                data.event.key = csi_last_byte_map[ch];
+                data.event.key = csi_map[key];
+                if (digit_start != -1 && param != -1){ // If the first parameter already exist the second parameter should be treated as modifier.
+                    data.event.modifer = static_cast<modifers>(stoi(m_buff.substr(digit_start, i - digit_start)) - 1);
+                }
             } 
-            else if (csi_parm_map.find(number) != csi_parm_map.end()){
-                data.event.kind = Kind::Key;
-                data.event.key = csi_parm_map[number];
-            }
             state = State::Ground;
             return i + 1;
         }
@@ -308,11 +322,9 @@ void d_default_input::m_restoreMode() {
 void d_default_input::m_fillDb(){
 #define KEY(name, id, type, param, last_byte)\
     if (type == "CSI"){\
-        if (last_byte == '~'){\
-            csi_parm_map[param] = Key::name;\
-        } else {\
-            csi_last_byte_map[last_byte] = Key::name;\
-        }\
+        long long key = make_key(param, last_byte);\
+        logger::debug("Adding csi key: " + to_string(Key::name) + " param: " + to_string(param) + " last_byte: " + string(1, last_byte) + " Key is: " + to_string(key));\
+        csi_map[key] = Key::name;\
     } else if (type == "SS3"){\
         ss3_last_byte_map[last_byte] = Key::name;\
     } 
