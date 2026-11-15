@@ -90,6 +90,7 @@ namespace drivers {
         std::ofstream m_file;
         std::array<size_t, 2> m_size;
         core::c_cell m_last_cell;
+        std::array<int, 2> m_last_cords;
         std::string m_buffer;
 
         static bool cell_style_equal(const core::c_cell& cell1, const core::c_cell& cell2){
@@ -158,13 +159,17 @@ namespace drivers {
                 return;
             }
             m_buffer.clear();
+            if (!(m_last_cords[0] + 1 == x && m_last_cords[1] == y)){
+                m_file << "\x1b[" << y << ";" << x << "H";
+            } 
             if (cell_style_equal(cell, m_last_cell)){
-                m_file <<"\x1b[" << y << ";"<< x  << "H" << cell.get_ch();
+                m_file << cell.get_ch();
             } else{
                 m_genrate(cell);
-                m_file <<"\x1b[" << y << ";"<< x  << "H" << m_buffer;
-                m_last_cell = cell;
+                m_last_cell = cell; 
+                m_file << m_buffer;
             }
+            m_last_cords = {x, y};
         };
         void d_startFrame() override {
             m_file << "\x1b[?25l";

@@ -196,7 +196,7 @@ namespace core{
         void m_render(c_surfaces& surfs);
 
     public:
-        int charactersRenderd;
+        int charactersRenderd = 0;
         Screen(drivers::d_screen* driver);
         std::array<size_t, 2> getSize();
         void flip(c_surfaces& surfs);
