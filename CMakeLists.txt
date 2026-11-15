@@ -52,10 +52,10 @@ target_compile_definitions(tuilib PRIVATE VERSION_INFO="0.0.1")
 # -------------------------
 # Native C++ test executable
 # -------------------------
-add_executable(smoke_test
-    demos/smoke_test.cpp
+add_executable(integration_demo
+    demos/integration_demo.cpp
     ${TUI_CORE_SOURCES}
 )
 
 # Link the same libraries to the test executable
-target_link_libraries(smoke_test PRIVATE utf8proc tinfo)
+target_link_libraries(integration_demo PRIVATE utf8proc tinfo)
