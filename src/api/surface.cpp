@@ -1,7 +1,5 @@
-#include "../api.h"
+#include "../../include/tuilib.h"
 #include "../core/tui.h"
-#include "../core/utils/logging.h"
-#include <algorithm>
 #include <cassert>
 #include <cstdlib>
 #include <functional>

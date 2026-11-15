@@ -19,7 +19,7 @@ using namespace core;
 std::unordered_map<char, Key> ctrl_map {};
 std::unordered_map<char, Key> ss3_last_byte_map {};
 
-long long make_key(int i, char c) {
+static long long make_key(int i, char c) {
     return (static_cast<long long>(i) << 8) | static_cast<unsigned char>(c);
 }
 namespace std{
@@ -328,7 +328,7 @@ void d_default_input::m_fillDb(){
     } else if (type == "SS3"){\
         ss3_last_byte_map[last_byte] = Key::name;\
     } 
-#include "../../templates/data.def"
+#include "../../data/keys.def"
 #undef KEY
 }
 void m_addCtrl(char k, Key v){

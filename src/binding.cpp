@@ -6,7 +6,7 @@
 #include <array>
 #include <string>
 
-#include "api.h"
+#include "../include/tuilib.h"
 #include "widgets/Label.h"
 #include "core/utils/logging.h"
 
@@ -40,7 +40,7 @@ struct PyLabel {
     }
 };
 
-PYBIND11_MODULE(tui, m) {
+PYBIND11_MODULE(tuilib, m) {
     m.doc() = "lightweight TUI library (pybind11 bindings)";
     m.def("set_logger", &Logger::set_callback);
     // -----------------

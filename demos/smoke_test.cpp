@@ -6,13 +6,65 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include "core/tui.h"
-#include "core/utils/logging.h"
+#include <deque>
+#include "../src/core/tui.h"
+#include "../src/core/utils/logging.h"
 #include <chrono>
-#include "api.h"
-#include "widgets/Label.h"
+#include "../include/tuilib.h"
+#include "../src/widgets/Label.h"
 
 using namespace std;
+
+class Scroll{
+    Surface surf;
+    std::deque<std::string> logs;
+public:
+    Scroll(Surface s): surf(std::move(s)){
+        surf.fill_bg(0, 0, 0, 100);
+        surf.fill_fg(0xbf, 0xc1, 0xc8);
+        surf.register_func([this](Event e) {return events(e);});
+    }
+    void update(){
+        int y = 0;
+        for (std::string& line : logs){
+            for (int x = 0; x < surf.get_size()[0]; x++){
+                char ch  = ' ';
+                if (x < line.size()){
+                    ch = line[x];
+                } 
+                surf[y * surf.get_size()[0] + x].set_ch(string(1, ch));
+            }
+            y += 1;
+        }
+    }
+    bool events(Event e){
+        bool dirty = false;
+        if (e.kind == Kind::Key){
+            logs.push_back("EVENT: Key: " + to_string(e.key) + " Mod: " + to_string(static_cast<uint8_t>(e.modifer)));
+            dirty = true;
+        }
+        if (e.kind == Kind::Text){
+            logs.push_back("EVENT: Key: '" + e.text + "' Mod: " + to_string(static_cast<uint8_t>(e.modifer)));
+            dirty = true;
+        }
+        if (logs.size() > surf.get_size()[1]){
+            logs.pop_front();
+        }
+        if (dirty){
+            update();
+        }
+        return false;
+    }
+    bool ToggleShown(){
+        if (surf.get_offset()[0] < 0){
+            surf.set_offset(surf.get_size()[0] * 3, 0);
+            return true;
+        } else {
+            surf.set_offset(-surf.get_size()[0], -surf.get_size()[1]);
+            return false;
+        }
+    };
+};
 class Debug{
     Surface surf;
     string str;
@@ -143,6 +195,7 @@ Characters drawn per frame: {CHARACTERS_DRAWN:5}
 Frames Skipped: {FRAMES_SKIPPED:5}
 )";
     Debug debug_surf;
+    Scroll scroll;
     bool debug_is_shown {false};
     unordered_map<string, string> values;
 
@@ -182,6 +235,7 @@ Frames Skipped: {FRAMES_SKIPPED:5}
             }
             if (e.text == "d"){
                 debug_is_shown = debug_surf.ToggleShown();
+                scroll.ToggleShown();
                 results = true;
             }
             auto itr = text_dirs.find(e.text);
@@ -212,7 +266,8 @@ public:
     Main(): 
         tui(),
         event(tui.addSurface({0, 0}, {0, 0}, " ", 1000)),
-        debug_surf(tui.addSurface(tui.getScreenSize(), {static_cast<int>(-tui.getScreenSize()[0]), static_cast<int>(-tui.getScreenSize()[1])}, " ", 100), debug_format_str),
+        debug_surf(tui.addSurface({tui.getScreenSize()[0] - tui.getScreenSize()[0] / 4, tui.getScreenSize()[1]}, {static_cast<int>(-tui.getScreenSize()[0]), static_cast<int>(-tui.getScreenSize()[1])}, " ", 100), debug_format_str),
+        scroll(tui.addSurface({tui.getScreenSize()[0] / 4, tui.getScreenSize()[1]},{static_cast<int>(-tui.getScreenSize()[0]), static_cast<int>(-tui.getScreenSize()[1])}, " ", 100000)),
         surf1(tui.addSurface({40, 10}, {20, 22}, " ", 70)),
         lab1(surf1, surf1_text, {5, 2}), 
         surf2(tui.addSurface({40, 10}, surf2_offset, " ", 80)),

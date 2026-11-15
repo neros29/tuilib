@@ -1,13 +1,17 @@
-DEF_PATH = "templates/data.def"
-UNIQUE_KEY = "templates/key.def"
+import pathlib
 
+MAIN_KEYS = "data/keys.def"
+UNIQUE_KEYS = "data/unique_keys.def"
+
+pathlib.Path(MAIN_KEYS).parent.mkdir(exist_ok=True)
+pathlib.Path(UNIQUE_KEYS).parent.mkdir(exist_ok=True)
 
 def clear():
-    with open(DEF_PATH, "w") as f:
+    with open(MAIN_KEYS, "w") as f:
         f.write("// AUTO GENERATED FILE\n")
         f.write("// AUTHOR templates/generate_keys.py\n")
 
-    with open(UNIQUE_KEY, "w") as f:
+    with open(UNIQUE_KEYS, "w") as f:
         f.write("// AUTO GENERATED FILE\n")
         f.write("// AUTHOR templates/generate_keys.py\n")
 
@@ -50,17 +54,18 @@ def write_keys(keys: list[dict]):
     for key in have_ids:
         ks[key['name']] = key['id']
     for k, v in ks.items():
-        with open(UNIQUE_KEY, "a") as f:
+        with open(UNIQUE_KEYS, "a") as f:
             f.write(f"U_KEY({k.upper()}, {int(v)}, \"{k.upper()}\")\n")
 
 def creat_key(key: dict):
-    with open(DEF_PATH, "a") as f:
+    with open(MAIN_KEYS, "a") as f:
         f.write(f'KEY({key["name"].upper()}, {int(key["id"])}, "{key["type"].upper()}", {int(key.get("parameter", "1"))}, \'{key.get("end_byte", "~")}\')\n')
 
 clear()
 keys = []
 import string
-printable = string.printable.replace('\r', '').replace('\n', '').replace('\t', '').replace('\x0b', '').replace('\x0c', '')
+printable = string.printable.replace('\r', '').replace('\n', '').replace('\t', '').replace('\x0b', '').replace('\x0c', '').replace(' ', '')
+keys.append({"name": 'SPACE', 'id': ord(' '), "type": 'ASCII'})
 for char in printable:
     char = char.lower()
     ascii_val = ord(char)

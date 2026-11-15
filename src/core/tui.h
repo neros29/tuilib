@@ -63,7 +63,7 @@ inline bool operator&(modifers lhs, modifers rhs) {
 }
 enum class Key : uint32_t{
 #define U_KEY(name, id, text) name = id,
-#include "../../templates/key.def"
+#include "../../data/unique_keys.def"
 #undef U_KEY
 };
 namespace std {
@@ -71,7 +71,7 @@ namespace std {
         switch (a){
 #define U_KEY(name, id, text)\
             case static_cast<Key>(id): return text;
-#include "../../templates/key.def"
+#include "../../data/unique_keys.def"
 #undef U_KEY
         }
         return "NONE";

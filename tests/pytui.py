@@ -6,7 +6,7 @@ from typing import Callable, Optional
 sys.path.append("build/")
 from enum import Enum, auto
 
-import tui
+import tuilib as tui
 
 logger = getLogger(__name__)
 levels = {
@@ -61,7 +61,7 @@ class Key(int):
     F10 = 20
     F11 = 21
     F12 = 22
-    K_0X20 = 32
+    SPACE = 32
     K_0X21 = 33
     K_0X22 = 34
     K_0X23 = 35

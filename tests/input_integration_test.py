@@ -95,7 +95,7 @@ events.append((['👍'], [make_event({"type": "text", "text": "👍"})]))
 # events.append((['\x08'], [make_event({"type": "key", "key": pytui.Key.BACKSPACE})]))
 # events.append((['\x7f'], [make_event({"type": "key", "key": pytui.Key.BACKSPACE})]))
 
-# events.append((['\x00'], [make_event({"type": "key", "key": pytui.Key.Space, "modifier": pytui.modifers.ctrl})]))
+# events.append((['\x00'], [make_event({"type": "key", "key": pytui.Key.SPACE, "modifier": pytui.modifers.ctrl})]))
 events.append((['\x01'], [make_event({"type": "key", "key": pytui.Key.K_A, "modifier": pytui.modifers.ctrl})]))
 
 events.append((['0', '1', '9'], [make_event({"type": "text", "text": "0"}), make_event({"type": "text", "text": "1"}),  make_event({"text": "9", "type": "text"})]))
@@ -103,6 +103,7 @@ events.append((['0', '1', '9'], [make_event({"type": "text", "text": "0"}), make
 # events.append((['\x1b'], [make_event({"type": "key", "key": pytui.Key.Escape})]))
 events.append((['\x1b', 'a'], [make_event({"type": "key", "key": pytui.Key.K_A, "modifier": pytui.modifers.alt})]))
 events.append((['\x1bx'], [make_event({"type": "key", "key": pytui.Key.K_X, "modifier": pytui.modifers.alt})]))
+events.append((['\x1b\x1b0A'], [make_event({"type": "key", "key": pytui.Key.UP, "modifier": pytui.modifers.alt})]))
 # events.append((['\x1b\x7f'], [make_event({"type": "key", "key": pytui.Key.BACKSPACE, "modifier": pytui.modifers.alt})]))
 # events.append((['\x1b\r'], [make_event({"type": "key", "key": pytui.Key.Enter, "modifier": pytui.modifers.alt})]))
 events.append((['\x1bOA'], [make_event({"type": "key", "key": pytui.Key.UP})]))
@@ -156,7 +157,7 @@ events.append((['\x1b[15;2~'],[make_event({"type": "key", "key": pytui.Key.F5, "
 
 # events.append((['\x1b[Z', 'xyz'], [make_event({"type": "key", "key": pytui.Key.Tab, "modifier": pytui.modifers.shift}), make_event({"type": "text", "text": "x"}), make_event({"type": "text", "text": "y"}), make_event({"type": "text", "text": "z"})]))
 events.append((['\x1b[99z', 'a'], [make_event({"type": "text", "text": "a"})]))
-# events.append((['\x00a'], [make_event({"type": "key", "modifier": pytui.modifers.ctrl, "key": pytui.Key.Space}), make_event({"type": "text", "text": "a"})]))
+# events.append((['\x00a'], [make_event({"type": "key", "modifier": pytui.modifers.ctrl, "key": pytui.Key.SPACE}), make_event({"type": "text", "text": "a"})]))
 
 # events.append((['\x1b[I'] / '\x1b[O' , Focus in / Focus out ))
 # events.append((['\x1b[<0;10;5M', '\x1b[<0;10;5m'] , Mouse press then release at (10,5) ))

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15...3.28)
 project(tui_project LANGUAGES CXX)
-
+# binding
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -40,22 +40,22 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/tui)
 # -------------------------
 # Python extension module
 # -------------------------
-pybind11_add_module(tui
-    src/tui.cpp
+pybind11_add_module(tuilib
+    src/binding.cpp
     ${TUI_CORE_SOURCES}
 )
 
 # Link libraries to the Python module
-target_link_libraries(tui PRIVATE utf8proc tinfo)
-target_compile_definitions(tui PRIVATE VERSION_INFO="0.0.1")
+target_link_libraries(tuilib PRIVATE utf8proc tinfo)
+target_compile_definitions(tuilib PRIVATE VERSION_INFO="0.0.1")
 
 # -------------------------
 # Native C++ test executable
 # -------------------------
-add_executable(test
-    src/test.cpp
+add_executable(smoke_test
+    demos/smoke_test.cpp
     ${TUI_CORE_SOURCES}
 )
 
 # Link the same libraries to the test executable
-target_link_libraries(test PRIVATE utf8proc tinfo)
+target_link_libraries(smoke_test PRIVATE utf8proc tinfo)

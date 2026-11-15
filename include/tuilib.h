@@ -1,5 +1,5 @@
 #pragma once
-#include "core/tui.h"
+#include "../src/core/tui.h"
 #include <array>
 #include <cstddef>
 #include <cstdint>

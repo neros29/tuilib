@@ -1,4 +1,4 @@
-#include "../api.h"
+#include "../../include/tuilib.h"
 class Label{
 private:
     Surface& root;
