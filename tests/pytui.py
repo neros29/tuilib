@@ -224,6 +224,9 @@ class Tui:
     def append(self, size: list[int], offset: list[int], ch: str, z: int):
         return Surface(self._tui.append(size, offset, ch, z))
 
+    def cleanup(self):
+        self._tui.cleanup()
+
     def get_screen_size(self): 
         return self._tui.getScreenSize()
 

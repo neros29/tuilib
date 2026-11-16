@@ -198,7 +198,6 @@ for i in range(11, 13):
 add_key('BACKSPACE', chr(0x7f))
 add_key('BACKSPACE', chr(0x08))
 add_key('TAB', chr(0x09))
-add_key('ENTER', chr(0x0A))
 add_key('ENTER', chr(0x0D))
 
 add_ctrl("SPACE", chr(0x0))

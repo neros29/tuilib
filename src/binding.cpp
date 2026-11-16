@@ -128,7 +128,8 @@ PYBIND11_MODULE(tuilib, m) {
             // py::return_value_policy::reference_internal
         )
         .def("getScreenSize", &Tui::getScreenSize)
-        .def("update", &Tui::update, py::arg("timeout_ms"));
+        .def("update", &Tui::update, py::arg("timeout_ms"))
+        .def("cleanup", &Tui::cleanup);
     // -----------------
     // Event
     // -----------------

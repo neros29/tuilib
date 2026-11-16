@@ -22,7 +22,9 @@ Tui::~Tui(){
     delete m_inputDriver;
 }
 
-
+void Tui::cleanup(){
+    m_inputDriver->d_clean();
+}
 void Tui::update(int waitinput_ms){
     static bool isDirty;
     m_surfaces.sort();

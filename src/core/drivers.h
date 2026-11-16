@@ -51,6 +51,7 @@ namespace drivers {
     public:
         virtual ~d_input(){};
         virtual std::vector<Event> d_getEvents(int timeout_ms) = 0;
+        virtual void d_clean() = 0;
         // virtual int d_getCharacterWidth(uint32_t ch) = 0;
     };
     class d_default_input: public drivers::d_input{
@@ -69,6 +70,9 @@ namespace drivers {
         ~d_default_input() override;
         d_default_input();
         std::vector<Event> d_getEvents(int timeout_ms) override;
+        void d_clean() override{
+            m_restoreMode();
+        }
         // int d_getCharacterWidth(uint32_t ch) override;
     };
     class d_test_screen : public drivers::d_screen{

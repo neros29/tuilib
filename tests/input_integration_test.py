@@ -70,6 +70,9 @@ class Main:
             self.tui.update(16)
         return self.results
 
+    def exit(self):
+        self.tui.cleanup()
+
 def make_event(e_dict: dict):
     e = pytui.Event()
     if e_dict["type"] == "key":
@@ -87,8 +90,8 @@ events.append((['ab'], [make_event({"type": "text", "text": "a"}), make_event({"
 events.append((['ø'], [make_event({"type": "text", "text": "ø"})]))
 events.append((['👍'], [make_event({"type": "text", "text": "👍"})]))
 events.append((['👍'], [make_event({"type": "text", "text": "👍"})]))
-# events.append((['\x80'], []))
-# events.append((['\xff'], []))
+events.append((['\x80'], []))
+events.append((['\xff'], []))
 events.append((['\r'], [make_event({"type": "key", "key": pytui.Key.ENTER})]))
 events.append((['\t'], [make_event({"type": "key", "key": pytui.Key.TAB})]))
 #
@@ -103,7 +106,7 @@ events.append((['0', '1', '9'], [make_event({"type": "text", "text": "0"}), make
 # events.append((['\x1b'], [make_event({"type": "key", "key": pytui.Key.Escape})]))
 events.append((['\x1b', 'a'], [make_event({"type": "key", "key": pytui.Key.K_A, "modifier": pytui.modifers.alt})]))
 events.append((['\x1bx'], [make_event({"type": "key", "key": pytui.Key.K_X, "modifier": pytui.modifers.alt})]))
-events.append((['\x1b\x1b0A'], [make_event({"type": "key", "key": pytui.Key.UP, "modifier": pytui.modifers.alt})]))
+events.append((['\x1b\x1bOA'], [make_event({"type": "key", "key": pytui.Key.UP, "modifier": pytui.modifers.alt})]))
 events.append((['\x1b\x7f'], [make_event({"type": "key", "key": pytui.Key.BACKSPACE, "modifier": pytui.modifers.alt})]))
 events.append((['\x1b\r'], [make_event({"type": "key", "key": pytui.Key.ENTER, "modifier": pytui.modifers.alt})]))
 events.append((['\x1bOA'], [make_event({"type": "key", "key": pytui.Key.UP})]))
@@ -166,23 +169,26 @@ events.append((['\x1b[99z', 'a'], [make_event({"type": "text", "text": "a"})]))
 # events.append((['\x1b[12;40R'] , Cursor position report row 12, col 40 (not a key) ))
 # events.append((['\x1b]0;title\x07'] , skipped (not a key); following input still works ))
 # events.append((['\x1b]0;title\x1b\\'] , skipped (ST-terminated) ))
-# events.append((['\x1b[99999999999z'] , []))
+events.append((['\x1b[99999999999z'] , []))
 # events.append((['\x1b['] + 300 digits , abandoned after the length cap ))
 # events.append((['\x1b['] then silence 300 ms , pending sequence discarded ))
 # events.append((['\x1bOp'] (keypad 0) , ignored or mapped, but not a jam ))
-# events.append((['\n'] (if ICRNL left on) , [make_event({"type": "key", "key": pytui.Key.Enter})] (or Ctrl+J; decide and document) ))
+events.append((['\n'], [make_event({"type": "key", "key": pytui.Key.K_J, "modifier": pytui.modifers.ctrl})]))
 
 print("\x1b[?1049h", end="", flush=True) # enter alt
 pytui.log(20, "=" * 10 + "PROGRAM STARTED" + "=" * 10)
 
 main = Main(events)
 results = main.run()
+main.exit()
 
 print("\x1b[?1049l", end="", flush=True) # exit alt
 total = 0
 for i, (event, result) in enumerate(zip(events, results)):
     end_results = True
     print(f"Test {i}")
+    if len(result) == 0:
+        print(f"\t✅Passed Event. With no output. Input was {event[0]}")
     for i, r in enumerate(result):
         end_results = end_results and r
         e = event[1][i]

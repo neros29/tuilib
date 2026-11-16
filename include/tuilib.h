@@ -142,6 +142,7 @@ public:
     int amontOfCharacters(){
         return m_screen.getSize()[0] * m_screen.getSize()[1];
     }
+    void cleanup();
     Surface addSurface(std::array<size_t, 2> size, std::array<int, 2> offset, std::string ch = " ", int z = -1);
     void update(int waitinput_ms = -1);
     std::array<size_t, 2> getScreenSize();

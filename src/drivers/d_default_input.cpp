@@ -4,6 +4,7 @@
 #include <fstream>
 #include <ostream>
 #include <poll.h>
+#include <stdexcept>
 #include <string>
 #include <unistd.h>
 #include <termios.h>
@@ -56,8 +57,13 @@ static size_t ground(string& m_buff, State& state, Data& data, size_t index){
             if (data.has_data()){
                 data.push(); // Push since multiple ASCII in a row are separate events.
             } 
-            data.event.kind = Kind::Text;
-            data.event.text = string(1, ch);
+            if (data.event.modifer != modifers::none){
+                data.event.kind = Kind::Key;
+                data.event.key = static_cast<Key>(ch);
+            } else {
+                data.event.kind = Kind::Text;
+                data.event.text = string(1, ch);
+            }
             continue;
         } 
         else if (ch == '\x1b'){ // Check if character is the escape character.
@@ -120,11 +126,9 @@ static size_t esc(string& m_buff, State& state, Data& data, size_t index){ // im
             state = State::String; 
             break;
         default:
-            data.event.kind = Kind::Key;
-            data.event.key = static_cast<Key>(ch);
             data.event.modifer = modifers::alt | data.event.modifer;
             state = State::Ground;
-            return index + 1;
+            return index;
     }
     return index;
 }
@@ -138,7 +142,6 @@ static size_t ss3(string& m_buff, State& state, Data& data, size_t index){
     if (ss3_map.find(ch) != ss3_map.end()){
        data.event.kind = Kind::Key;
        data.event.key = ss3_map[ch];
-       data.event.modifer = modifers::none;
     } 
     else {
         logger::warn("SS3 End Byte " + string(1, ch) + " Is not in table.");
@@ -146,11 +149,29 @@ static size_t ss3(string& m_buff, State& state, Data& data, size_t index){
     state = State::Ground;
     return index + 1;
 }
+static int stoi(std::string_view s){
+    int r = 0;
+    for (const char& c : s){
+        if ('0' <= c && c <= '9'){
+            r = (r * 10) + (c - '0');
+        } else {
+            return 0;
+        }
+    }
+    return r;
+}
 static size_t csi(string& m_buff, State& state, Data& data, size_t index){ 
     int digit_start = -1;
     int param = -1;
     for (size_t i = index + 1; i < m_buff.size(); i++){
         char& ch = m_buff[i];
+        if (i == index + 1 && ch == 'Z'){
+            data.event.kind = Kind::Key;
+            data.event.key = Key::TAB;
+            data.event.modifer = modifers::shift | data.event.modifer;
+            state = State::Ground;
+            return i + 1;
+        }
         if (0x30 <= ch && ch <= 0x39){ // is digit
             if (digit_start == -1){
                 digit_start = i;
@@ -161,14 +182,14 @@ static size_t csi(string& m_buff, State& state, Data& data, size_t index){
                 param = 0; // set number to 0 when there is no digit before the ; eg \x1b[;1A
             }
             else {
-                param = stoi(m_buff.substr(digit_start, i - digit_start));
+                param = stoi(string_view(m_buff).substr(digit_start, i - digit_start));
                 digit_start = -1;
             }
         }
         else if (0x40 <= ch && ch <= 0x7E){
             if (param == -1){ // If the first parameter dose not exist then this is the first parameter.
                 if (digit_start != -1){
-                    param = stoi(m_buff.substr(digit_start, i - digit_start));
+                    param = stoi(string_view(m_buff).substr(digit_start, i - digit_start));
                     digit_start = -1;
                 } else {
                     param = 1;
@@ -179,7 +200,7 @@ static size_t csi(string& m_buff, State& state, Data& data, size_t index){
                 data.event.kind = Kind::Key;
                 data.event.key = csi_map[key];
                 if (digit_start != -1 && param != -1){ // If the first parameter already exist the second parameter should be treated as modifier.
-                    data.event.modifer = static_cast<modifers>(stoi(m_buff.substr(digit_start, i - digit_start)) - 1);
+                    data.event.modifer = static_cast<modifers>(stoi(string_view(m_buff).substr(digit_start, i - digit_start)) - 1);
                 }
             } 
             state = State::Ground;
@@ -234,10 +255,21 @@ static size_t utf8(string& m_buff, State& state, Data& data, size_t index){ // T
     return index;
 }
 static size_t parseInput(string& buffer, State& s, Data& d){
-    int idx = 0;
+    size_t idx = 0;
+    size_t prev_idx = 0;
+    int no_change_ider = 0;
+    int MAX_NO_IDX_CHANGE = 5;
+    bool clean_state {false};
+
     while (idx < buffer.size()){
         if (d.exit){
             d.exit = false;
+            break;
+        }
+        if (++no_change_ider >= MAX_NO_IDX_CHANGE){
+            logger::error("Detected infinite loop.");
+            dump_debug(buffer, s, d, idx, "", "parseInput");
+            clean_state = true;
             break;
         }
         switch (s){
@@ -258,10 +290,21 @@ static size_t parseInput(string& buffer, State& s, Data& d){
                 break;
             default:
                 logger::error("No function defined for state: " + to_string(static_cast<uint8_t>(s)));
+                d.exit = true;
+                clean_state = true;
+        }
+        if (idx > prev_idx){
+            prev_idx = idx;
+            no_change_ider = 0;
         }
     }
     if (d.has_data()){
         d.push();
+    }
+    if (clean_state){
+        s = State::Ground;
+        d.clear();
+        return buffer.size();
     }
     return idx;
 }
@@ -307,7 +350,8 @@ static string m_getCap(const char* name){
 void d_default_input::m_setRawMode() {
     tcgetattr(STDIN_FILENO, &m_old);
     termios t = m_old;
-    t.c_lflag &= ~(ICANON | ECHO | ISIG);
+    t.c_lflag &= ~(ICANON | ECHO | ISIG | IEXTEN );
+    t.c_iflag &= ~(ICRNL | INLCR | IGNCR | IXON | ISTRIP | BRKINT | PARMRK | IGNBRK);
     t.c_cc[VMIN] = 1;
     t.c_cc[VTIME] = 0;
     tcsetattr(STDIN_FILENO, TCSANOW, &t);
@@ -315,7 +359,7 @@ void d_default_input::m_setRawMode() {
     int err = 0;
     if (setupterm(nullptr, STDOUT_FILENO, &err) != 0) {
         logger::critical("[Input] error in setupterm " + to_string(err));
-        terminate();
+        throw std::invalid_argument{"[Input] error in setupterm " + to_string(err)};
     }
 
     std::string smkx = m_getCap("smkx");
