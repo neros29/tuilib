@@ -116,7 +116,7 @@ namespace drivers {
                     colors[i] = std::to_string(i) + ";";
                 }
             }
-            m_buffer.append("\x1b[0m\x1b[");
+            m_buffer.append("\x1b[0;");
 
             std::array<u_int8_t, 4> fg = ch.get_fg();
             if (!ch.is_def("fg")){
@@ -143,7 +143,7 @@ namespace drivers {
 				if (style & styles::HIDDEN)        m_buffer.append("8;");
 				if (style & styles::STRIKETHROUGH) m_buffer.append("9;");
             }
-            m_buffer.append("m");
+            m_buffer[m_buffer.size() - 1] = 'm'; // over write trailing semicolon to avoid parsing problems in some terminals.
             if (!ch.is_def("ch") && fg[3] > 0){
                 m_buffer.append(ch.get_ch());
             } else{
