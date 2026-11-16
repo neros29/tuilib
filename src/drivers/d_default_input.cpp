@@ -342,7 +342,7 @@ static string getData(){
     return "";
 }
 static string m_getCap(const char* name){
-        char* s = tigetstr(const_cast<char*>(name));
+        char* s = tigetstr(name);
         if (s == (char*)-1 || s == nullptr) return {};
         return std::string(s);
 }
@@ -369,8 +369,8 @@ void d_default_input::m_setRawMode() {
 void d_default_input::m_restoreMode() {
     tcsetattr(STDIN_FILENO, TCSANOW, &m_old);
     // reset from application cursor mode.
-    std::string rmkx = m_getCap("rmkx");
-    if (!rmkx.empty()) putp(const_cast<char*>(rmkx.c_str()));
+    const std::string rmkx = m_getCap("rmkx");
+    if (!rmkx.empty()) putp(rmkx.c_str());
 }
 void d_default_input::m_fillDb(){
     if (csi_map.empty() && ss3_map.empty()){
