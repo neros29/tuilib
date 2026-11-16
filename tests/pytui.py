@@ -4,7 +4,7 @@ import sys
 import atexit
 from typing import Callable, Optional
 sys.path.append("build/")
-from enum import Enum, auto
+from enum import IntEnum
 
 import tuilib as tui
 
@@ -26,7 +26,7 @@ def cleanup_logging():
 
 atexit.register(cleanup_logging)
 
-class style(int):
+class style(IntEnum):
     NONE =          0
     BOLD =          1 << 0
     DIM =           1 << 1
@@ -37,7 +37,7 @@ class style(int):
     HIDDEN =        1 << 6
     STRIKETHROUGH = 1 << 7
 
-class Key(int):
+class Key(IntEnum):
     NONE = 0
     UP = 1
     DOWN = 2
@@ -145,7 +145,7 @@ class modifers(int):
     caps_lock = 0b1000000
     num_lock =  0b10000000
 
-class Kind(int):
+class Kind(IntEnum):
     Key = 0;
     Text = 1;
 
@@ -256,9 +256,12 @@ class _PyEvent:
 class Event:
     def __init__(self, event: Optional[tui.Event] = None) -> None:
         self._event = event if event else _PyEvent()
-        self.kind = self._event.kind
+        self.kind = Kind(self._event.kind)
         self.text = self._event.text
-        self.key = self._event.key
+        try:
+            self.key = Key(self._event.key)
+        except ValueError:
+            self.key = Key.NONE
         self.modifer = self._event.modifer
     def __eq__(self, value: object, /) -> bool:
         if isinstance(value, Event):

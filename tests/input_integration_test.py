@@ -22,10 +22,10 @@ class Main:
 
     @pytui.register_func_wrapper
     def events(self, system_event: pytui.Event):
-        pytui.log(10, f"System Event: {system_event.key=} {system_event.kind=} {system_event.modifer=} {system_event.text=}")
+        pytui.log(10, f"System Event: {system_event.key.name=} {system_event.kind.name=} {system_event.modifer=} {system_event.text=}")
         for i, event in enumerate(self.test_events[self.index][1]):
             if event == system_event and not self.results[self.index][i]:
-                pytui.log(10, f"Event: {event.key=} {event.kind=} {event.modifer=} {event.text=} {self.index=} Matched System Event")
+                pytui.log(10, f"Event: {event.key.name=} {event.kind.name=} {event.modifer=} {event.text=} {self.index=} Matched System Event")
                 self.results[self.index][i] = True
                 if all(self.results[self.index]):
                     pytui.log(10, "Received all inputs.")
@@ -187,9 +187,9 @@ for i, (event, result) in enumerate(zip(events, results)):
         end_results = end_results and r
         e = event[1][i]
         if r:
-            print(f"\t✅Passed Event. {e.key=} {e.kind=} {e.modifer=} {e.text=}. Key sent: '{event[0]}'")
+            print(f"\t✅Passed Event. {e.key.name=} {e.kind.name=} {e.modifer=} {e.text=}. Key sent: '{event[0]}'")
         else:
-            print(f"\t❌Failed Event. {e.key=} {e.kind=} {e.modifer=} {e.text=}. Key sent: '{event[0]}'")
+            print(f"\t❌Failed Event. {e.key.name=} {e.kind.name=} {e.modifer=} {e.text=}. Key sent: '{event[0]}'")
     if end_results:
         print()
         total += 1;
