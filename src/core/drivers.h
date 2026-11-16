@@ -62,7 +62,6 @@ namespace drivers {
         std::vector<Event> m_events {};
         Data m_data;
         State m_state;
-        void m_fillCtrldb();
         void m_fillDb();
         void m_setRawMode();
         void m_restoreMode();

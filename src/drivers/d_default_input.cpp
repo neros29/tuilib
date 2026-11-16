@@ -9,15 +9,21 @@
 #include <termios.h>
 #include <unordered_map>
 #include <utf8proc.h>
+#include <utility>
 #include <vector>
 
 using namespace drivers;
 using namespace std;
 using namespace core;
 
-
-std::unordered_map<char, Key> ctrl_map {};
-std::unordered_map<char, Key> ss3_last_byte_map {};
+enum class KEY_TYPES: uint8_t{
+#define TYPE(name, value) name = value,
+#include "../../data/key_types.def"
+#undef TYPE
+};
+std::unordered_map<char, std::pair<Key, int>> ctrl_map {};
+std::unordered_map<char, Key> ss3_map {};
+std::unordered_map<char, Key> ckey_map {};
 
 static long long make_key(int i, char c) {
     return (static_cast<long long>(i) << 8) | static_cast<unsigned char>(c);
@@ -65,8 +71,9 @@ static size_t ground(string& m_buff, State& state, Data& data, size_t index){
             if (data.has_data()){
                 data.push(); // Push since a ctrl character is always independent.
             }
-            data.event.key = ctrl_map[ch];
-            data.event.modifer = data.event.modifer | modifers::ctrl;
+            pair<Key, int> key = ctrl_map[ch];
+            data.event.key = key.first;
+            data.event.modifer = data.event.modifer | static_cast<modifers>(key.second);
             data.event.kind = Kind::Key;
             continue;
         }
@@ -128,9 +135,9 @@ static size_t ss3(string& m_buff, State& state, Data& data, size_t index){
         return index - 1;
     }
     char& ch = m_buff[index];
-    if (ss3_last_byte_map.find(ch) != ss3_last_byte_map.end()){
+    if (ss3_map.find(ch) != ss3_map.end()){
        data.event.kind = Kind::Key;
-       data.event.key = ss3_last_byte_map[ch];
+       data.event.key = ss3_map[ch];
        data.event.modifer = modifers::none;
     } 
     else {
@@ -198,7 +205,7 @@ static size_t utf8(string& m_buff, State& state, Data& data, size_t index){ // T
             if (consumed < 0){ // invalid UTF-8
                 dump_debug(m_buff, state, data, i, "Invalid utf8 bytes.", "utf8");
                 logger::warn("Invalid utf8 bytes.");
-                return i;
+                return m_buff.size();
             } 
             int catagory = utf8proc_category(cp);
             if (catagory == UTF8PROC_CATEGORY_MC || catagory == UTF8PROC_CATEGORY_ME || catagory == UTF8PROC_CATEGORY_MN){
@@ -280,12 +287,14 @@ static int getDataSize(){
 }
 
 static string getData(){
-    int dataSize = getDataSize();
+    int dataSize = 4096;
     if (dataSize){
-        char buff[dataSize + 1];
-        read(0, &buff, dataSize);
-        buff[dataSize] = '\0';
-        return buff;
+        char buff[4096];
+        int ammont = read(0, buff, dataSize);
+        if (ammont == -1){
+            return "";
+        }
+        return string(buff, ammont);
     }
     return "";
 }
@@ -320,54 +329,24 @@ void d_default_input::m_restoreMode() {
     if (!rmkx.empty()) putp(const_cast<char*>(rmkx.c_str()));
 }
 void d_default_input::m_fillDb(){
+    if (csi_map.empty() && ss3_map.empty()){
 #define KEY(name, id, type, param, last_byte)\
-    if (type == "CSI"){\
-        long long key = make_key(param, last_byte);\
-        logger::debug("Adding csi key: " + to_string(Key::name) + " param: " + to_string(param) + " last_byte: " + string(1, last_byte) + " Key is: " + to_string(key));\
-        csi_map[key] = Key::name;\
-    } else if (type == "SS3"){\
-        ss3_last_byte_map[last_byte] = Key::name;\
-    } 
+        if (type == static_cast<uint8_t>(KEY_TYPES::CSI)){\
+            long long key = make_key(param, static_cast<char>(last_byte));\
+            logger::debug("Adding CSI key: " + to_string(Key::name) + " param: " + to_string(param) + " last_byte: " + string(1, static_cast<char>(last_byte)) + " Key is: " + to_string(key));\
+            csi_map[key] = Key::name;\
+        }\
+        else if (type == static_cast<uint8_t>(KEY_TYPES::SS3)){\
+            ss3_map[static_cast<char>(last_byte)] = Key::name;\
+            logger::debug("Adding SS3 key: " + to_string(Key::name) + " param: " + to_string(param) + " last_byte: " + string(1, static_cast<char>(last_byte)));\
+        }\
+        else if (type == static_cast<uint8_t>(KEY_TYPES::CTRL)){\
+            logger::debug("Adding CTRL key: " + to_string(Key::name) + " param: " + to_string(param) + " last_byte: " + to_string(last_byte));\
+            ctrl_map[static_cast<char>(last_byte)] = pair<Key, int>(Key::name, param);\
+        }
 #include "../../data/keys.def"
 #undef KEY
-}
-void m_addCtrl(char k, Key v){
-    logger::debug("[d_default_input][fillCtrldb] Added Ctrl + " + to_string(v) + " key with Byte: " + to_string(k));
-    ctrl_map[k] = v;
-}
-void d_default_input::m_fillCtrldb(){
-    // genraly speaking last character wins. I am still leaving every character even ones that match keys, just for completeness.
-    // m_addCtrl(0, '@');  
-    // m_addCtrl(0, ' ');
-    // m_addCtrl(0, '2');
-
-    std::string alphabet = "abcdefghijklmnopqrstuvwxyz";
-    for (int i = 1; i <= 26; i ++){ // add the alphabet since it's a simple order
-        m_addCtrl(i, static_cast<Key>(alphabet[i - 1]));
     }
-    // m_addCtrl(27, '[');  
-    // m_addCtrl(27, '3');  
-    //
-    // m_addCtrl(28, '\\');
-    //
-    // m_addCtrl(29, ']');  
-    // m_addCtrl(29, '5');  
-    //
-    // m_addCtrl(30, '~');
-    // m_addCtrl(30, '^');  
-    // m_addCtrl(30, '6');  
-    //
-    // m_addCtrl(31, '_');
-    // m_addCtrl(31, '/');
-    // m_addCtrl(31, '7');
-    //
-    // m_addCtrl(48, '0');  
-    // m_addCtrl(49, '1');
-    // m_addCtrl(57, '9');  
-    //
-    // 127
-    // m_addCtrl(127, '?');
-    // m_addCtrl(127, Key::DELETE);  
 }
 // ===========================================
 vector<Event> d_default_input::d_getEvents(int timeout_ms){
@@ -383,7 +362,6 @@ vector<Event> d_default_input::d_getEvents(int timeout_ms){
 d_default_input::d_default_input(): m_data(m_events){
     m_setRawMode();
     m_fillDb();
-    m_fillCtrldb();
 }
 d_default_input::~d_default_input(){
     m_restoreMode();

@@ -61,6 +61,9 @@ class Key(int):
     F10 = 20
     F11 = 21
     F12 = 22
+    BACKSPACE = 23
+    TAB = 24
+    ENTER = 25
     SPACE = 32
     K_0X21 = 33
     K_0X22 = 34
