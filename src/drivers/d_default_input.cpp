@@ -194,7 +194,7 @@ static size_t ss3(string_view m_buff, State& state, Data& data, Context& cont, s
        data.event.key = cont.ss3_map[ch];
     } 
     else {
-        logger::warn("SS3 End Byte " + string(1, ch) + " Is not in table.");
+        logger::warn("SS3 End Byte '" + string(1, ch) + "' Is not in table.");
     }
     state = State::Ground;
     return index + 1;
@@ -227,6 +227,8 @@ size_t d_default_input_internals::csi(string_view m_buff, State& state, Data& da
                 data.event.kind = Kind::Key;
                 data.event.key = it->second;
                 data.event.modifer = data.event.modifer | static_cast<modifers>(modifer);
+            } else {
+                logger::warn("CSI End Byte '" + string(1, end_ch) + "' With param '" + to_string(param) + "' Is not in table.");
             }
             state = State::Ground;
             return i + 1;
