@@ -1,4 +1,5 @@
-#include "../core/drivers.h"
+#include "d_default_input.h"
+#include "../core/utils/logging.h"
 #include <cstddef>
 #include <cstdint>
 #include <fstream>
@@ -6,6 +7,7 @@
 #include <poll.h>
 #include <stdexcept>
 #include <string>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <termios.h>
 #include <unordered_map>
@@ -14,6 +16,7 @@
 #include <vector>
 
 using namespace drivers;
+using namespace d_default_input_internals;
 using namespace std;
 using namespace core;
 
@@ -22,21 +25,11 @@ enum class KEY_TYPES: uint8_t{
 #include "../../data/key_types.def"
 #undef TYPE
 };
-std::unordered_map<char, std::pair<Key, int>> ctrl_map {};
-std::unordered_map<char, Key> ss3_map {};
-std::unordered_map<char, Key> ckey_map {};
 
-static long long make_key(int i, char c) {
+long long d_default_input_internals::make_key(int i, char c) {
     return (static_cast<long long>(i) << 8) | static_cast<unsigned char>(c);
 }
-namespace std{
-    std::string to_string(Event e){
-        return "Kind: " + to_string(static_cast<uint8_t>(e.kind)) +" Key: " + to_string(e.key) + " Text: " + e.text + " mods: " + to_string(static_cast<uint8_t>(e.modifer));
-    }
-}
-std::unordered_map<long long, Key> csi_map {};
-
-static void dump_debug(string& m_buff, State& state, Data& data, size_t index, string msg, string func){
+static void dump_debug(string_view m_buff, State& state, Data& data, size_t index, string msg, string func){
     fstream file("logs/debug-dump", ios::app);
     file << "=============" << msg  << "=============" << endl;
     file << "BUFF: '" << m_buff << "'" << endl;
@@ -50,9 +43,37 @@ static void dump_debug(string& m_buff, State& state, Data& data, size_t index, s
     file.flush();
     file.close();
 }
-static size_t ground(string& m_buff, State& state, Data& data, size_t index){
+char d_default_input_internals::parse_csi_data(std::string_view s, std::vector<int>& results){ 
+    results.clear();
+    int value = 0;
+    bool has_diget = false;
+    int i = 0;
+    for (const char ch : s){
+        if (0x30 <= ch && ch <= 0x39){ // is digit
+            value = (value * 10) + (ch - '0');
+            has_diget = true;
+        }
+        else if (ch == ';'){
+            results.push_back(value); 
+            value = 0;
+            has_diget = true;
+        }
+        else if (0x40 <= ch && ch <= 0x7E){
+            if (has_diget){
+                results.push_back(value);
+            }
+            return ch;
+        } else {
+            break;
+        }
+        i ++;
+    }
+    return '\0';
+}
+
+static size_t ground(string_view m_buff, State& state, Data& data, Context& cont, size_t index){
     for (size_t i = index; i < m_buff.size(); i++){
-        char& ch = m_buff[i];
+        const char& ch = m_buff[i];
         if (ch >= '\x20' && ch <= '\x7e'){ // Check if character is in printable ASCII
             if (data.has_data()){
                 data.push(); // Push since multiple ASCII in a row are separate events.
@@ -73,11 +94,11 @@ static size_t ground(string& m_buff, State& state, Data& data, size_t index){
             state = State::Esc;
             return i;
         } 
-        else if (ctrl_map.find(ch) != ctrl_map.end()){ // check if character is the control map
+        else if (cont.ctrl_map.find(ch) != cont.ctrl_map.end()){ // check if character is the control map
             if (data.has_data()){
                 data.push(); // Push since a ctrl character is always independent.
             }
-            pair<Key, int> key = ctrl_map[ch];
+            pair<Key, int> key = cont.ctrl_map[ch];
             data.event.key = key.first;
             data.event.modifer = data.event.modifer | static_cast<modifers>(key.second);
             data.event.kind = Kind::Key;
@@ -96,13 +117,13 @@ static size_t ground(string& m_buff, State& state, Data& data, size_t index){
     }
     return m_buff.size();
 }
-static size_t esc(string& m_buff, State& state, Data& data, size_t index){ // implement lone escape key detection.
+static size_t esc(string_view m_buff, State& state, Data& data, Context& cont,  size_t index){ // implement lone escape key detection.
     index += 1;
     if (index >= m_buff.size()){
         data.exit = true;
         return index - 1;
     }
-    char& ch = m_buff[index];
+    const char& ch = m_buff[index];
     switch (ch){
         case '[':
             state = State::Csi;
@@ -132,16 +153,45 @@ static size_t esc(string& m_buff, State& state, Data& data, size_t index){ // im
     }
     return index;
 }
-static size_t ss3(string& m_buff, State& state, Data& data, size_t index){ 
+size_t d_default_input_internals::paste(string_view m_buff, State& state, Data& data, Context& cont, size_t index){
+    std::vector<int> results;
+    bool was_esc = false;
+    int csi_start = -1;
+    for (size_t i = index; i < m_buff.size(); i++){
+        const char& ch = m_buff[i];
+        if (was_esc){
+            if (ch == '['){
+                csi_start = i + 1;
+            }
+            was_esc = false;
+        }
+        else if (csi_start != -1 && 0x40 <= ch && ch <= 0x7E){
+            char last_byte = parse_csi_data(m_buff.substr(csi_start, (i - csi_start) + 1), results);
+            if (results.size() == 1 && last_byte == '~' && results[0] == 201){
+                data.event.kind = Kind::Paste;
+                data.event.text = m_buff.substr(index, (csi_start - 2) - index); // subtract two to remove the \x1b[
+                data.event.modifer = modifers::none;
+                state = State::Ground;
+                return i;
+            }
+        }
+        else if (ch == '\x1b'){ // Check if character is the escape character.
+            was_esc = true;
+        } 
+    }
+    data.exit = true;
+    return index;
+}
+static size_t ss3(string_view m_buff, State& state, Data& data, Context& cont, size_t index){ 
     index += 1;
     if (index >= m_buff.size()){
         data.exit = true;
         return index - 1;
     }
-    char& ch = m_buff[index];
-    if (ss3_map.find(ch) != ss3_map.end()){
+    const char& ch = m_buff[index];
+    if (cont.ss3_map.find(ch) != cont.ss3_map.end()){
        data.event.kind = Kind::Key;
-       data.event.key = ss3_map[ch];
+       data.event.key = cont.ss3_map[ch];
     } 
     else {
         logger::warn("SS3 End Byte " + string(1, ch) + " Is not in table.");
@@ -149,60 +199,35 @@ static size_t ss3(string& m_buff, State& state, Data& data, size_t index){
     state = State::Ground;
     return index + 1;
 }
-static int stoi(std::string_view s){
-    int r = 0;
-    for (const char& c : s){
-        if ('0' <= c && c <= '9'){
-            r = (r * 10) + (c - '0');
-        } else {
-            return 0;
-        }
-    }
-    return r;
-}
-static size_t csi(string& m_buff, State& state, Data& data, size_t index){ 
-    int digit_start = -1;
-    int param = -1;
+size_t d_default_input_internals::csi(string_view m_buff, State& state, Data& data, Context& cont, size_t index){ 
+    vector<int> results;
     for (size_t i = index + 1; i < m_buff.size(); i++){
-        char& ch = m_buff[i];
-        if (i == index + 1 && ch == 'Z'){
-            data.event.kind = Kind::Key;
-            data.event.key = Key::TAB;
-            data.event.modifer = modifers::shift | data.event.modifer;
-            state = State::Ground;
-            return i + 1;
-        }
-        if (0x30 <= ch && ch <= 0x39){ // is digit
-            if (digit_start == -1){
-                digit_start = i;
+        const char& ch  = m_buff[i];
+        if (0x40 <= ch && ch <= 0x7E){
+            char end_ch = parse_csi_data(m_buff.substr(index + 1, i - index), results);
+            if (end_ch == '\0'){
+                logger::error("Invalid csi data.");
+                dump_debug(m_buff, state, data, index, "Invalid csi data.", "csi");
+                return m_buff.size();
             }
-        }
-        else if (ch == ';'){
-            if (digit_start == -1){
-                param = 0; // set number to 0 when there is no digit before the ; eg \x1b[;1A
-            }
-            else {
-                param = stoi(string_view(m_buff).substr(digit_start, i - digit_start));
-                digit_start = -1;
-            }
-        }
-        else if (0x40 <= ch && ch <= 0x7E){
-            if (param == -1){ // If the first parameter dose not exist then this is the first parameter.
-                if (digit_start != -1){
-                    param = stoi(string_view(m_buff).substr(digit_start, i - digit_start));
-                    digit_start = -1;
-                } else {
-                    param = 1;
-                }
-            }
-            long long key = make_key(param, ch);
-            if (csi_map.find(key) != csi_map.end()){
-                data.event.kind = Kind::Key;
-                data.event.key = csi_map[key];
-                if (digit_start != -1 && param != -1){ // If the first parameter already exist the second parameter should be treated as modifier.
-                    data.event.modifer = static_cast<modifers>(stoi(string_view(m_buff).substr(digit_start, i - digit_start)) - 1);
-                }
+            int param = 1;
+            int modifer = 0;
+            if (results.size() >= 1){
+                param = results[0];
             } 
+            if (end_ch == '~' && param == 200){
+                state = State::Paste;
+                return i + 1;
+            }
+            if (results.size() >= 2){
+                modifer = results[1] - 1;
+            }
+            auto it = cont.csi_map.find(make_key(param, end_ch));
+            if (it != cont.csi_map.end()){
+                data.event.kind = Kind::Key;
+                data.event.key = it->second;
+                data.event.modifer = data.event.modifer | static_cast<modifers>(modifer);
+            }
             state = State::Ground;
             return i + 1;
         }
@@ -210,7 +235,7 @@ static size_t csi(string& m_buff, State& state, Data& data, size_t index){
     data.exit = true;
     return index;
 }
-static size_t utf8(string& m_buff, State& state, Data& data, size_t index){ // TODO make this function work better. Specifically zwj, as well as end of string cases.
+static size_t utf8(string_view m_buff, State& state, Data& data, Context& cont, size_t index){ // TODO make this function work better. Specifically zwj, as well as end of string cases.
     char first_byte = m_buff[index];
     int codepoint_len = InputString::get_byte_len(first_byte);
     if (codepoint_len > 4){
@@ -252,9 +277,9 @@ static size_t utf8(string& m_buff, State& state, Data& data, size_t index){ // T
         }
     }
     logger::warn("Something went wrong");
-    return index;
+    return m_buff.size();
 }
-static size_t parseInput(string& buffer, State& s, Data& d){
+static size_t parseInput(string& buffer, State& s, Data& d, Context& c){
     size_t idx = 0;
     size_t prev_idx = 0;
     int no_change_ider = 0;
@@ -274,19 +299,22 @@ static size_t parseInput(string& buffer, State& s, Data& d){
         }
         switch (s){
             case State::Ground:
-                idx = ground(buffer, s, d, idx);
+                idx = ground(buffer, s, d, c, idx);
                 break;
             case State::Utf8:
-                idx = utf8(buffer, s, d, idx);
+                idx = utf8(buffer, s, d, c, idx);
                 break;
             case State::Esc:
-                idx = esc(buffer, s, d, idx);
+                idx = esc(buffer, s, d, c, idx);
                 break;
             case State::Ss3:
-                idx = ss3(buffer, s, d, idx);
+                idx = ss3(buffer, s, d, c, idx);
                 break;
             case State::Csi:
-                idx = csi(buffer, s, d, idx);
+                idx = csi(buffer, s, d, c, idx);
+                break;
+            case State::Paste:
+                idx = paste(buffer, s, d, c, idx);
                 break;
             default:
                 logger::error("No function defined for state: " + to_string(static_cast<uint8_t>(s)));
@@ -373,33 +401,33 @@ void d_default_input::m_restoreMode() {
     if (!rmkx.empty()) putp(rmkx.c_str());
 }
 void d_default_input::m_fillDb(){
-    if (csi_map.empty() && ss3_map.empty()){
+    if (m_cont.csi_map.empty() && m_cont.ss3_map.empty()){
 #define KEY(name, id, type, param, last_byte)\
         if (type == static_cast<uint8_t>(KEY_TYPES::CSI)){\
             long long key = make_key(param, static_cast<char>(last_byte));\
             logger::debug("Adding CSI key: " + to_string(Key::name) + " param: " + to_string(param) + " last_byte: " + string(1, static_cast<char>(last_byte)) + " Key is: " + to_string(key));\
-            csi_map[key] = Key::name;\
+            m_cont.csi_map[key] = Key::name;\
         }\
         else if (type == static_cast<uint8_t>(KEY_TYPES::SS3)){\
-            ss3_map[static_cast<char>(last_byte)] = Key::name;\
+            m_cont.ss3_map[static_cast<char>(last_byte)] = Key::name;\
             logger::debug("Adding SS3 key: " + to_string(Key::name) + " param: " + to_string(param) + " last_byte: " + string(1, static_cast<char>(last_byte)));\
         }\
         else if (type == static_cast<uint8_t>(KEY_TYPES::CTRL)){\
             logger::debug("Adding CTRL key: " + to_string(Key::name) + " param: " + to_string(param) + " last_byte: " + to_string(last_byte));\
-            ctrl_map[static_cast<char>(last_byte)] = pair<Key, int>(Key::name, param);\
+            m_cont.ctrl_map[static_cast<char>(last_byte)] = pair<Key, int>(Key::name, param);\
         }
 #include "../../data/keys.def"
 #undef KEY
     }
 }
-// ===========================================
+
 vector<Event> d_default_input::d_getEvents(int timeout_ms){
     m_events.clear();
     if (!checkstdin(timeout_ms)){
         return m_events;
     }
     m_buff += getData();
-    size_t idx = parseInput(m_buff, m_state, m_data);
+    size_t idx = parseInput(m_buff, m_state, m_data, m_cont);
     m_buff.erase(m_buff.begin(), m_buff.begin() + idx);
     return m_events;
 }

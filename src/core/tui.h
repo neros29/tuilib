@@ -66,6 +66,16 @@ enum class Key : uint32_t{
 #include "../../data/unique_keys.def"
 #undef U_KEY
 };
+enum class Kind: uint8_t { Key, Text, Paste };
+struct Event{
+    Kind kind;
+    modifers modifer;
+    std::string text;
+    Key key;
+    bool operator==(Event e) const{
+        return kind == e.kind && modifer == e.modifer && key == e.key && text == e.text;
+    };
+};
 namespace std {
     inline std::string to_string(Key a){
         switch (a){
@@ -76,14 +86,10 @@ namespace std {
         }
         return "NONE";
     }
+    inline std::string to_string(Event e){
+        return "Kind: " + std::to_string(static_cast<uint8_t>(e.kind)) +" Key: " + std::to_string(e.key) + " Text: " + e.text + " mods: " + std::to_string(static_cast<uint8_t>(e.modifer));
+    }
 }
-enum class Kind: uint8_t { Key, Text };
-struct Event{
-    Kind kind;
-    modifers modifer;
-    std::string text;
-    Key key;
-};
 namespace core{
     namespace flags {
         constexpr uint16_t PLACEHOLDER = 1 << 0;

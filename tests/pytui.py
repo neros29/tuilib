@@ -148,6 +148,7 @@ class modifers(int):
 class Kind(IntEnum):
     Key = 0;
     Text = 1;
+    Paste = 2;
 
 class Cell:
     def __init__(self, character: tui.Cell) -> None:

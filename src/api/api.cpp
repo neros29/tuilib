@@ -1,6 +1,7 @@
 #include "../../include/tuilib.h"
 #include "../core/utils/logging.h"
-#include "../core/drivers.h"
+#include "../drivers/d_default_input.h"
+#include "../drivers/d_defualt_screen.h"
 #include <cstddef>
 
 using namespace std;

@@ -78,6 +78,9 @@ def make_event(e_dict: dict):
     if e_dict["type"] == "key":
         e.kind = pytui.Kind.Key
         e.key = e_dict["key"]
+    if e_dict["type"] == "paste":
+        e.kind = pytui.Kind.Paste
+        e.text = e_dict["text"]
     if e_dict["type"] == "text":
         e.text = e_dict["text"]
     e.modifer = e_dict.get('modifier', pytui.modifers.none)
@@ -164,8 +167,8 @@ events.append((['\x1b[99z', 'a'], [make_event({"type": "text", "text": "a"})]))
 
 # events.append((['\x1b[I'] / '\x1b[O' , Focus in / Focus out ))
 # events.append((['\x1b[<0;10;5M', '\x1b[<0;10;5m'] , Mouse press then release at (10,5) ))
-# events.append((['\x1b[200~hi\x1b[201~'] , Paste "hi" ))
-# events.append((['\x1b[200~a\x1b[Ab\x1b[201~'] , Paste containing the escape bytes, treated as literal text ))
+events.append((['\x1b[200~hi\x1b[201~'] , [make_event({"type": "paste", "text": "hi"})]))
+events.append((['\x1b[200~a\x1b[Ab\x1b[201~'] , [make_event({"type": "paste", "text": "a\x1b[Ab"})]))
 # events.append((['\x1b[12;40R'] , Cursor position report row 12, col 40 (not a key) ))
 # events.append((['\x1b]0;title\x07'] , skipped (not a key); following input still works ))
 # events.append((['\x1b]0;title\x1b\\'] , skipped (ST-terminated) ))
