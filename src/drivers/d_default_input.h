@@ -39,6 +39,8 @@ namespace d_default_input_internals {
     long long make_key(int i, char c);
     size_t csi(std::string_view m_buff, State& state, Data& data, Context& cont, size_t index);
     size_t paste(std::string_view m_buff, State& state, Data& data, Context& cont, size_t index);
+    size_t ss3(std::string_view m_buff, State& state, Data& data, Context& cont, size_t index);
+    size_t utf8(std::string_view m_buff, State& state, Data& data, Context& cont, size_t index);
 
 }
 
@@ -52,7 +54,7 @@ namespace drivers {
         std::vector<Event> m_events {};
         d_default_input_internals::Data m_data;
         d_default_input_internals::Context m_cont;
-        d_default_input_internals::State m_state;
+        d_default_input_internals::State m_state{d_default_input_internals::State::Ground};
         void m_fillDb();
         void m_setRawMode();
         void m_restoreMode();

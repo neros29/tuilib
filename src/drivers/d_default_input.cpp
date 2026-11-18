@@ -182,7 +182,7 @@ size_t d_default_input_internals::paste(string_view m_buff, State& state, Data& 
     data.exit = true;
     return index;
 }
-static size_t ss3(string_view m_buff, State& state, Data& data, Context& cont, size_t index){ 
+size_t d_default_input_internals::ss3(string_view m_buff, State& state, Data& data, Context& cont, size_t index){ 
     index += 1;
     if (index >= m_buff.size()){
         data.exit = true;
@@ -237,19 +237,22 @@ size_t d_default_input_internals::csi(string_view m_buff, State& state, Data& da
     data.exit = true;
     return index;
 }
-static size_t utf8(string_view m_buff, State& state, Data& data, Context& cont, size_t index){ // TODO make this function work better. Specifically zwj, as well as end of string cases.
+size_t d_default_input_internals::utf8(string_view m_buff, State& state, Data& data, Context& cont, size_t index){ // TODO make this function work better. Specifically zwj, as well as end of string cases.
     char first_byte = m_buff[index];
     int codepoint_len = InputString::get_byte_len(first_byte);
     if (codepoint_len > 4){
         dump_debug(m_buff, state, data, index, "Too long Unicode code point found.", "utf8");
         logger::warn("Too long Unicode code point found.");
-        return index;
+        return m_buff.size();
     }
     char codepoint[5] {first_byte, '\0', '\0', '\0', '\0'};
-    for (size_t i = index  + 1; i <= m_buff.size(); i++){
-        if (i - (index + 1) >= codepoint_len - 1){
+    for (size_t i = index  + 1; i < m_buff.size(); i++){
+        if (i - index  <= codepoint_len){
+            codepoint[i - index] = m_buff[i];
+        }
+        if (i - index  >= codepoint_len - 1){
             utf8proc_int32_t cp;
-            int consumed = utf8proc_iterate(reinterpret_cast<utf8proc_uint8_t*>(codepoint), 4, &cp);
+            int consumed = utf8proc_iterate(reinterpret_cast<utf8proc_uint8_t*>(codepoint), codepoint_len, &cp);
             if (consumed < 0){ // invalid UTF-8
                 dump_debug(m_buff, state, data, i, "Invalid utf8 bytes.", "utf8");
                 logger::warn("Invalid utf8 bytes.");
@@ -270,16 +273,11 @@ static size_t utf8(string_view m_buff, State& state, Data& data, Context& cont, 
                 data.event.text += string(codepoint);
             }
             state = State::Ground;
-            return i;
-        }
-        if (i - index < 5){
-            codepoint[i - index] = m_buff[i];
-        } else {
-            logger::warn("Something went wrong");
+            return i + 1;
         }
     }
-    logger::warn("Something went wrong");
-    return m_buff.size();
+    data.exit = true;
+    return index;
 }
 static size_t parseInput(string& buffer, State& s, Data& d, Context& c){
     size_t idx = 0;

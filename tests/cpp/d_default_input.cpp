@@ -21,6 +21,11 @@ protected:
             {make_key(1, 'B'), Key::DOWN},
             {make_key(2, '~'), Key::INSERT},
         };
+        con.ss3_map = {
+            {'A', Key::UP},
+            {'B', Key::DOWN},
+            {'~', Key::INSERT},
+        };
     }
     ParserPartsTestFixture(): d(events){}
 
@@ -95,6 +100,13 @@ TEST_F(ParserPartsTestFixture, csiInsert){
     Event c{Kind::Key, modifers::none, "", Key::INSERT};
     EXPECT_EQ(d.event, c);
 }
+TEST_F(ParserPartsTestFixture, csiUnknown){
+    size_t idx = csi("[181818181~", s, d, con, 0);
+    EXPECT_EQ(s, State::Ground);
+    EXPECT_EQ(idx, 11);
+    Event c{Kind::Text, modifers::none, "", Key::NONE};
+    EXPECT_EQ(d.event, c);
+}
 TEST_F(ParserPartsTestFixture, csiIndex){
     size_t idx = csi("[2~A", s, d, con, 0);
     EXPECT_EQ(s, State::Ground);
@@ -145,3 +157,50 @@ TEST_F(ParserPartsTestFixture, pasteShort){
     Event c{Kind::Paste, modifers::none, "hi", Key::NONE};
     EXPECT_EQ(d.event, c);
 }
+
+// Testing ss3
+TEST_F(ParserPartsTestFixture, ss3Standerd){
+    size_t idx = ss3("OA", s, d, con, 0);
+    EXPECT_EQ(s, State::Ground);
+    EXPECT_EQ(idx, 2);
+    Event c{Kind::Key, modifers::none, "", Key::UP};
+    EXPECT_EQ(d.event, c);
+}
+TEST_F(ParserPartsTestFixture, ss3Unknown){
+    size_t idx = ss3("OC", s, d, con, 0);
+    EXPECT_EQ(s, State::Ground);
+    EXPECT_EQ(idx, 2);
+    Event c{Kind::Text, modifers::none, "", Key::NONE};
+    EXPECT_EQ(d.event, c);
+}
+TEST_F(ParserPartsTestFixture, ss3Exit){
+    s = State::Ss3;
+    size_t idx = ss3("O", s, d, con, 0);
+    EXPECT_EQ(s, State::Ss3);
+    EXPECT_EQ(idx, 0);
+    EXPECT_TRUE(d.exit);
+}
+// Testing uf8
+TEST_F(ParserPartsTestFixture, utf8Stanerd){
+    size_t idx = utf8("そ", s, d, con, 0);
+    EXPECT_EQ(s, State::Ground);
+    EXPECT_EQ(idx, 3);
+    Event c{Kind::Text, modifers::none, "そ", Key::NONE};
+    EXPECT_EQ(d.event, c);
+}
+TEST_F(ParserPartsTestFixture, utf8Exit){
+    s = State::Utf8;
+    size_t idx = utf8("\xC3", s, d, con, 0);
+    EXPECT_EQ(s, State::Utf8);
+    EXPECT_EQ(idx, 0);
+    EXPECT_TRUE(d.exit);
+}
+TEST_F(ParserPartsTestFixture, utf8Zerowidth){
+    d.event.text = "e";
+    size_t idx = utf8("\u0301", s, d, con, 0);
+    EXPECT_EQ(s, State::Ground);
+    EXPECT_EQ(idx, 2);
+    Event c{Kind::Text, modifers::none, "e\u0301", Key::NONE};
+    EXPECT_EQ(d.event, c);
+}
+
