@@ -16,6 +16,8 @@ levels = {
     40: "ERROR",
     50: "CRITICAL",
 }
+with open("logs/test-log", "w") as f:
+    f.write("");
 def log(level, msg):
     with open("logs/test-log", "a") as f:
         f.write(f"[{levels[level]}]{msg}\n")

@@ -62,7 +62,7 @@ class Cell{
         return m_cell.get_fg();
     }
     std::array<uint8_t, 4> get_bg() const{
-        return m_cell.get_fg();
+        return m_cell.get_bg();
     }
     uint16_t get_style() const{
         return m_cell.get_style();
