@@ -83,6 +83,11 @@ static size_t ground(string_view m_buff, State& state, Data& data, Context& cont
                 data.event.key = static_cast<Key>(ch);
             } else {
                 data.event.kind = Kind::Text;
+                if (ch >= 'A' && ch <= 'Z'){
+                    data.event.key = static_cast<Key>(ch + ('a' - 'A'));
+                } else {
+                    data.event.key = static_cast<Key>(ch);
+                }
                 data.event.text = string(1, ch);
             }
             continue;

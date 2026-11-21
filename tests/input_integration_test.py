@@ -75,21 +75,27 @@ class Main:
 
 def make_event(e_dict: dict):
     e = pytui.Event()
-    if e_dict["type"] == "key":
+    if e_dict.get('key'):
         e.kind = pytui.Kind.Key
         e.key = e_dict["key"]
-    if e_dict["type"] == "paste":
+    if e_dict.get('text'):
         e.kind = pytui.Kind.Paste
         e.text = e_dict["text"]
-    if e_dict["type"] == "text":
-        e.text = e_dict["text"]
+
+    if e_dict['type'] == 'text':
+        e.kind = pytui.Kind.Text
+    if e_dict['type'] == 'key':
+        e.kind = pytui.Kind.Key
+    if e_dict['type'] == 'paste':
+        e.kind = pytui.Kind.Paste
+
     e.modifer = e_dict.get('modifier', pytui.modifers.none)
     return e
 
 events = []
-events.append((['a'], [make_event({"type": "text", "text": "a"})]))
-events.append((['A'], [make_event({"type": "text", "text": "A"})]))
-events.append((['ab'], [make_event({"type": "text", "text": "a"}), make_event({"type": "text", "text": "b"})]))
+events.append((['a'], [make_event({"type": "text", "text": "a", "key": pytui.Key.K_A})]))
+events.append((['A'], [make_event({"type": "text", "text": "A", "key": pytui.Key.K_A})]))
+events.append((['ab'], [make_event({"type": "text", "text": "a", "key": pytui.Key.K_A}), make_event({"type": "text", "text": "b", "key": pytui.Key.K_B})]))
 events.append((['ø'], [make_event({"type": "text", "text": "ø"})]))
 events.append((['e\u0301'], [make_event({"type": "text", "text": "e\u0301"})]))
 events.append((['👍'], [make_event({"type": "text", "text": "👍"})]))
@@ -105,7 +111,7 @@ events.append((['\x7f'], [make_event({"type": "key", "key": pytui.Key.BACKSPACE}
 # events.append((['\x00'], [make_event({"type": "key", "key": pytui.Key.SPACE, "modifier": pytui.modifers.ctrl})]))
 events.append((['\x01'], [make_event({"type": "key", "key": pytui.Key.K_A, "modifier": pytui.modifers.ctrl})]))
 
-events.append((['0', '1', '9'], [make_event({"type": "text", "text": "0"}), make_event({"type": "text", "text": "1"}),  make_event({"text": "9", "type": "text"})]))
+events.append((['0', '1', '9'], [make_event({"type": "text", "text": "0", "key": pytui.Key.K_0}), make_event({"type": "text", "text": "1", "key": pytui.Key.K_1}),  make_event({"text": "9", "type": "text", "key": pytui.Key.K_9})]))
 
 # events.append((['\x1b'], [make_event({"type": "key", "key": pytui.Key.Escape})]))
 events.append((['\x1b', 'a'], [make_event({"type": "key", "key": pytui.Key.K_A, "modifier": pytui.modifers.alt})]))
@@ -162,8 +168,8 @@ events.append((['\x1b[3;5~'],[make_event({"type": "key", "key": pytui.Key.DELETE
 events.append((['\x1b[15;2~'],[make_event({"type": "key", "key": pytui.Key.F5, "modifier": pytui.modifers.shift})]))
 events.append((['\x1b[Z'], [make_event({"type": "key", "key": pytui.Key.TAB, "modifier": pytui.modifers.shift})]))
 
-events.append((['\x1b[Z', 'xyz'], [make_event({"type": "key", "key": pytui.Key.TAB, "modifier": pytui.modifers.shift}), make_event({"type": "text", "text": "x"}), make_event({"type": "text", "text": "y"}), make_event({"type": "text", "text": "z"})]))
-events.append((['\x1b[99z', 'a'], [make_event({"type": "text", "text": "a"})]))
+events.append((['\x1b[Z', 'xyz'], [make_event({"type": "key", "key": pytui.Key.TAB, "modifier": pytui.modifers.shift}), make_event({"type": "text", "text": "x", "key": pytui.Key.K_X}), make_event({"type": "text", "text": "y", "key": pytui.Key.K_Y}), make_event({"type": "text", "text": "z", "key": pytui.Key.K_Z})]))
+events.append((['\x1b[99z', 'a'], [make_event({"type": "text", "text": "a", "key": pytui.Key.K_A})]))
 # events.append((['\x00a'], [make_event({"type": "key", "modifier": pytui.modifers.ctrl, "key": pytui.Key.SPACE}), make_event({"type": "text", "text": "a"})]))
 
 # events.append((['\x1b[I'] / '\x1b[O' , Focus in / Focus out ))

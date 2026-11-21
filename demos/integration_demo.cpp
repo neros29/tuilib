@@ -1,5 +1,6 @@
 #include <array>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <term.h>
 #include <unistd.h>
@@ -24,7 +25,7 @@ public:
         surf.fill_fg(0xbf, 0xc1, 0xc8);
         surf.register_func([this](Event e) {return events(e);});
     }
-    void update(){
+    void update(){ // TODO This needs to be way more efficient
         int y = 0;
         for (std::string& line : logs){
             for (int x = 0; x < surf.get_size()[0]; x++){
@@ -38,21 +39,24 @@ public:
         }
     }
     bool events(Event e){
-        bool dirty = false;
-        if (e.kind == Kind::Key){
-            logs.push_back("EVENT: Key: " + to_string(e.key) + " Mod: " + to_string(static_cast<uint8_t>(e.modifer)));
-            dirty = true;
+        stringstream ss; // TODO make this more efficient
+        ss << "EVENT: Key: ";
+        ss << to_string(e.key);
+        for (int i = 0; i <= 15 - to_string(e.key).size(); i ++){
+            ss << " ";
         }
-        if (e.kind == Kind::Text){
-            logs.push_back("EVENT: Key: '" + e.text + "' Mod: " + to_string(static_cast<uint8_t>(e.modifer)));
-            dirty = true;
+        ss << "Mod: ";
+        ss << to_string(static_cast<uint8_t>(e.modifer));
+        for (int i = 0; i <= 15 - to_string(static_cast<uint8_t>(e.modifer)).size(); i ++){
+            ss << " ";
         }
+        ss << "Text: '";
+        ss << e.text << "'";
+        logs.push_back(ss.str());
         if (logs.size() > surf.get_size()[1]){
             logs.pop_front();
         }
-        if (dirty){
-            update();
-        }
+        update();
         return false;
     }
     bool ToggleShown(){
@@ -222,21 +226,21 @@ Frames Skipped: {FRAMES_SKIPPED:5}
             {Key::RIGHT,  {2, 0}},
         };
         bool results = false;
+        if (e.key == Key::K_D){
+            debug_is_shown = debug_surf.ToggleShown();
+            scroll.ToggleShown();
+            results = true;
+        }
+        if (e.key == Key::K_Q){
+            running = false;
+            results = true;
+        }
         if (e.kind == Kind::Text){
             if (e.text == "c"){
                 if (e.modifer & modifers::ctrl){
                     running = false;
                     results = true;
                 }
-            }
-            if (e.text == "q"){
-                running = false;
-                results = true;
-            }
-            if (e.text == "d"){
-                debug_is_shown = debug_surf.ToggleShown();
-                scroll.ToggleShown();
-                results = true;
             }
             auto itr = text_dirs.find(e.text);
             if (itr != text_dirs.end()){
