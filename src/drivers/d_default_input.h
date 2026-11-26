@@ -41,6 +41,7 @@ namespace d_default_input_internals {
     size_t paste(std::string_view m_buff, State& state, Data& data, Context& cont, size_t index);
     size_t ss3(std::string_view m_buff, State& state, Data& data, Context& cont, size_t index);
     size_t utf8(std::string_view m_buff, State& state, Data& data, Context& cont, size_t index);
+    size_t ground(std::string_view m_buff, State& state, Data& data, Context& cont, size_t index);
 
 }
 

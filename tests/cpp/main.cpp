@@ -4,7 +4,7 @@
 
 static void log(int level, const std::string& msg) {
     std::string level_str;
-    std::ofstream log("logs/debug.log", std::ios::app);
+    std::ofstream log("logs/gtest.log", std::ios::app);
     switch (level) {
         case LogLevel::INFO:     level_str = "INFO";     break;
         case LogLevel::WARNING:  level_str = "WARNING";  break;

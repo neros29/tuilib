@@ -71,7 +71,7 @@ char d_default_input_internals::parse_csi_data(std::string_view s, std::vector<i
     return '\0';
 }
 
-static size_t ground(string_view m_buff, State& state, Data& data, Context& cont, size_t index){
+size_t d_default_input_internals::ground(string_view m_buff, State& state, Data& data, Context& cont, size_t index){
     for (size_t i = index; i < m_buff.size(); i++){
         const char& ch = m_buff[i];
         if (ch >= '\x20' && ch <= '\x7e'){ // Check if character is in printable ASCII
