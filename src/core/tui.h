@@ -19,7 +19,7 @@ private:
 public:
     static int get_byte_len(unsigned char firstbyte);
     size_t size();
-    static int getWidth(std::string ch); 
+    static int getWidth(std::string_view ch); 
     InputString(std::string s);
     std::string operator[](int i);
 };
@@ -111,7 +111,7 @@ namespace core{
 
         // setBg
         void set_bg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);
-        void set_ch(std::string chi);
+        void set_ch(std::string_view chi);
         void set_ch(char chi);
         void set_style(uint16_t flag);
         void or_style(uint16_t flag);
@@ -121,7 +121,7 @@ namespace core{
         void or_flags(uint16_t flag);
         uint16_t get_flags() const;
 
-        bool is_def(std::string value) const;
+        bool is_def(std::string_view value) const;
         //set ch
         
         std::string get_ch() const;

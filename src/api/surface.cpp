@@ -6,6 +6,7 @@
 #include <functional>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <cmath>
 #include "../core/utils/logging.h"
@@ -220,6 +221,7 @@ void Surface::blit(Surface &surf) {
 }
 
 void Surface::drawRect(std::array<size_t, 2> top_l, std::array<size_t, 2> bottom_r, std::string_view str, std::array<int, 3> fg, std::array<int, 3> bg, int s){
+    // create list of lines
     std::vector<std::string_view> str_line;
     size_t start = 0;
     size_t end = str.find('\n');
@@ -229,8 +231,14 @@ void Surface::drawRect(std::array<size_t, 2> top_l, std::array<size_t, 2> bottom
         end = str.find('\n', start);
     }
     str_line.push_back(str.substr(start));
+
     int width = min(m_is->size[0], bottom_r[0]);
     int height = min(m_is->size[1], bottom_r[1]);
+
+    bool apply_fg {fg[0] >= 0 && fg[1] >= 0 && fg[2] >= 0};
+    bool apply_bg {bg[0] >= 0 && bg[1] >= 0 && bg[2] >= 0};
+    bool apply_s {s >= 0};
+
     for (size_t y = top_l[1]; y < height; y ++){
         std::string_view line;
         if (y - top_l[1] < str_line.size()){
@@ -245,25 +253,23 @@ void Surface::drawRect(std::array<size_t, 2> top_l, std::array<size_t, 2> bottom
             c_cell& cell = m_is->surface[idx];
             if (place_holder > 0){
                 place_holder --;
-                cell.set_ch('X');
+                cell.set_ch('X'); // place holder just for debugging so that if things go wrong it is visible.
                 cell.set_flags(core::flags::PLACEHOLDER);
             }
             else if (str_idx < line.size()){
                 int byte_width = InputString::get_byte_len(line[str_idx]);
+                std::string_view ch = line.substr(str_idx, byte_width);
                 if (byte_width > 1){
-                    place_holder = InputString::getWidth(string(line.substr(str_idx, byte_width))) - 1;
-                    if (place_holder > 0){
-                        logger::debug("place holder: " + to_string(place_holder) + " char: " + string(line.substr(str_idx, byte_width)));
-                    }
+                    place_holder = InputString::getWidth(ch) - 1;
                 }
-                cell.set_ch(string(line.substr(str_idx, byte_width)));
+                cell.set_ch(ch);
                 str_idx += byte_width;
             } else {
                 cell.set_ch(' ');
             }
-            if (fg[0] >= 0) cell.set_fg(fg[0], fg[1], fg[2]);
-            if (bg[0] >= 0) cell.set_bg(bg[0], bg[1], bg[2]);
-            if (s >= 0) cell.set_style(s);
+            if (apply_fg) cell.set_fg(fg[0], fg[1], fg[2]);
+            if (apply_bg) cell.set_bg(bg[0], bg[1], bg[2]);
+            if (apply_s) cell.set_style(s);
         }
     }
     m_is->m_dirty = true;

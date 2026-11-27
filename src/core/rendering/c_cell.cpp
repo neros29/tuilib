@@ -43,7 +43,7 @@ void c_cell::set_fg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha){
 void c_cell::set_bg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha){
     m_setColor(m_bg, {red, green, blue, alpha});
 }
-void c_cell::set_ch(std::string chi){
+void c_cell::set_ch(std::string_view chi){
     if (chi.size() < 8){
         array<char, 8> data;
         for (int i = 0; i < 8; i ++){
@@ -95,7 +95,7 @@ void c_cell::or_flags(uint16_t flags){
 uint16_t c_cell::get_flags() const{
     return static_cast<uint16_t>((m_flags & flags::SYSTEM_MASK) >> flags::SYSTEM_SHIFT);
 }
-bool c_cell::is_def(string type) const{
+bool c_cell::is_def(std::string_view type) const{
     if (type == "ch"){
         return std::get_if<std::monostate>(&m_ch);
     }

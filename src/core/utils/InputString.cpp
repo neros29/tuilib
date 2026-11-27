@@ -39,7 +39,7 @@ string InputString::operator[](int i){
     
 }
 
-int InputString::getWidth(string s){
+int InputString::getWidth(std::string_view s){
     if (s.empty()) return 0;
     utf8proc_int32_t cp = 0;
     // utf8proc_iterate decodes the first codepoint from UTF-8 bytes.
