@@ -12,9 +12,7 @@ class Main:
         self.surf = self.tui.append([50, 5], [10, 10], " ", 0)
         self.surf.fill_bg(255, 0, 0)
         self.surf.fill_fg(255, 255, 255)
-        self.surf.fill_style(pytui.style.BOLD | pytui.style.UNDERLINE)
         self.surf.register_func(self.events)
-        self.lab = pytui.Label(self.surf, "hello world", [0, 0])
         self.index = 0
         self.running = True
         self.wait = 0.5
@@ -48,9 +46,10 @@ class Main:
         self.new = True
 
     def run(self):
-        self.lab.update()
         start = time.perf_counter()
         events = []
+        front = "Test: "
+        self.surf.draw_rect([0, 0], [len(front), 1], front, fg=[-1, -1, -1], bg=[-1, -1, -1], s= pytui.style.BOLD | pytui.style.UNDERLINE)
         while self.running:
             if events:
                 self.send_event([events.pop()])
@@ -58,6 +57,7 @@ class Main:
             if self.new:
                 # pytui.log(10, f"Got all text in {time.perf_counter() - start} seconds")
                 pytui.log(10, f"{'=' * 20} Starting Test {self.index} {'=' * 20}")
+                self.surf.draw_rect([len(front) + 0, 0], [ len(front) + 4, 1], str(self.index))
                 events = self.test_events[self.index][0].copy()
                 events.reverse()
                 start = time.perf_counter()

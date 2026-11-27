@@ -58,6 +58,10 @@ void c_cell::set_ch(std::string chi){
         m_ch = new std::string(chi);
     }
 }
+void c_cell::set_ch(char chi){
+    array<char, 8> data = {chi, '\0'};
+    m_ch = data;
+}
 std::string c_cell::get_ch() const{
     if (holds_alternative<std::monostate>(m_ch)){
         return " ";

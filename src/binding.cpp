@@ -7,38 +7,11 @@
 #include <string>
 
 #include "../include/tuilib.h"
-#include "widgets/Label.h"
 #include "core/utils/logging.h"
 
 namespace py = pybind11;
 using namespace std;
 
-// Safe Python-facing wrapper for Label.
-//
-// IMPORTANT: Label stores a `const std::string&` (non-owning reference).
-// If we bound Label directly, a Python string would be converted to a temporary
-// std::string that dies right after the call -> dangling reference.
-//
-// This wrapper owns the std::string so the reference stays valid.
-struct PyLabel {
-    std::string text;
-    Label label;
-
-    PyLabel(Surface& root, std::string t, std::array<int, 2> offset)
-        : text(std::move(t)), label(root, text, offset) {}
-
-    void set_text(std::string t) {
-        text = std::move(t);
-        label.updateSurface();
-    }
-
-    const std::string& get_text() const { return text; }
-
-    void update(string i_text) { 
-        text = i_text;
-        label.updateSurface();
-    }
-};
 
 PYBIND11_MODULE(tuilib, m) {
     m.doc() = "lightweight TUI library (pybind11 bindings)";
@@ -96,6 +69,7 @@ PYBIND11_MODULE(tuilib, m) {
         .def("offset", &Surface::get_offset)
         .def("size", &Surface::get_size)
         .def("blit", &Surface::blit, py::arg("surf"))
+        .def("draw_rect", &Surface::drawRect, py::arg("top_left"),  py::arg("bottom_right"), py::arg("str"), py::arg("fg"), py::arg("bg"), py::arg("style"))
         // .def("register_keys", &Surface::register_keys, py::arg("keys"))
         // .def("get_event", &Surface::get_event, py::arg("event"))
         .def("register_func", &Surface::register_func, py::arg("func"))
@@ -141,9 +115,4 @@ PYBIND11_MODULE(tuilib, m) {
     // -----------------
     // Label (safe wrapper)
     // -----------------
-    py::class_<PyLabel>(m, "Label", py::dynamic_attr())
-        .def(py::init<Surface&, std::string, std::array<int, 2>>(),
-             py::arg("root"), py::arg("text"), py::arg("offset"))
-        .def("update", &PyLabel::update, py::arg("text"));
-
 }

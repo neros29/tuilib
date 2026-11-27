@@ -112,6 +112,7 @@ namespace core{
         // setBg
         void set_bg(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);
         void set_ch(std::string chi);
+        void set_ch(char chi);
         void set_style(uint16_t flag);
         void or_style(uint16_t flag);
         uint16_t get_style() const;

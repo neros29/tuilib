@@ -12,7 +12,6 @@
 #include "../src/core/utils/logging.h"
 #include <chrono>
 #include "../include/tuilib.h"
-#include "../src/widgets/Label.h"
 
 using namespace std;
 
@@ -61,7 +60,7 @@ public:
     }
     bool ToggleShown(){
         if (surf.get_offset()[0] < 0){
-            surf.set_offset(surf.get_size()[0] * 3, 0);
+            surf.set_offset(surf.get_size()[0] * 2, 0);
             return true;
         } else {
             surf.set_offset(-surf.get_size()[0], -surf.get_size()[1]);
@@ -205,12 +204,10 @@ Frames Skipped: {FRAMES_SKIPPED:5}
 
     Surface surf1;
     string surf1_text = "Unicode test.\nそれん\nソレン\nSøren";
-    Label lab1;
 
     array<int, 2> surf2_offset = {20, 12};
     Surface surf2;
     string surf2_text = "Terrminal User Interface\nbuilt by Soren Mile";
-    Label lab2;
 
     bool events(Event e){
         unordered_map<std::string, array<int, 2>> text_dirs {
@@ -270,12 +267,10 @@ public:
     Main(): 
         tui(),
         event(tui.addSurface({0, 0}, {0, 0}, " ", 1000)),
-        debug_surf(tui.addSurface({tui.getScreenSize()[0] - tui.getScreenSize()[0] / 4, tui.getScreenSize()[1]}, {static_cast<int>(-tui.getScreenSize()[0]), static_cast<int>(-tui.getScreenSize()[1])}, " ", 100), debug_format_str),
-        scroll(tui.addSurface({tui.getScreenSize()[0] / 4, tui.getScreenSize()[1]},{static_cast<int>(-tui.getScreenSize()[0]), static_cast<int>(-tui.getScreenSize()[1])}, " ", 100000)),
+        debug_surf(tui.addSurface({(tui.getScreenSize()[0] / 3) * 2, tui.getScreenSize()[1]}, {static_cast<int>(-tui.getScreenSize()[0]), static_cast<int>(-tui.getScreenSize()[1])}, " ", 100), debug_format_str),
+        scroll(tui.addSurface({tui.getScreenSize()[0] / 3, tui.getScreenSize()[1]},{static_cast<int>(-tui.getScreenSize()[0]), static_cast<int>(-tui.getScreenSize()[1])}, " ", 100000)),
         surf1(tui.addSurface({40, 10}, {20, 22}, " ", 70)),
-        lab1(surf1, surf1_text, {5, 2}), 
-        surf2(tui.addSurface({40, 10}, surf2_offset, " ", 80)),
-        lab2(surf2, surf2_text, {5, 2})
+        surf2(tui.addSurface({40, 10}, surf2_offset, " ", 80))
     {
         cout << "\x1b[?1049h" << endl;
         event.register_func([this](Event e){
@@ -283,10 +278,11 @@ public:
                 });
         surf1.fill_fg(0xbf, 0xc1, 0xc8, 200);
         surf1.fill_bg(0x57, 0xA4, 0x90, 200);
-
+        surf1.drawRect({5, 2}, surf1.get_size(), surf1_text);
         surf2.fill_fg(0xbf, 0xc1, 0xc8);
         surf2.fill_bg(0x10,0x50, 0x10, 200);
         surf2.fill_style(styles::UNDERLINE | styles::BOLD);
+        surf2.drawRect({5, 2}, surf2.get_size(), surf2_text);
         logger::info("[Main] starting up.");
     }
     ~Main(){

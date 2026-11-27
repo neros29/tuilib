@@ -1,5 +1,6 @@
 #include "../../include/tuilib.h"
 #include "../core/tui.h"
+#include <array>
 #include <cassert>
 #include <cstdlib>
 #include <functional>
@@ -7,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include "../core/utils/logging.h"
 
 using namespace std;
 using namespace core;
@@ -212,6 +214,56 @@ void Surface::blit(Surface &surf) {
             y++;
         } else {
             x++;
+        }
+    }
+    m_is->m_dirty = true;
+}
+
+void Surface::drawRect(std::array<size_t, 2> top_l, std::array<size_t, 2> bottom_r, std::string_view str, std::array<int, 3> fg, std::array<int, 3> bg, int s){
+    std::vector<std::string_view> str_line;
+    size_t start = 0;
+    size_t end = str.find('\n');
+    while (end != std::string_view::npos){
+        str_line.push_back(str.substr(start, end - start));
+        start = end + 1;
+        end = str.find('\n', start);
+    }
+    str_line.push_back(str.substr(start));
+    int width = min(m_is->size[0], bottom_r[0]);
+    int height = min(m_is->size[1], bottom_r[1]);
+    for (size_t y = top_l[1]; y < height; y ++){
+        std::string_view line;
+        if (y - top_l[1] < str_line.size()){
+            line = str_line[y - top_l[1]];
+        } else {
+            line = "";
+        }
+        int place_holder = 0;
+        int str_idx = 0;
+        for (size_t x = top_l[0]; x < width; x ++){
+            int idx = y * m_is->size[0] + x;
+            c_cell& cell = m_is->surface[idx];
+            if (place_holder > 0){
+                place_holder --;
+                cell.set_ch('X');
+                cell.set_flags(core::flags::PLACEHOLDER);
+            }
+            else if (str_idx < line.size()){
+                int byte_width = InputString::get_byte_len(line[str_idx]);
+                if (byte_width > 1){
+                    place_holder = InputString::getWidth(string(line.substr(str_idx, byte_width))) - 1;
+                    if (place_holder > 0){
+                        logger::debug("place holder: " + to_string(place_holder) + " char: " + string(line.substr(str_idx, byte_width)));
+                    }
+                }
+                cell.set_ch(string(line.substr(str_idx, byte_width)));
+                str_idx += byte_width;
+            } else {
+                cell.set_ch(' ');
+            }
+            if (fg[0] >= 0) cell.set_fg(fg[0], fg[1], fg[2]);
+            if (bg[0] >= 0) cell.set_bg(bg[0], bg[1], bg[2]);
+            if (s >= 0) cell.set_style(s);
         }
     }
     m_is->m_dirty = true;

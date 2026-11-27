@@ -2,6 +2,7 @@
 #include "../core/utils/logging.h"
 #include "../drivers/d_default_input.h"
 #include "../drivers/d_defualt_screen.h"
+#include <thread>
 #include <cstddef>
 
 using namespace std;

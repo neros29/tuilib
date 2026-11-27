@@ -207,9 +207,11 @@ class Surface:
     def blit(self, surf):
         return self._surf.blit(surf.surf)
 
+    def draw_rect(self, top_left: list, bottom_right: list, string: str, fg: list = [-1, -1, -1], bg: list = [-1, -1, -1], s: int = -1) -> None:
+        return self._surf.draw_rect(top_left, bottom_right, string, fg, bg, s)
+
     def register_func(self, func: Callable):
         return self._surf.register_func(func)
-
 
     # def register_keys(self, keys: list[str]):
     #     return self._surf.register_keys(keys)
@@ -273,14 +275,3 @@ class Event:
         if isinstance(value, Event):
             return self.kind == value.kind and self.text == value.text and self.key == value.key and self.modifer == value.modifer
         return NotImplemented
-class Label:
-    def __init__ (self, root: Surface, text: str, offset: list[int]) -> None:
-        self._label = tui.Label(root._surf, text, offset)
-        self._text = text
-
-    def update(self):
-        self._label.update(self._text)
-
-    def set_text(self, new_text):
-        self._text = new_text
-        self.update()

@@ -26,7 +26,6 @@ set(TUI_CORE_SOURCES
     src/drivers/d_default_input.cpp
     src/api/api.cpp
     src/api/surface.cpp
-    src/widgets/Label.cpp
 )
 
 # IMPORTANT: You must add the library BEFORE you can set properties on it

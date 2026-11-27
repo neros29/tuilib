@@ -4,9 +4,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <chrono>
-#include <thread>
-#include <concepts>
-#include <type_traits>
 #include <functional>
 
 class Cell{
@@ -103,6 +100,7 @@ public:
 
     std::array<size_t, 2> get_size() const; 
     void blit(Surface& surf);
+    void drawRect(std::array<size_t, 2> top_l, std::array<size_t, 2> bottom_r, std::string_view str, std::array<int, 3> fg = {-1, -1, -1}, std::array<int, 3> bg = {-1, -1, -1}, int s = -1);
 };
 
 class Tui{
